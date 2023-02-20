@@ -1,0 +1,55 @@
+#================================================================================
+# Vimage.rogue
+# February 19, 2023
+#================================================================================
+
+$define VERSION "1.0"
+$define DATE    "February 19, 2023"
+
+$requireRogue "2.12"
+
+uses Console/CommandLineParser
+uses Bitmap
+uses Bitmap/IO
+
+try
+  Vimage( System.command_line_arguments )
+catch (error:Error)
+  Console.error.println error
+  System.exit 1
+endTry
+
+class Vimage
+  METHODS
+    method init( args:String[] )
+      local command = parse_args( args )
+
+      trace command
+      # has //options and possibly //args
+
+      if (command//options//help)
+        print_usage
+        System.exit 0
+      endIf
+
+    method parse_args( args:String[] )->Value
+      local command = CommandLineParser().
+      [
+        option( "--flag",     &alias="-f" )
+        option( "--help",     &aliases=["-h","-?"] )
+        option( "--setting=", &alias="-s" )
+      ].parse( args )
+      return command
+
+    method print_usage
+      println "Vimage v$"(VERSION)
+      println "$"(DATE)
+      println
+
+      println @|USAGE
+               |  vimage [OPTIONS]
+               |
+               |OPTIONS
+               |  --help, -h, -?
+               |    Show this help text.
+endClass
