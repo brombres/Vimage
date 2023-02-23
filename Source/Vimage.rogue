@@ -1,9 +1,65 @@
 #================================================================================
 # Vimage.rogue
 # February 19, 2023
+#
+# a
+# A
+# b color     - BG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# B           -
+# c
+# C
+# d
+# D
+# e
+# E
+# f color     - FG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# F
+# g
+# G
+# h           - LEFT (Cursor escapes image layers back to images)
+# H
+# i
+# I
+# j           - DOWN (Next Image)
+# J [h|v|WxH] - JOIN (splice)
+# j+CTRL      - MOVE BUFFER DOWN
+# k           - UP (Previous Image)
+# K
+# k+CTRL      - MOVE BUFFER UP
+# l           - RIGHT (Cursor moves from images to current image layers)
+# L
+# m
+# M
+# n WxH       - NEW
+# N
+# o pattern   - Open file or files; inserts above current buffer
+# O
+# p           - PASTE - new image from clipboard stacked above current image.
+# P
+# q
+# Q
+# r
+# R
+# s WxH       - SPLIT into multiple buffers
+# S
+# t           - S(T)ACK - cur buffer becomes layer of image underneath
+# T
+# u           - UNDO
+# U
+# v
+# V
+# w
+# W
+# x
+# X
+# y [rgbay]   - Yank (copy) R, G, B, A, or Y=all channels to clipboard.
+# Y
+# z           - ZOOM IN  (scale * 2)
+# Z           - ZOOM OUT (scale / 2)
+# :swap [argb][argb01]
 #================================================================================
 
-$define VERSION "1.0"
+$define VERSION "0.1"
 $define DATE    "February 19, 2023"
 
 $requireRogue "2.12"
@@ -11,6 +67,16 @@ $requireRogue "2.12"
 uses Console/CommandLineParser
 uses Bitmap
 uses Bitmap/IO
+uses Epilog
+
+$include VMGImage
+$include VMGImageList
+$include VMGImageView
+$include VMGState
+$include VMGState
+$include VMGStatusBar
+$include VMGTitleBar
+$include VMGUI
 
 try
   Vimage( System.command_line_arguments )
@@ -24,7 +90,7 @@ class Vimage
     method init( args:String[] )
       local command = parse_args( args )
 
-      trace command
+      #trace command
       # has //options and possibly //args
 
       if (command//options//help)
@@ -32,12 +98,15 @@ class Vimage
         System.exit 0
       endIf
 
+      VMGState.current = IdleState()
+      VMGUI.run
+
     method parse_args( args:String[] )->Value
       local command = CommandLineParser().
       [
-        option( "--flag",     &alias="-f" )
+        #option( "--flag",     &alias="-f" )
         option( "--help",     &aliases=["-h","-?"] )
-        option( "--setting=", &alias="-s" )
+        #option( "--setting=", &alias="-s" )
       ].parse( args )
       return command
 

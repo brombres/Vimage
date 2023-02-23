@@ -1,0 +1,15 @@
+uses UI
+
+class VMGImageList : UIList [singleton]
+  DEFINITIONS
+    FIXED_WIDTH = 16
+
+  METHODS
+    method init
+      prior.init
+      fixed_width = FIXED_WIDTH
+      expand_to_fill_height
+
+    method on_draw
+      ConsoleUICanvas.fill( display_bounds, '-' )
+endClass

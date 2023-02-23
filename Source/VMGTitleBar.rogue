@@ -1,0 +1,12 @@
+uses UI
+
+class VMGTitleBar : UIComponent [singleton]
+  METHODS
+    method init
+      prior.init
+      expand_to_fill_width
+      fixed_height = 1
+
+    method on_draw
+      ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.INVERSE) )
+endClass

@@ -1,0 +1,17 @@
+uses Console/ConsoleUI
+uses UI
+
+class VMGUI : ConsoleUI [singleton]
+  METHODS
+    method init
+      prior.init
+
+      local layout = (VMGImageList + VMGImageView)
+      layout /= VMGTitleBar
+      layout /= VMGStatusBar
+      add( layout )
+
+    method on( e:KeyEvent )
+      VMGState.current.on( e )
+
+endClass

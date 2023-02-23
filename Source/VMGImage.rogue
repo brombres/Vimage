@@ -1,0 +1,11 @@
+uses Bitmap
+
+class VMGImage
+  PROPERTIES
+    name   : String
+    bitmap : Bitmap
+
+  METHODS
+    method init( name, bitmap )
+endClass
+

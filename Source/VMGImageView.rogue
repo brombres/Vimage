@@ -1,0 +1,40 @@
+uses Console/ANSIBitmap
+uses UI
+
+class VMGImageView : UIComponent [singleton]
+  PROPERTIES
+    image         : VMGImage
+    display_image : Bitmap
+    canvas        : TextCanvas
+    scale_to_fit  = true
+    zoom          : Real64
+    is_modified   : Logical
+
+  METHODS
+    method init
+      show( VMGImage("32x17",Bitmap(32,17).[clear(Color.BLUE)]) )
+
+    method on_draw
+      if (is_modified)
+        local scale = ((display_bounds.size->RealXY*RealXY(1,2)) / image.bitmap.size->RealXY).min
+        local new_size = ((image.bitmap.size->RealXY * scale) + XY(0.5,0.5))->XY
+        if (not display_image or display_image.size != new_size)
+          display_image = image.bitmap.resized( new_size )
+          zoom = new_size.x->Real64 / image.bitmap.width
+          if (new_size.y & 1)
+            display_image.expand( 0, 0, 0, 1, Color.BLACK )
+          endIf
+          canvas = ANSIBitmap( display_image )->TextCanvas
+        endIf
+      endIf
+
+      ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
+
+      local pos = Box( canvas.size ).positioned_within( display_bounds ).top_left
+      ConsoleUICanvas.draw( canvas, pos )
+
+    method show( image )
+      is_modified = true
+      scale_to_fit = true
+      request_redraw
+endClass

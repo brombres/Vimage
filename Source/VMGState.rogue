@@ -1,0 +1,25 @@
+class VMGState
+  GLOBAL PROPERTIES
+    current = VMGState()
+
+  METHODS
+    method change_state( new_state:VMGState )
+      on_leave
+      current = new_state
+      current.on_enter
+
+    method on( e:KeyEvent )
+      noAction
+
+    method on_enter
+      noAction
+
+    method on_leave
+      noAction
+endClass
+
+class IdleState : VMGState
+  METHODS
+    method on( e:KeyEvent )
+      if (e.is_press(Keycode.Q)) VMGUI.is_running = false
+endClass
