@@ -1,6 +1,9 @@
 uses UI
 
 class VMGStatusBar : UIComponent [singleton]
+  PROPERTIES
+    text : String
+
   METHODS
     method init
       prior.init
@@ -8,5 +11,13 @@ class VMGStatusBar : UIComponent [singleton]
       fixed_height = 1
 
     method on_draw
+      localize display_bounds
       ConsoleUICanvas.fill( display_bounds, ' ' )
+      if (text)
+        ConsoleUICanvas.cursor = display_bounds.position
+        ConsoleUICanvas.print text
+      endIf
+
+    method set_text( @text )
+      request_redraw
 endClass

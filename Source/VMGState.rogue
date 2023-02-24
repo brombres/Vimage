@@ -23,12 +23,14 @@ class IdleState : VMGState
     method on( e:KeyEvent )
       if (e.is_press)
         if (e.is_press(Keycode.J))
+          update_status( "j (DOWN)" )
           if local current = VMGImageList.selected
             if (current.next)
               VMGImageList.select( current.next->(as VMGImageListItem) )
             endIf
           endIf
         elseIf (e.is_press(Keycode.K))
+          update_status( "k (UP)" )
           if local current = VMGImageList.selected
             forEach (child in VMGImageList.children)
               if (child.next is current)
@@ -41,4 +43,7 @@ class IdleState : VMGState
           VMGUI.is_running = false
         endIf
       endIf
+
+    method update_status( text:String )
+      VMGStatusBar.text = text
 endClass

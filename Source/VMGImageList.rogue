@@ -65,6 +65,7 @@ class VMGImageListItem : UIComponent
       if (this.contains(e))
         if (e.is_release)
           VMGImageList.select( this )
+          VMGStatusBar.text = "Select $"(image)
         endIf
       endIf
 
