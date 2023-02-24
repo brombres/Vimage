@@ -16,6 +16,7 @@ class VMGImageView : UIComponent [singleton]
       VMGImageList.add( image )
       VMGImageList.select( image )
       VMGUI.show( image )
+      VMGImageList.add( VMGImage( Bitmap(64,128) ) )
 
     method on_draw
       if (is_modified)

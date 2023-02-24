@@ -12,5 +12,8 @@ class VMGImage
       local dims = "[$x$]"(bitmap.width,bitmap.height)
       if (@name) return "$ $"(@name,dims)
       return dims
+
+    method to->String
+      return name
 endClass
 

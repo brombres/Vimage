@@ -39,9 +39,13 @@ class VMGImageList : UIList [singleton]
       endForEach
 
     method select( item:VMGImageListItem )
-      if (selected) selected.deselect
+      if (selected)
+        selected.deselect
+        selected.request_redraw
+      endIf
       selected = item
-      item.select
+      item.request_redraw
+      VMGUI.show( item.image )
 endClass
 
 class VMGImageListItem : UIComponent
@@ -50,11 +54,19 @@ class VMGImageListItem : UIComponent
 
   METHODS
     method init( image )
+      on_resize
 
     method deselect
 
     method is_selected->Logical
       return VMGImageList.selected is this
+
+    method on( e:PointerEvent )
+      if (this.contains(e))
+        if (e.is_release)
+          VMGImageList.select( this )
+        endIf
+      endIf
 
     method on_draw
       localize display_bounds
@@ -69,6 +81,4 @@ class VMGImageListItem : UIComponent
 
     method on_resize
       fixed_size = XY( VMGImageList.FIXED_WIDTH, 1 )
-
-    method select
 endClass

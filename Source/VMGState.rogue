@@ -21,5 +21,24 @@ endClass
 class IdleState : VMGState
   METHODS
     method on( e:KeyEvent )
-      if (e.is_press(Keycode.Q)) VMGUI.is_running = false
+      if (e.is_press)
+        if (e.is_press(Keycode.J))
+          if local current = VMGImageList.selected
+            if (current.next)
+              VMGImageList.select( current.next->(as VMGImageListItem) )
+            endIf
+          endIf
+        elseIf (e.is_press(Keycode.K))
+          if local current = VMGImageList.selected
+            forEach (child in VMGImageList.children)
+              if (child.next is current)
+                VMGImageList.select( child->(as VMGImageListItem) )
+                escapeForEach
+              endIf
+            endForEach
+          endIf
+        elseIf (e.is_press(Keycode.Q))
+          VMGUI.is_running = false
+        endIf
+      endIf
 endClass
