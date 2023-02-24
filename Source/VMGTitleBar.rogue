@@ -1,6 +1,9 @@
 uses UI
 
 class VMGTitleBar : UIComponent [singleton]
+  PROPERTIES
+    image : VMGImage
+
   METHODS
     method init
       prior.init
@@ -8,5 +11,16 @@ class VMGTitleBar : UIComponent [singleton]
       fixed_height = 1
 
     method on_draw
+      localize display_bounds
       ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.INVERSE) )
+      if (image)
+        ConsoleUICanvas.cursor = display_bounds.position
+        ConsoleUICanvas.style.inverse
+        ConsoleUICanvas.print image.name
+        ConsoleUICanvas.style.inverse_off
+      endIf
+
+    method show( image )
+      request_redraw
+
 endClass

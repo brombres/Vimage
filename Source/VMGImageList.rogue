@@ -4,12 +4,71 @@ class VMGImageList : UIList [singleton]
   DEFINITIONS
     FIXED_WIDTH = 16
 
+  PROPERTIES
+    selected : VMGImageListItem
+
   METHODS
     method init
       prior.init
-      fixed_width = FIXED_WIDTH
-      expand_to_fill_height
+      on_resize
+
+    method add( image:VMGImage )
+      add( VMGImageListItem(image) )
+      request_layout
+
+    method dispatch( e:PointerEvent )
+      # Send input events to children in reverse order because the top layer comes last
+      if (next) next.dispatch( e )
+      if (e.is_consumed) return
+      handle( e )
 
     method on_draw
       ConsoleUICanvas.fill( display_bounds, '-' )
+
+    method on_resize
+      fixed_width = FIXED_WIDTH
+
+    method select( image:VMGImage )
+      forEach (child in children)
+        if local item = child->(as VMGImageListItem)
+          if (item.image is image)
+            select( item )
+            return
+          endIf
+        endIf
+      endForEach
+
+    method select( item:VMGImageListItem )
+      if (selected) selected.deselect
+      selected = item
+      item.select
+endClass
+
+class VMGImageListItem : UIComponent
+  PROPERTIES
+    image : VMGImage
+
+  METHODS
+    method init( image )
+
+    method deselect
+
+    method is_selected->Logical
+      return VMGImageList.selected is this
+
+    method on_draw
+      localize display_bounds
+      localize is_selected
+      temporarily ConsoleUICanvas.clip = display_bounds
+        ConsoleUICanvas.cursor = display_bounds.position
+        if (is_selected) ConsoleUICanvas.style.inverse
+        ConsoleUICanvas.print image.name
+        loop (VMGImageList.FIXED_WIDTH) ConsoleUICanvas.print ' '
+        if (is_selected) ConsoleUICanvas.style.inverse_off
+      endTemporarily
+
+    method on_resize
+      fixed_size = XY( VMGImageList.FIXED_WIDTH, 1 )
+
+    method select
 endClass

@@ -2,16 +2,24 @@ uses Console/ConsoleUI
 uses UI
 
 class VMGUI : ConsoleUI [singleton]
+  PROPERTIES
+    image_list_scroller : UIScrollView
+
   METHODS
     method init
       prior.init
 
-      local layout = (VMGImageList + VMGImageView)
+      image_list_scroller = UIScrollView( VMGImageList ).[ shrink_to_fit_width ]
+      local layout = (image_list_scroller + VMGImageView)
       layout /= VMGTitleBar
       layout /= VMGStatusBar
       add( layout )
 
     method on( e:KeyEvent )
       VMGState.current.on( e )
+
+    method show( image:VMGImage )
+      VMGTitleBar.show( image )
+      VMGImageView.show( image )
 
 endClass

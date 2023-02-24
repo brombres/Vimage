@@ -2,10 +2,15 @@ uses Bitmap
 
 class VMGImage
   PROPERTIES
-    name   : String
     bitmap : Bitmap
+    name   : String
 
   METHODS
-    method init( name, bitmap )
+    method init( bitmap, name=null )
+
+    method name->String
+      local dims = "[$x$]"(bitmap.width,bitmap.height)
+      if (@name) return "$ $"(@name,dims)
+      return dims
 endClass
 

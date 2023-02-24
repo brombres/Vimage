@@ -12,7 +12,10 @@ class VMGImageView : UIComponent [singleton]
 
   METHODS
     method init
-      show( VMGImage("32x17",Bitmap(32,17).[clear(Color.BLUE)]) )
+      local image = VMGImage( Bitmap(32,17).[clear(Color.BLUE)] )
+      VMGImageList.add( image )
+      VMGImageList.select( image )
+      VMGUI.show( image )
 
     method on_draw
       if (is_modified)
