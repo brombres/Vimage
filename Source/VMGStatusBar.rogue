@@ -2,7 +2,7 @@ uses UI
 
 class VMGStatusBar : UIComponent [singleton]
   PROPERTIES
-    text : String
+    builder = TextCanvas(Console.width,1)
 
   METHODS
     method init
@@ -12,12 +12,21 @@ class VMGStatusBar : UIComponent [singleton]
 
     method on_draw
       localize display_bounds
-      ConsoleUICanvas.fill( display_bounds, ' ' )
-      if (text)
-        ConsoleUICanvas.cursor = display_bounds.position
-        ConsoleUICanvas.print text
-      endIf
+      builder.flush
+      builder.resize( display_bounds.size )
+      ConsoleUICanvas.draw( builder, display_bounds.position )
 
-    method set_text( @text )
+    method on_use->TextCanvas
+      builder.clear
+      return builder
+
+    method on_end_use( builder:TextCanvas )
+      builder.flush
+      request_redraw
+
+    method set_text( value:String )
+      builder.clear(' ')
+      builder.print( value )
+      builder.flush
       request_redraw
 endClass

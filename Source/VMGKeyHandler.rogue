@@ -1,59 +1,52 @@
 class VMGKeyHandler
-  PROPERTIES
-    keycode : Int32
-    handler : Function(KeyEvent)
-
   METHODS
-    method init( keycode, handler )
-
     method on( e:KeyEvent )
-      handler( e )
+      noAction
+
+    method set_state( new_state:VMGState )
+      VMGState.current.change_state( new_state )
+
+    method set_status( text:String )
+      VMGStatusBar.text = text
+endClass
+
+class KeyHandlerColon : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = ":"
+      VMGUI.command.clear
+      state = EnterCmdState()
 endClass
 
 class KeyHandlerQBuffer : VMGKeyHandler [singleton]
   METHODS
-    method init
-      prior.init( Keycode.W,
-        (e) =>
-        {
-          VMGStatusBar.text = "q (Quit)"
-          VMGUI.is_running = false
-        }
-      )
+    method on( e:KeyEvent )
+      status = "q (Quit)"
+      VMGUI.is_running = false
 endClass
 
 class KeyHandlerSBuffer : VMGKeyHandler [singleton]
   METHODS
-    method init
-      prior.init( Keycode.W,
-        (e) =>
-        {
-          VMGStatusBar.text = "s (Down)"
-          if local current = VMGImageList.selected
-            if (current.next)
-              VMGImageList.select( current.next->(as VMGImageListItem) )
-            endIf
-          endIf
-        }
-      )
+    method on( e:KeyEvent )
+      status = "s (Down)"
+      if local current = VMGImageList.selected
+        if (current.next)
+          VMGImageList.select( current.next->(as VMGImageListItem) )
+        endIf
+      endIf
 endClass
 
 class KeyHandlerWBuffer : VMGKeyHandler [singleton]
   METHODS
-    method init
-      prior.init( Keycode.W,
-        (e) =>
-        {
-          VMGStatusBar.text = "w (Up)"
-          if local current = VMGImageList.selected
-            forEach (child in VMGImageList.children)
-              if (child.next is current)
-                VMGImageList.select( child->(as VMGImageListItem) )
-                escapeForEach
-              endIf
-            endForEach
+    method on( e:KeyEvent )
+      status = "w (Up)"
+      if local current = VMGImageList.selected
+        forEach (child in VMGImageList.children)
+          if (child.next is current)
+            VMGImageList.select( child->(as VMGImageListItem) )
+            escapeForEach
           endIf
-        }
-      )
+        endForEach
+      endIf
 endClass
 

@@ -1,9 +1,15 @@
 class VMGState
+  DEFINITIONS
+    SHIFT   = (1:<<:16)
+    CONTROL = (2:<<:16)
+    ALT     = (4:<<:16)
+    OS      = (8:<<:16)
+
   GLOBAL PROPERTIES
     current = VMGState()
 
   PROPERTIES
-    handlers = [Int32:VMGKeyHandler]
+    key_handlers = [Int32:VMGKeyHandler]
 
   METHODS
     method change_state( new_state:VMGState )
@@ -13,7 +19,7 @@ class VMGState
 
     method on( e:KeyEvent )
       if (e.is_press)
-        if local handler = handlers[e.keycode]
+        if local handler = key_handlers[ (e.modifier_key_state:<<:16) | e.keycode ]
           handler.on( e )
           return
         endIf
@@ -24,13 +30,83 @@ class VMGState
 
     method on_leave
       noAction
+
+    method set_state( new_state:VMGState )
+      current.change_state( new_state )
+
+    method set_status( text:String )
+      VMGStatusBar.text = text
 endClass
 
 class IdleState : VMGState
   METHODS
     method init
-      handlers[Keycode.Q] = KeyHandlerQBuffer
-      handlers[Keycode.S] = KeyHandlerSBuffer
-      handlers[Keycode.W] = KeyHandlerWBuffer
+      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
+      key_handlers[Keycode.Q] = KeyHandlerQBuffer
+      key_handlers[Keycode.S] = KeyHandlerSBuffer
+      key_handlers[Keycode.W] = KeyHandlerWBuffer
 
+endClass
+
+class EnterCmdState : VMGState
+  METHODS
+    method on( e:KeyEvent )
+      if (e.is_press)
+        if (e.is_press(Keycode.ESCAPE))
+          state = IdleState()
+        elseIf (e.unicode >= 32 and e.unicode != 127)
+          VMGUI.command.print e.unicode
+          update_status( VMGUI.command )
+        endIf
+      endIf
+
+    method update_status( cmd_line:String )
+      use builder = VMGStatusBar
+        builder.print ':'
+
+        local keyword = cmd_line.before_first(' ')
+        local args = cmd_line.after_first(' ')
+        local cmds = VMGCmdHandler[]
+        forEach (cmd in VMGUI.cmd_handlers)
+          if (cmd.keyword == keyword) cmds.add( cmd )
+        endForEach
+        if (cmds.is_empty)
+          forEach (cmd in VMGUI.cmd_handlers)
+            if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
+          endForEach
+        endIf
+
+        which (cmds.count)
+          case 0
+            if (cmd_line.trimmed.count > 0)
+              builder.print keyword
+              builder.print ' '
+              builder.style.dim
+              builder.print " [invalid command]"
+              builder.style.dim_off
+            endIf
+
+          case 1
+            local cmd = cmds.first
+            builder.print keyword
+            builder.style.dim
+            builder.print cmd.keyword[ forEach in keyword.count..<cmd.keyword.count ]
+            builder.style.dim_off
+
+            if (args.count)
+              builder.print ' '
+              builder.print args
+            endIf
+
+            if (cmd.syntax and cmd.syntax.count)
+              builder.print ' '
+              builder.style.dim
+              builder.print cmd.syntax
+              builder.style.dim_off
+            endIf
+
+          others
+        endWhich
+
+      endUse
 endClass

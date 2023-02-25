@@ -1,0 +1,21 @@
+class VMGCmdHandler
+  PROPERTIES
+    keyword : String
+    syntax  : String
+
+  METHODS
+    method execute( args:String )
+      status = "! Unimplemented command: $ $"(keyword,args)
+
+    method set_state( new_state:VMGState )
+      VMGState.current.change_state( new_state )
+
+    method set_status( text:String )
+      VMGStatusBar.text = text
+endClass
+
+class CmdBG : VMGCmdHandler [singleton]
+  PROPERTIES
+    keyword = "bg"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+endClass

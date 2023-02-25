@@ -4,7 +4,7 @@
 #
 # a            - Left / Cursor Images<-Layers
 # A            - Left (BR Corner) / Layer moves out to become image
-# b color      - BG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# b
 # B            -
 # c [WxH|WASD] - Crop/expand, [ENTER|ESC]
 # C
@@ -12,7 +12,7 @@
 # D            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
 # e
 # E
-# f color      - FG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# f
 # F
 # g
 # G
@@ -54,7 +54,12 @@
 # Y
 # z            - ZOOM IN  (scale * 2)
 # Z            - ZOOM OUT (scale / 2)
+# :bg <color>
+# :fg <color>
 # :swap [argb][argb01]
+#
+# <color>
+#   [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
 #================================================================================
 
 $define VERSION "0.1"
@@ -67,6 +72,7 @@ uses Bitmap
 uses Bitmap/IO
 uses Epilog
 
+$include VMGCmdHandler
 $include VMGImage
 $include VMGImageList
 $include VMGImageView
