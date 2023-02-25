@@ -2,60 +2,58 @@
 # Vimage.rogue
 # February 19, 2023
 #
-# a
-# A
-# b color     - BG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
-# B           -
-# c
+# a            - Left / Cursor Images<-Layers
+# A            - Left (BR Corner) / Layer moves out to become image
+# b color      - BG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# B            -
+# c [WxH|WASD] - Crop/expand, [ENTER|ESC]
 # C
-# d
-# D
+# d            - Right / Cursor Images->Layers
+# D            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
 # e
 # E
-# f color     - FG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# f color      - FG COLOR [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
 # F
 # g
 # G
-# h           - LEFT (Cursor escapes image layers back to images)
+# h            - Hflip
 # H
 # i
 # I
-# j           - DOWN (Next Image)
-# J [h|v|WxH] - JOIN (splice)
-# j+CTRL      - MOVE BUFFER DOWN
-# k           - UP (Previous Image)
+# j WxH        - un(j)oin / Split into multiple images
+# J [h|v|WxH]  - JOIN (splice)
+# k
 # K
-# k+CTRL      - MOVE BUFFER UP
-# l           - RIGHT (Cursor moves from images to current image layers)
+# l
 # L
 # m
 # M
-# n WxH       - NEW
+# n [WxH]      - New [previous/default size]
 # N
-# o pattern   - Open file or files; inserts above current buffer
-# O
-# p           - PASTE - new image from clipboard stacked above current image.
-# P
-# q
-# Q
-# r
-# R
-# s WxH       - SPLIT into multiple buffers
-# S
-# t           - S(T)ACK - cur buffer becomes layer of image underneath
+# o pattern    - Open file or files; inserts above current buffer
+# O            - Open using built-in file dialog
+# p            - Paste - new image/layer from clipboard stacked above current image/layer
+# P            - Paste below
+# q            - Quit (close) current buffer
+# Q            - Quit (close) all buffers
+# r            - Rotate 90º CW
+# R            - Rotate 90º CCW
+# s            - Down / Next Image / Next Layer
+# S            - Down (BR Corner) / Move image/layer down 1 level
+# t            - S(T)ACK - cur buffer becomes layer of image underneath
 # T
-# u           - UNDO
+# u            - UNDO
 # U
-# v
+# v            - Vflip
 # V
-# w
-# W
+# w            - Up / Previous Image
+# W            - Up (BR Corner) / Move image/layer up 1 level
 # x
 # X
-# y [rgbay]   - Yank (copy) R, G, B, A, or Y=all channels to clipboard.
+# y [rgbay]    - Yank (copy) R, G, B, A, or Y=all channels to clipboard.
 # Y
-# z           - ZOOM IN  (scale * 2)
-# Z           - ZOOM OUT (scale / 2)
+# z            - ZOOM IN  (scale * 2)
+# Z            - ZOOM OUT (scale / 2)
 # :swap [argb][argb01]
 #================================================================================
 
@@ -72,7 +70,7 @@ uses Epilog
 $include VMGImage
 $include VMGImageList
 $include VMGImageView
-$include VMGState
+$include VMGKeyHandler
 $include VMGState
 $include VMGStatusBar
 $include VMGTitleBar
@@ -98,7 +96,6 @@ class Vimage
         System.exit 0
       endIf
 
-      VMGState.current = IdleState()
       VMGUI.run
 
     method parse_args( args:String[] )->Value

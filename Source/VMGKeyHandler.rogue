@@ -1,0 +1,59 @@
+class VMGKeyHandler
+  PROPERTIES
+    keycode : Int32
+    handler : Function(KeyEvent)
+
+  METHODS
+    method init( keycode, handler )
+
+    method on( e:KeyEvent )
+      handler( e )
+endClass
+
+class KeyHandlerQBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method init
+      prior.init( Keycode.W,
+        (e) =>
+        {
+          VMGStatusBar.text = "q (Quit)"
+          VMGUI.is_running = false
+        }
+      )
+endClass
+
+class KeyHandlerSBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method init
+      prior.init( Keycode.W,
+        (e) =>
+        {
+          VMGStatusBar.text = "s (Down)"
+          if local current = VMGImageList.selected
+            if (current.next)
+              VMGImageList.select( current.next->(as VMGImageListItem) )
+            endIf
+          endIf
+        }
+      )
+endClass
+
+class KeyHandlerWBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method init
+      prior.init( Keycode.W,
+        (e) =>
+        {
+          VMGStatusBar.text = "w (Up)"
+          if local current = VMGImageList.selected
+            forEach (child in VMGImageList.children)
+              if (child.next is current)
+                VMGImageList.select( child->(as VMGImageListItem) )
+                escapeForEach
+              endIf
+            endForEach
+          endIf
+        }
+      )
+endClass
+

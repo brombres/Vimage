@@ -4,10 +4,13 @@ uses UI
 class VMGUI : ConsoleUI [singleton]
   PROPERTIES
     image_list_scroller : UIScrollView
+    repeat_count        : Int32?
 
   METHODS
     method init
       prior.init
+
+      VMGState.current.change_state( IdleState() )
 
       image_list_scroller = UIScrollView( VMGImageList ).[ shrink_to_fit_width ]
       local layout = (image_list_scroller + VMGImageView)
