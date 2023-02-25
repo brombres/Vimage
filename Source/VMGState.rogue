@@ -34,8 +34,12 @@ class VMGState
     method set_state( new_state:VMGState )
       current.change_state( new_state )
 
-    method set_status( text:String )
-      VMGStatusBar.text = text
+    method set_status( text:String, &dim )
+      use builder = VMGStatusBar
+        if (dim) builder.style.dim
+        builder.print text
+        if (dim) builder.style.dim_off
+      endUse
 endClass
 
 class IdleState : VMGState
@@ -50,13 +54,58 @@ endClass
 
 class EnterCmdState : VMGState
   METHODS
+    method find_commands( keyword:String )->VMGCmdHandler[]
+      local cmds = VMGCmdHandler[]
+      forEach (cmd in VMGUI.cmd_handlers)
+        if (cmd.keyword == keyword) cmds.add( cmd )
+      endForEach
+      if (cmds.is_empty)
+        forEach (cmd in VMGUI.cmd_handlers)
+          if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
+        endForEach
+      endIf
+      return cmds
+
     method on( e:KeyEvent )
       if (e.is_press)
         if (e.is_press(Keycode.ESCAPE))
           state = IdleState()
-        elseIf (e.unicode >= 32 and e.unicode != 127)
+          set_status( "[Cancelled]", &dim )
+        elseIf (e.unicode >= 33 and e.unicode != 127)
           VMGUI.command.print e.unicode
           update_status( VMGUI.command )
+        elseIf (e.keycode == Keycode.BACKSPACE or e.keycode == Keycode.DELETE)
+          if (VMGUI.command.count)
+            VMGUI.command.remove_last
+            update_status( VMGUI.command )
+          endIf
+        elseIf (e.keycode == Keycode.SPACE or e.keycode == Keycode.ENTER)
+          local cmds = find_commands( VMGUI.command.before_first(' ') )
+          which (cmds.count)
+            case 0
+              state = IdleState()
+              set_status( "[Invalid command]", &dim )
+            case 1
+              local keyword = VMGUI.command.before_first(' ')
+              local args = VMGUI.command.after_first( ' ' )
+
+              if (keyword == cmds.first.keyword)
+                VMGUI.command.print ' '
+              else
+                VMGUI.command.clear
+                VMGUI.command.print cmds.first.keyword
+                VMGUI.command.print ' '
+                VMGUI.command.print args
+                update_status( VMGUI.command )
+              endIf
+
+              if (e.keycode == Keycode.ENTER)
+                state = IdleState()
+                cmds.first.execute( args )
+              endIf
+            others
+              noAction
+          endWhich
         endIf
       endIf
 
@@ -66,15 +115,7 @@ class EnterCmdState : VMGState
 
         local keyword = cmd_line.before_first(' ')
         local args = cmd_line.after_first(' ')
-        local cmds = VMGCmdHandler[]
-        forEach (cmd in VMGUI.cmd_handlers)
-          if (cmd.keyword == keyword) cmds.add( cmd )
-        endForEach
-        if (cmds.is_empty)
-          forEach (cmd in VMGUI.cmd_handlers)
-            if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
-          endForEach
-        endIf
+        local cmds = find_commands( keyword )
 
         which (cmds.count)
           case 0
@@ -106,6 +147,16 @@ class EnterCmdState : VMGState
             endIf
 
           others
+            builder.print keyword
+            builder.print ' '
+            builder.style.dim
+            builder.print '['
+            forEach (cmd at i in cmds)
+              if (i > 0) builder.print '|'
+              builder.print cmd.keyword
+            endForEach
+            builder.print ']'
+            builder.style.dim_off
         endWhich
 
       endUse

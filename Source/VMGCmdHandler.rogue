@@ -5,13 +5,17 @@ class VMGCmdHandler
 
   METHODS
     method execute( args:String )
-      status = "! Unimplemented command: $ $"(keyword,args)
+      set_status( "[Unimplemented command: $]"(keyword.appending(args)), &dim )
 
     method set_state( new_state:VMGState )
       VMGState.current.change_state( new_state )
 
-    method set_status( text:String )
-      VMGStatusBar.text = text
+    method set_status( text:String, &dim )
+      use builder = VMGStatusBar
+        if (dim) builder.style.dim
+        builder.print text
+        if (dim) builder.style.dim_off
+      endUse
 endClass
 
 class CmdBG : VMGCmdHandler [singleton]
