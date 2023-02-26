@@ -79,13 +79,13 @@ class EnterCmdState : VMGState
             VMGUI.command.remove_last
             update_status( VMGUI.command )
           endIf
-        elseIf (e.keycode == Keycode.SPACE or e.keycode == Keycode.ENTER)
+        elseIf (e.keycode == Keycode.SPACE or e.keycode == Keycode.TAB or e.keycode == Keycode.ENTER)
           local cmds = find_commands( VMGUI.command.before_first(' ') )
           which (cmds.count)
             case 0
               if (e.keycode == Keycode.SPACE)
                 VMGUI.command.print ' '
-              else
+              elseIf (e.keycode != Keycode.TAB)
                 state = IdleState()
                 set_status( "[Invalid command]" )
               endIf
@@ -108,6 +108,7 @@ class EnterCmdState : VMGState
                 state = IdleState()
                 cmds.first.execute( args )
               endIf
+
             others
               noAction
           endWhich

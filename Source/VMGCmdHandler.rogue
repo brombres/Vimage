@@ -23,7 +23,7 @@ class VMGCmdHandler
 
         which (arg.count)
           case 0
-            set_status( "[bg: missing color specification]" )
+            set_status( "[$: missing color specification]"(keyword) )
             return null
           case 1  # V        -> 0xFFVVVVVV
             local v = arg->Int32( &base=16 )
@@ -93,6 +93,22 @@ class VMGCmdHandler
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
 
+    method parse_size( arg:String )->XY?
+      local pair = arg.split('x')
+      if (pair.count == 2)
+        local x = pair.first->Int32
+        local y = pair.last->Int32
+        if (x->String == pair.first and y->String == pair.last)
+          return XY(x,y)
+        else
+          set_status( "[Syntax error: invalid size '$']"(arg) )
+          return null
+        endIf
+      else
+        set_status( "[$: missing size specification]"(keyword) )
+        return null
+      endIf
+
     method set_state( new_state:VMGState )
       VMGState.current.change_state( new_state )
 
@@ -102,6 +118,9 @@ class VMGCmdHandler
         builder.print text
         if (dim) builder.style.dim_off
       endUse
+
+    method syntax->String
+      return @syntax
 endClass
 
 class CmdBG : VMGCmdHandler [singleton]
@@ -115,4 +134,51 @@ class CmdBG : VMGCmdHandler [singleton]
         status = "bg color $"(color_string(color))
         Vimage.bg_color = color
       endIf
+endClass
+
+class CmdNew : VMGCmdHandler [singleton]
+  PROPERTIES
+    keyword = "new"
+
+  METHODS
+    method execute( args:String )
+      local sz : XY
+
+      if (args.trimmed.count == 0)
+        sz = default_size
+      else
+        if local size = parse_size( args )
+          sz = size
+        endIf
+      endIf
+
+      local before_index = 0
+      if (VMGImageList.selected)
+        if local index = VMGImageList.locate( VMGImageList.selected )
+          before_index = index
+        endIf
+      endIf
+
+      local bitmap = Bitmap( sz ).[ clear(Vimage.bg_color) ]
+      local image  = VMGImage( bitmap )
+      local item   = VMGImageListItem( image )
+      VMGImageList.insert( item, before_index )
+      VMGImageList.select( item )
+      VMGImageList.request_layout
+
+      status = "new image [$x$] ($)"(sz.x,sz.y,Vimage.bg_color)
+
+    method default_size->XY
+      if local selected = VMGImageList.selected
+        if local image = selected.image
+          return image.bitmap.size
+        endIf
+      endIf
+      return VMGImageView.size * XY(1,2)
+
+    method syntax->String
+      if (VMGUI.command.after_first(' ').count?) return "WxH"
+
+      localize default_size
+      return "$x$"(default_size.x,default_size.y)
 endClass

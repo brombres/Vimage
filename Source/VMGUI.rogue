@@ -13,6 +13,7 @@ class VMGUI : ConsoleUI [singleton]
       prior.init
 
       register( CmdBG )
+      register( CmdNew )
 
       VMGState.current.change_state( IdleState() )
 
