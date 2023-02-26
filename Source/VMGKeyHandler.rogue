@@ -28,10 +28,23 @@ endClass
 class KeyHandlerJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "j (Down)"
       if local current = VMGImageList.selected
+        status = "j (Down)"
         if (current.next)
           VMGImageList.select( current.next->(as VMGImageListItem) )
+        endIf
+      endIf
+endClass
+
+class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      if local current = VMGImageList.selected
+        status = "J (Shift Down)"
+        if local index = VMGImageList.locate( current )
+          VMGImageList.remove( current )
+          VMGImageList.insert( current, index+1 )
+          VMGImageList.request_layout
         endIf
       endIf
 endClass
@@ -47,6 +60,21 @@ class KeyHandlerKBuffer : VMGKeyHandler [singleton]
             escapeForEach
           endIf
         endForEach
+      endIf
+endClass
+
+class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "K (Shift Up)"
+      if local current = VMGImageList.selected
+        if local index = VMGImageList.locate( current )
+          if (index > 0)
+            VMGImageList.remove( current )
+            VMGImageList.insert( current, index-1 )
+            VMGImageList.request_layout
+          endIf
+        endIf
       endIf
 endClass
 

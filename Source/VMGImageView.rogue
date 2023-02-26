@@ -36,7 +36,9 @@ class VMGImageView : UIComponent [singleton]
       local pos = Box( canvas.size ).positioned_within( display_bounds ).top_left
       ConsoleUICanvas.draw( canvas, pos )
 
-    method show( image )
+    method show( new_image:VMGImage )
+      if (new_image is image) return
+      image = new_image
       is_modified = true
       scale_to_fit = true
       request_redraw

@@ -49,6 +49,8 @@ class IdleState : VMGState
       key_handlers[Keycode.Q] = KeyHandlerQBuffer
       key_handlers[Keycode.J] = KeyHandlerJBuffer
       key_handlers[Keycode.K] = KeyHandlerKBuffer
+      key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
+      key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
 
 endClass
 
