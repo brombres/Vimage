@@ -2,30 +2,33 @@
 # Vimage.rogue
 # February 19, 2023
 #
-# a            - Left / Cursor Images<-Layers
-# A            - Left (BR Corner) / Layer moves out to become image
+# a
+# A
 # b
 # B            -
 # c [WxH|WASD] - Crop/expand, [ENTER|ESC]
 # C
-# d            - Right / Cursor Images->Layers
-# D            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
+# d
+# D
 # e
 # E
 # f
 # F
 # g
 # G
-# h            - Hflip
-# H
+# - h            - Hflip
+# h            - Left / Cursor Images<-Layers
+# H            - Left (BR Corner) / Layer moves out to become image
 # i
 # I
-# j WxH        - un(j)oin / Split into multiple images
-# J [h|v|WxH]  - JOIN (splice)
-# k
-# K
-# l
-# L
+# - j WxH        - un(j)oin / Split into multiple images
+# - J [h|v|WxH]  - JOIN (splice)
+# j            - Down / Next Image / Next Layer
+# J            - Down (BR Corner) / Move image/layer down 1 level
+# k            - Up / Previous Image
+# K            - Up (BR Corner) / Move image/layer up 1 level
+# l            - Right / Cursor Images->Layers
+# L            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
 # m
 # M
 # n [WxH]      - New [previous/default size]
@@ -38,16 +41,16 @@
 # Q            - Quit (close) all buffers
 # r            - Rotate 90º CW
 # R            - Rotate 90º CCW
-# s            - Down / Next Image / Next Layer
-# S            - Down (BR Corner) / Move image/layer down 1 level
+# s
+# S
 # t            - S(T)ACK - cur buffer becomes layer of image underneath
 # T
 # u            - UNDO
 # U
 # v            - Vflip
 # V
-# w            - Up / Previous Image
-# W            - Up (BR Corner) / Move image/layer up 1 level
+# w
+# W
 # x
 # X
 # y [rgbay]    - Yank (copy) R, G, B, A, or Y=all channels to clipboard.

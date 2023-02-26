@@ -47,8 +47,8 @@ class IdleState : VMGState
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
       key_handlers[Keycode.Q] = KeyHandlerQBuffer
-      key_handlers[Keycode.S] = KeyHandlerSBuffer
-      key_handlers[Keycode.W] = KeyHandlerWBuffer
+      key_handlers[Keycode.J] = KeyHandlerJBuffer
+      key_handlers[Keycode.K] = KeyHandlerKBuffer
 
 endClass
 

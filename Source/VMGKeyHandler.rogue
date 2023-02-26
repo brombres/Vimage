@@ -25,10 +25,10 @@ class KeyHandlerQBuffer : VMGKeyHandler [singleton]
       VMGUI.is_running = false
 endClass
 
-class KeyHandlerSBuffer : VMGKeyHandler [singleton]
+class KeyHandlerJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "s (Down)"
+      status = "j (Down)"
       if local current = VMGImageList.selected
         if (current.next)
           VMGImageList.select( current.next->(as VMGImageListItem) )
@@ -36,10 +36,10 @@ class KeyHandlerSBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerWBuffer : VMGKeyHandler [singleton]
+class KeyHandlerKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "w (Up)"
+      status = "k (Up)"
       if local current = VMGImageList.selected
         forEach (child in VMGImageList.children)
           if (child.next is current)
