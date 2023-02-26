@@ -5,7 +5,93 @@ class VMGCmdHandler
 
   METHODS
     method execute( args:String )
-      set_status( "[Unimplemented command: $]"(keyword.appending(args)), &dim )
+      set_status( "[Unimplemented command: $]"(keyword.appending(args)) )
+
+    method color_string( color:Color )->String
+      local parts = color.argb->String( &hex ).split( 2 )
+      parts[1] .= to_lowercase
+      parts[3] .= to_lowercase
+      return parts.join("")
+
+    method parse_color( arg:String )->Color?
+      arg .= trimmed
+
+      contingent
+        forEach (ch in arg)
+          necessary (ch.is_number(16))
+        endForEach
+
+        which (arg.count)
+          case 0
+            set_status( "[bg: missing color specification]" )
+            return null
+          case 1  # V        -> 0xFFVVVVVV
+            local v = arg->Int32( &base=16 )
+            v |= v:<<:4
+            return Color( v, v, v )
+          case 2  # Vv       -> 0xFFVvVvVv
+            local v = arg->Int32( &base=16 )
+            return Color( v, v, v )
+          case 3  # RGB      -> 0xFFRRGGBB
+            local r = arg[0].to_number( &base=16 )
+            local g = arg[1].to_number( &base=16 )
+            local b = arg[2].to_number( &base=16 )
+            r |= r:<<:4
+            g |= g:<<:4
+            b |= b:<<:4
+            return Color( r, g, b )
+          case 4  # ARGB     -> 0xAARRGGBB
+            local a = arg[0].to_number( &base=16 )
+            local r = arg[1].to_number( &base=16 )
+            local g = arg[2].to_number( &base=16 )
+            local b = arg[3].to_number( &base=16 )
+            a |= a:<<:4
+            r |= r:<<:4
+            g |= g:<<:4
+            b |= b:<<:4
+            return Color( r, g, b, a )
+          case 6  # RRGGBB   -> 0xFFRRGGBB
+            local r = arg.substring(0,2)->Int32( &base=16 )
+            local g = arg.substring(2,2)->Int32( &base=16 )
+            local b = arg.substring(4,2)->Int32( &base=16 )
+            return Color( r, g, b )
+          case 8  # AARRGGBB -> 0xAARRGGBB
+            local a = arg.substring(0,2)->Int32( &base=16 )
+            local r = arg.substring(2,2)->Int32( &base=16 )
+            local g = arg.substring(4,2)->Int32( &base=16 )
+            local b = arg.substring(6,2)->Int32( &base=16 )
+            return Color( r, g, b, a )
+        endWhich
+
+      unsatisfied
+        arg .= replacing(' ','_').replacing('-','_')
+        which (arg)
+          case "black":       return Color( 0xff000000 )
+          case "blue":        return Color( 0xff0000FF )
+          case "brown":       return Color( 0xff882222 )
+          case "cyan":        return Color( 0xff00FFFF )
+          case "dark_gray":   return Color( 0xff444444 )
+          case "dark_green":  return Color( 0xff008800 )
+          case "gray":        return Color( 0xff888888 )
+          case "green":       return Color( 0xff00FF00 )
+          case "light_gray":  return Color( 0xffCCCCCC )
+          case "light_green": return Color( 0xff88FF88 )
+          case "magenta":     return Color( 0xffFF00FF )
+          case "orange":      return Color( 0xffFF8800 )
+          case "pink":        return Color( 0xffFFCCCC )
+          case "purple":      return Color( 0xff880088 )
+          case "red":         return Color( 0xffFF0000 )
+          case "rogue_blue":  return Color( 0xff3333FF )
+          case "royal_blue":  return Color( 0xff4169E1 )
+          case "sky_blue":    return Color( 0xff87CEEB )
+          case "transparent": return Color( 0 )
+          case "yellow":      return Color( 0xffFFFF00 )
+          case "white":       return Color( 0xffFFFFFF )
+        endWhich
+      endContingent
+
+      set_status( "[Syntax error: invalid color '$']"(arg) )
+      return null
 
     method set_state( new_state:VMGState )
       VMGState.current.change_state( new_state )
@@ -22,4 +108,11 @@ class CmdBG : VMGCmdHandler [singleton]
   PROPERTIES
     keyword = "bg"
     syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        status = "bg color $"(color_string(color))
+        Vimage.bg_color = color
+      endIf
 endClass

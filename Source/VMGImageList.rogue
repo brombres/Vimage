@@ -22,9 +22,6 @@ class VMGImageList : UIList [singleton]
       if (e.is_consumed) return
       handle( e )
 
-    method on_draw
-      ConsoleUICanvas.fill( display_bounds, '-' )
-
     method on_resize
       fixed_width = FIXED_WIDTH
 

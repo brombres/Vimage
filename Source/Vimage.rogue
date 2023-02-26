@@ -83,13 +83,16 @@ $include VMGTitleBar
 $include VMGUI
 
 try
-  Vimage( System.command_line_arguments )
+  Vimage.init( System.command_line_arguments )
 catch (error:Error)
   Console.error.println error
   System.exit 1
 endTry
 
-class Vimage
+class Vimage [singleton]
+  PROPERTIES
+    bg_color = Color.BLACK : Color
+
   METHODS
     method init( args:String[] )
       local command = parse_args( args )

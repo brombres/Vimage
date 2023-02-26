@@ -83,8 +83,13 @@ class EnterCmdState : VMGState
           local cmds = find_commands( VMGUI.command.before_first(' ') )
           which (cmds.count)
             case 0
-              state = IdleState()
-              set_status( "[Invalid command]", &dim )
+              if (e.keycode == Keycode.SPACE)
+                VMGUI.command.print ' '
+              else
+                state = IdleState()
+                set_status( "[Invalid command]" )
+              endIf
+
             case 1
               local keyword = VMGUI.command.before_first(' ')
               local args = VMGUI.command.after_first( ' ' )
@@ -121,6 +126,10 @@ class EnterCmdState : VMGState
           case 0
             if (cmd_line.trimmed.count > 0)
               builder.print keyword
+              if (args.count)
+                builder.print ' '
+                builder.print args
+              endIf
               builder.print ' '
               builder.style.dim
               builder.print " [invalid command]"
