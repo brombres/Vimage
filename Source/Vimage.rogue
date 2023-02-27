@@ -94,7 +94,8 @@ endTry
 
 class Vimage [singleton]
   PROPERTIES
-    bg_color = Color.BLACK : Color
+    bg_color  = Color.BLACK : Color
+    clipboard : VMGImage
 
   METHODS
     method init( args:String[] )

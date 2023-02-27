@@ -18,6 +18,12 @@ class KeyHandlerColon : VMGKeyHandler [singleton]
       state = EnterCmdState()
 endClass
 
+class KeyHandlerDBuffer : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      VMGState.change_state( DState() )
+endClass
+
 class KeyHandlerQBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )

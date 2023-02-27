@@ -8,14 +8,17 @@ class VMGState
   GLOBAL PROPERTIES
     current = VMGState()
 
+  GLOBAL METHODS
+    method change_state( new_state:VMGState )
+      current.set_state( new_state )
+
   PROPERTIES
     key_handlers = [Int32:VMGKeyHandler]
 
   METHODS
-    method change_state( new_state:VMGState )
-      on_leave
-      current = new_state
-      current.on_enter
+    method cancel
+      state = IdleState()
+      set_status( "[cancelled]", &dim )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -32,7 +35,9 @@ class VMGState
       noAction
 
     method set_state( new_state:VMGState )
-      current.change_state( new_state )
+      current.on_leave
+      current = new_state
+      current.on_enter
 
     method set_status( text:String, &dim )
       use builder = VMGStatusBar
@@ -46,6 +51,7 @@ class IdleState : VMGState
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
+      key_handlers[Keycode.D] = KeyHandlerDBuffer
       key_handlers[Keycode.Q] = KeyHandlerQBuffer
       key_handlers[Keycode.J] = KeyHandlerJBuffer
       key_handlers[Keycode.K] = KeyHandlerKBuffer
@@ -71,8 +77,7 @@ class EnterCmdState : VMGState
     method on( e:KeyEvent )
       if (e.is_press)
         if (e.is_press(Keycode.ESCAPE))
-          state = IdleState()
-          set_status( "[Cancelled]", &dim )
+          cancel
         elseIf (e.unicode >= 33 and e.unicode != 127)
           VMGUI.command.print e.unicode
           update_status( VMGUI.command )
@@ -89,7 +94,7 @@ class EnterCmdState : VMGState
                 VMGUI.command.print ' '
               elseIf (e.keycode != Keycode.TAB)
                 state = IdleState()
-                set_status( "[Invalid command]" )
+                set_status( "[invalid command]" )
               endIf
 
             case 1
@@ -172,4 +177,42 @@ class EnterCmdState : VMGState
         endWhich
 
       endUse
+endClass
+
+class DState : VMGState
+  METHODS
+    method on_enter
+      use status = VMGStatusBar
+        status.print 'd'
+        status.style.dim
+        status.print "[d]"
+        status.style.dim_off
+      endUse
+
+    method on( e:KeyEvent )
+      if (e.is_press)
+        if (e.keycode == Keycode.ESCAPE)
+          cancel
+        elseIf (e.unicode == 'd')
+          state = IdleState()
+          if (VMGImageList.selected)
+            set_status( "dd (delete image and copy to clipboard)" )
+            Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+            local next = VMGImageList.selected.next
+            VMGImageList.remove( VMGImageList.selected )
+            if (next)
+              VMGImageList.select( next->(as VMGImageListItem) )
+            elseIf (VMGImageList.count)
+              VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+            else
+              VMGImageList.select( null )
+            endIf
+          else
+            set_status( "[dd: nothing to delete]" )
+          endIf
+        else
+          set_status( "[invalid command 'd$']"(e.unicode) )
+          state = IdleState()
+        endIf
+      endIf
 endClass

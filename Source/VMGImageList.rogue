@@ -35,14 +35,18 @@ class VMGImageList : UIList [singleton]
         endIf
       endForEach
 
-    method select( item:VMGImageListItem )
+    method select( item:VMGImageListItem ) [preferred]
       if (selected)
         selected.deselect
         selected.request_redraw
       endIf
       selected = item
-      item.request_redraw
-      VMGUI.show( item.image )
+      if (item)
+        item.request_redraw
+        VMGUI.show( item.image )
+      else
+        VMGUI.show( null )
+      endIf
 endClass
 
 class VMGImageListItem : UIComponent
