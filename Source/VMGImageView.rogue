@@ -20,8 +20,6 @@ class VMGImageView : UIComponent [singleton]
       VMGImageList.add( VMGImage( Bitmap(64,128) ) )
 
     method on_draw
-      ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
-
       if (image)
         if (is_modified)
           local scale = ((display_bounds.size->RealXY*RealXY(1,2)) / image.bitmap.size->RealXY).min
@@ -34,8 +32,14 @@ class VMGImageView : UIComponent [singleton]
           canvas = ANSIBitmap( display_image )->TextCanvas
         endIf
 
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
+
         local pos = Box( canvas.size ).positioned_within( display_bounds ).top_left
         ConsoleUICanvas.draw( canvas, pos )
+
+      else
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DEFAULT) )
+
       endIf
 
     method show( new_image:VMGImage )

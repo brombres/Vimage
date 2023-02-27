@@ -20,6 +20,10 @@ class VMGState
       state = IdleState()
       set_status( "[cancelled]", &dim )
 
+    method execute( cmd:VMGCmd )
+      Vimage.cmd = cmd
+      cmd.execute
+
     method on( e:KeyEvent )
       if (e.is_press)
         if local handler = key_handlers[ (e.modifier_key_state:<<:16) | e.keycode ]
@@ -55,20 +59,20 @@ class IdleState : VMGState
       key_handlers[Keycode.Q] = KeyHandlerQBuffer
       key_handlers[Keycode.J] = KeyHandlerJBuffer
       key_handlers[Keycode.K] = KeyHandlerKBuffer
+      key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
       key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
       key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
-
 endClass
 
 class EnterCmdState : VMGState
   METHODS
-    method find_commands( keyword:String )->VMGCmdHandler[]
-      local cmds = VMGCmdHandler[]
-      forEach (cmd in VMGUI.cmd_handlers)
+    method find_commands( keyword:String )->VMGCmdLineHandler[]
+      local cmds = VMGCmdLineHandler[]
+      forEach (cmd in VMGUI.cmd_line_handlers)
         if (cmd.keyword == keyword) cmds.add( cmd )
       endForEach
       if (cmds.is_empty)
-        forEach (cmd in VMGUI.cmd_handlers)
+        forEach (cmd in VMGUI.cmd_line_handlers)
           if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
         endForEach
       endIf
@@ -194,22 +198,8 @@ class DState : VMGState
         if (e.keycode == Keycode.ESCAPE)
           cancel
         elseIf (e.unicode == 'd')
+          execute( VMGCmdDD )
           state = IdleState()
-          if (VMGImageList.selected)
-            set_status( "dd (delete image and copy to clipboard)" )
-            Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
-            local next = VMGImageList.selected.next
-            VMGImageList.remove( VMGImageList.selected )
-            if (next)
-              VMGImageList.select( next->(as VMGImageListItem) )
-            elseIf (VMGImageList.count)
-              VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
-            else
-              VMGImageList.select( null )
-            endIf
-          else
-            set_status( "[dd: nothing to delete]" )
-          endIf
         else
           set_status( "[invalid command 'd$']"(e.unicode) )
           state = IdleState()

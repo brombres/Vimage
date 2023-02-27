@@ -6,7 +6,7 @@ class VMGUI : ConsoleUI [singleton]
     image_list_scroller : UIScrollView
     repeat_count        : Int32?
     command             = String()
-    cmd_handlers        = [String:VMGCmdHandler]
+    cmd_line_handlers        = [String:VMGCmdLineHandler]
 
   METHODS
     method init
@@ -26,8 +26,8 @@ class VMGUI : ConsoleUI [singleton]
     method on( e:KeyEvent )
       VMGState.current.on( e )
 
-    method register( cmd_handler:VMGCmdHandler )
-      cmd_handlers[cmd_handler.keyword] = cmd_handler
+    method register( cmd_handler:VMGCmdLineHandler )
+      cmd_line_handlers[cmd_handler.keyword] = cmd_handler
 
     method show( image:VMGImage )
       VMGTitleBar.show( image )

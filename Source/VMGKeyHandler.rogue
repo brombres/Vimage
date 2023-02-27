@@ -42,6 +42,14 @@ class KeyHandlerJBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
+class KeyHandlerPeriod : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      if (Vimage.cmd)
+        Vimage.cmd.execute
+      endIf
+endClass
+
 class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )

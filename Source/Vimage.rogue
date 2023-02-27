@@ -75,7 +75,8 @@ uses Bitmap
 uses Bitmap/IO
 uses Epilog
 
-$include VMGCmdHandler
+$include VMGCmd
+$include VMGCmdLineHandler
 $include VMGImage
 $include VMGImageList
 $include VMGImageView
@@ -96,6 +97,7 @@ class Vimage [singleton]
   PROPERTIES
     bg_color  = Color.BLACK : Color
     clipboard : VMGImage
+    cmd       : VMGCmd
 
   METHODS
     method init( args:String[] )

@@ -1,0 +1,51 @@
+class VMGCmd
+  METHODS
+    method execute
+
+    method set_status( text:String, &dim )
+      use builder = VMGStatusBar
+        if (dim) builder.style.dim
+        builder.print text
+        if (dim) builder.style.dim_off
+      endUse
+endClass
+
+class VMGCmdDD : VMGCmd [singleton]
+  METHODS
+    method execute
+      if (VMGImageList.selected)
+        set_status( "dd (delete image and copy to clipboard)" )
+        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+        local next = VMGImageList.selected.next
+        VMGImageList.remove( VMGImageList.selected )
+        if (next)
+          VMGImageList.select( next->(as VMGImageListItem) )
+        elseIf (VMGImageList.count)
+          VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+        else
+          VMGImageList.select( null )
+        endIf
+      else
+        set_status( "[dd: nothing to delete]" )
+      endIf
+endClass
+
+class VMGCmdNew( size:XY, bg_color:Color ) : VMGCmd
+  METHODS
+    method execute
+      local before_index = 0
+      if (VMGImageList.selected)
+        if local index = VMGImageList.locate( VMGImageList.selected )
+          before_index = index
+        endIf
+      endIf
+
+      local bitmap = Bitmap( size ).[ clear(bg_color) ]
+      local image  = VMGImage( bitmap )
+      local item   = VMGImageListItem( image )
+      VMGImageList.insert( item, before_index )
+      VMGImageList.select( item )
+      VMGImageList.request_layout
+
+      status = "new image [$x$] ($)"(size.x,size.y,bg_color)
+endClass

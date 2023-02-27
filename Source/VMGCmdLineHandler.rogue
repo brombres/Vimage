@@ -1,4 +1,4 @@
-class VMGCmdHandler
+class VMGCmdLineHandler
   PROPERTIES
     keyword : String
     syntax  : String
@@ -6,6 +6,10 @@ class VMGCmdHandler
   METHODS
     method execute( args:String )
       set_status( "[Unimplemented command: $]"(keyword.appending(args)) )
+
+    method execute( cmd:VMGCmd )
+      Vimage.cmd = cmd
+      cmd.execute
 
     method color_string( color:Color )->String
       local parts = color.argb->String( &hex ).split( 2 )
@@ -85,6 +89,7 @@ class VMGCmdHandler
           case "royal_blue":  return Color( 0xff4169E1 )
           case "sky_blue":    return Color( 0xff87CEEB )
           case "transparent": return Color( 0 )
+          case "clear":       return Color( 0 )
           case "yellow":      return Color( 0xffFFFF00 )
           case "white":       return Color( 0xffFFFFFF )
         endWhich
@@ -123,7 +128,7 @@ class VMGCmdHandler
       return @syntax
 endClass
 
-class CmdBG : VMGCmdHandler [singleton]
+class CmdBG : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
     syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
@@ -136,7 +141,7 @@ class CmdBG : VMGCmdHandler [singleton]
       endIf
 endClass
 
-class CmdNew : VMGCmdHandler [singleton]
+class CmdNew : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"
 
@@ -152,21 +157,7 @@ class CmdNew : VMGCmdHandler [singleton]
         endIf
       endIf
 
-      local before_index = 0
-      if (VMGImageList.selected)
-        if local index = VMGImageList.locate( VMGImageList.selected )
-          before_index = index
-        endIf
-      endIf
-
-      local bitmap = Bitmap( sz ).[ clear(Vimage.bg_color) ]
-      local image  = VMGImage( bitmap )
-      local item   = VMGImageListItem( image )
-      VMGImageList.insert( item, before_index )
-      VMGImageList.select( item )
-      VMGImageList.request_layout
-
-      status = "new image [$x$] ($)"(sz.x,sz.y,Vimage.bg_color)
+      execute( VMGCmdNew(sz,Vimage.bg_color) )
 
     method default_size->XY
       if local selected = VMGImageList.selected
