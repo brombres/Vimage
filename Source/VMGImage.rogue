@@ -2,10 +2,11 @@ uses Bitmap
 
 class VMGImage
   PROPERTIES
-    file   : File
-    bitmap : Bitmap
-    name   : String
-    zoom   : Real64
+    file        : File
+    bitmap      : Bitmap
+    name        : String
+    zoom        : Real64
+    view_center = RealXY(0.5,0.5)
 
   METHODS
     method init( bitmap, name=null )

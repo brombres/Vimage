@@ -15,6 +15,8 @@ class VMGImageView : UIComponent [singleton]
     method init
 
     method on_draw
+      localize display_bounds
+
       if (image)
         if (is_modified)
           is_modified = false
@@ -29,6 +31,7 @@ class VMGImageView : UIComponent [singleton]
             if (image.zoom)
               if (image.zoom < min_zoom)
                 image.zoom = min_zoom
+                image.view_center = RealXY(0.5,0.5)
               else
                 new_size = ((image.bitmap.size->RealXY * image.zoom) + RealXY(0.5,0.5))->XY
               endIf
@@ -47,13 +50,25 @@ class VMGImageView : UIComponent [singleton]
         ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
-          local pos = Box( canvas.size ).positioned_within( display_bounds ).top_left
+          local sz = canvas.size
+          local pos = Box( display_bounds.center - (sz*image.view_center), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
 
       else
         ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
 
+      endIf
+
+    method scroll( delta:RealXY )
+      if (image)
+        if (image.zoom == min_zoom)
+          image.view_center = RealXY(0.5,0.5)
+        elseIf (image.zoom)
+          delta *= display_bounds.size / (image.bitmap.size * image.zoom)
+          image.view_center = (image.view_center + delta).clamped( 0.0, 1.0 )
+        endIf
+        request_redraw
       endIf
 
     method show( new_image:VMGImage )
@@ -91,7 +106,10 @@ class VMGImageView : UIComponent [singleton]
       if (image)
         if (image.zoom > min_zoom)
           image.zoom /= 2
-          if (image.zoom < min_zoom) image.zoom = min_zoom
+          if (image.zoom < min_zoom)
+            image.zoom = min_zoom
+            image.view_center = RealXY(0.5,0.5)
+          endIf
         endIf
         VMGTitleBar.zoom = image.zoom
         is_modified = true

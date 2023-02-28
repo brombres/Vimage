@@ -48,14 +48,14 @@ endClass
 class KeyHandlerQBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "q (Quit)"
+      status = "q (quit)"
       VMGUI.is_running = false
 endClass
 
 class KeyHandlerJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "j (Down)"
+      status = "j (down)"
       execute
 
     method on_execute
@@ -77,7 +77,7 @@ endClass
 class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "J (Shift Down)"
+      status = "J (shift down)"
       execute
 
     method on_execute
@@ -93,7 +93,7 @@ endClass
 class KeyHandlerKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "k (Up)"
+      status = "k (up)"
       execute
 
     method on_execute
@@ -110,7 +110,7 @@ endClass
 class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "K (Shift Up)"
+      status = "K (shift up)"
       execute
 
     method on_execute
@@ -123,5 +123,27 @@ class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
           endIf
         endIf
       endIf
+endClass
+
+class KeyHandlerZ : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "z (zoom in)"
+      execute
+
+    method on_execute
+      VMGImageView.zoom_in
+      if (VMGState.current is not ImageViewState) VMGState.change_state( ImageViewState )
+endClass
+
+class KeyHandlerShiftZ : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "z (zoom out)"
+      execute
+
+    method on_execute
+      VMGImageView.zoom_out
+      if (VMGState.current is not ImageViewState) VMGState.change_state( ImageViewState )
 endClass
 
