@@ -112,6 +112,10 @@ class Vimage [singleton]
         System.exit 0
       endIf
 
+      forEach (filepath in command//args)
+        VMGImageList.insert( VMGImage(File(filepath)) )
+      endForEach
+
       VMGUI.run
 
     method execute( cmd )

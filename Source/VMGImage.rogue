@@ -2,11 +2,19 @@ uses Bitmap
 
 class VMGImage
   PROPERTIES
+    file   : File
     bitmap : Bitmap
     name   : String
 
   METHODS
     method init( bitmap, name=null )
+
+    method init( file )
+      if local bitmap = Bitmap( file )
+        init( bitmap, file.filepath )
+      else
+        init( Bitmap(16,16), file.filepath )
+      endIf
 
     method name->String
       local dims = "[$x$]"(bitmap.width,bitmap.height)

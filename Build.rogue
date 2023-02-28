@@ -45,7 +45,7 @@ endRoutine
 
 routine rogo_run
   # Runs this project.
-  execute exe_file.esc
+  execute "$ $"(exe_file.esc,"M3gan.png")
 endRoutine
 
 routine rogo_debug

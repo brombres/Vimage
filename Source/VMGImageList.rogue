@@ -22,6 +22,10 @@ class VMGImageList : UIList [singleton]
       if (e.is_consumed) return
       handle( e )
 
+    method insert( image:VMGImage )
+      insert( VMGImageListItem(image) )
+      request_layout
+
     method on_resize
       fixed_width = FIXED_WIDTH
 
