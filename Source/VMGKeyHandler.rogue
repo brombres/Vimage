@@ -177,3 +177,37 @@ class KeyHandlerVFlip : VMGKeyHandler [singleton]
       endIf
 endClass
 
+class KeyHandlerRotate90CW : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "r (rotate 90º clockwise)"
+      execute
+
+    method on_execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.bitmap.rotate_90( &cw )
+        img.is_modified = true
+        img.zoom = 0
+        VMGImageView.mark_modified
+        VMGImageView.min_zoom = 0
+      endIf
+endClass
+
+class KeyHandlerRotate90CCW : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "R (rotate 90º counter-clockwise)"
+      execute
+
+    method on_execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.bitmap.rotate_90( &ccw )
+        img.is_modified = true
+        img.zoom = 0
+        VMGImageView.mark_modified
+        VMGImageView.min_zoom = 0
+      endIf
+endClass
+

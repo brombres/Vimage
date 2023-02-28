@@ -60,12 +60,14 @@ class ImageListState : VMGState [singleton]
       key_handlers[Keycode.D]               = VMGKeyHandler( DState )
       key_handlers[Keycode.F]               = KeyHandlerHFlip
       key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
-      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
       key_handlers[Keycode.J]               = KeyHandlerJBuffer
       key_handlers[Keycode.K]               = KeyHandlerKBuffer
       key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
       key_handlers[Keycode.J+SHIFT]         = KeyHandlerShiftJBuffer
       key_handlers[Keycode.K+SHIFT]         = KeyHandlerShiftKBuffer
+      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
+      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
       key_handlers[Keycode.Z]               = KeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
 
@@ -106,6 +108,8 @@ class EditState : VMGState [singleton]
       key_handlers[Keycode.L]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
       key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
       key_handlers[Keycode.Q]               = KeyHandlerQBuffer
+      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
+      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
       key_handlers[Keycode.Z]               = KeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
       key_handlers[Keycode.ESCAPE]          = VMGKeyHandler( ImageListState )
