@@ -5,6 +5,7 @@ class VMGImage
     file   : File
     bitmap : Bitmap
     name   : String
+    zoom   : Real64
 
   METHODS
     method init( bitmap, name=null )
@@ -15,6 +16,14 @@ class VMGImage
       else
         init( Bitmap(16,16), file.filepath )
       endIf
+
+    method compact_name->String
+      local dims = "[$x$]"(bitmap.width,bitmap.height)
+      if (@name)
+        local brief_name = File(@name).filename.before_last('.')
+        return "$ $"(brief_name,dims)
+      endIf
+      return dims
 
     method name->String
       local dims = "[$x$]"(bitmap.width,bitmap.height)

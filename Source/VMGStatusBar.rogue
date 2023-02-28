@@ -12,6 +12,9 @@ class VMGStatusBar : UIComponent [singleton]
 
     method on_draw
       localize display_bounds
+      builder.cursor = XY( Console.width-VMGState.current.state_name.count, 0 )
+      builder.style.reset
+      builder.print VMGState.current.state_name
       builder.flush
       builder.resize( display_bounds.size )
       ConsoleUICanvas.draw( builder, display_bounds.position )

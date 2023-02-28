@@ -15,7 +15,7 @@ class VMGUI : ConsoleUI [singleton]
       register( CmdBG )
       register( CmdNew )
 
-      VMGState.current.change_state( IdleState() )
+      VMGState.current.change_state( ImageListState() )
 
       image_list_scroller = VMGImageListScrollView( VMGImageList ).[ shrink_to_fit_width ]
       local layout = (image_list_scroller + VMGImageView)

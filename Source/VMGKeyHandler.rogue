@@ -10,6 +10,8 @@ class VMGKeyHandler
 
     method init( new_state )
 
+    method init( handler, new_state )
+
     method execute
       loop (which{Vimage.repeat_count||1})
         on_execute

@@ -17,7 +17,7 @@ class VMGState
 
   METHODS
     method cancel
-      state = IdleState()
+      state = ImageListState()
       set_status( "[cancelled]", &dim )
 
     method execute( cmd:VMGCmd )
@@ -48,9 +48,12 @@ class VMGState
         builder.print text
         if (dim) builder.style.dim_off
       endUse
+
+    method state_name->String
+      return ""
 endClass
 
-class IdleState : VMGState
+class ImageListState : VMGState
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
@@ -61,6 +64,8 @@ class IdleState : VMGState
       key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
       key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
       key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
+      key_handlers[Keycode.Z]       = VMGKeyHandler( (e) => VMGImageView.zoom_in, ImageViewState )
+      key_handlers[Keycode.Z+SHIFT] = VMGKeyHandler( (e) => VMGImageView.zoom_out, ImageViewState )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -81,6 +86,53 @@ class IdleState : VMGState
 
     method on_enter
       Vimage.repeat_count = null
+
+    method state_name->String
+      return "IMAGE LIST"
+endClass
+
+class ImageViewState : VMGState [singleton]
+  METHODS
+    method init
+      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
+      key_handlers[Keycode.D] = VMGKeyHandler( DState )
+      key_handlers[Keycode.Q] = KeyHandlerQBuffer
+      key_handlers[Keycode.J] = KeyHandlerJBuffer
+      key_handlers[Keycode.K] = KeyHandlerKBuffer
+      key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
+      key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
+      key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
+      key_handlers[Keycode.Z]       = VMGKeyHandler( (e) => VMGImageView.zoom_in )
+      key_handlers[Keycode.Z+SHIFT] = VMGKeyHandler( (e) => VMGImageView.zoom_out )
+
+    method on( e:KeyEvent )
+      if (e.is_press)
+        if (e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
+          local digit = (e.keycode - Keycode.NUMBER_0)
+          if (Vimage.repeat_count)
+            Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
+          else
+            Vimage.repeat_count = digit
+            VMGStatusBar.builder.clear
+          endIf
+          VMGStatusBar.builder.print digit
+          VMGStatusBar.request_redraw
+          return
+        endIf
+      endIf
+      prior.on( e )
+
+    method on_enter
+      Vimage.repeat_count = null
+      VMGImageList.is_dim = true
+      VMGImageList.request_redraw
+
+    method on_leave
+      VMGImageList.is_dim = false
+      VMGImageList.request_redraw
+
+    method state_name->String
+      return "IMAGE VIEW"
 endClass
 
 class EnterCmdState : VMGState
@@ -116,7 +168,7 @@ class EnterCmdState : VMGState
               if (e.keycode == Keycode.SPACE)
                 VMGUI.command.print ' '
               elseIf (e.keycode != Keycode.TAB)
-                state = IdleState()
+                state = ImageListState()
                 set_status( "[invalid command]" )
               endIf
 
@@ -135,7 +187,7 @@ class EnterCmdState : VMGState
               endIf
 
               if (e.keycode == Keycode.ENTER)
-                state = IdleState()
+                state = ImageListState()
                 cmds.first.execute( args )
               endIf
 
@@ -218,10 +270,10 @@ class DState : VMGState [singleton]
           cancel
         elseIf (e.unicode == 'd')
           execute( VMGCmdDD )
-          state = IdleState()
+          state = ImageListState()
         else
           set_status( "[invalid command 'd$']"(e.unicode) )
-          state = IdleState()
+          state = ImageListState()
         endIf
       endIf
 endClass

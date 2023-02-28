@@ -6,6 +6,7 @@ class VMGImageList : UIList [singleton]
 
   PROPERTIES
     selected : VMGImageListItem
+    is_dim   : Logical
 
   METHODS
     method init
@@ -15,6 +16,9 @@ class VMGImageList : UIList [singleton]
     method add( image:VMGImage )
       add( VMGImageListItem(image) )
       request_layout
+
+    method after_draw
+      if (is_dim) ConsoleUICanvas.style.dim_off
 
     method dispatch( e:PointerEvent )
       # Send input events to children in reverse order because the top layer comes last
@@ -26,8 +30,17 @@ class VMGImageList : UIList [singleton]
       insert( VMGImageListItem(image) )
       request_layout
 
+    method on_draw
+      if (is_dim) ConsoleUICanvas.style.dim
+
     method on_resize
       fixed_width = FIXED_WIDTH
+
+      #{
+    method request_redraw [override]
+      prior.request_redraw
+      scroll_view.request_redraw
+      }#
 
     method scroll_view->VMGImageListScrollView
       local view = parent
@@ -107,7 +120,7 @@ class VMGImageListItem : UIComponent
       temporarily ConsoleUICanvas.clip = display_bounds
         ConsoleUICanvas.cursor = display_bounds.position
         if (is_selected) ConsoleUICanvas.style.inverse
-        ConsoleUICanvas.print image.name
+        ConsoleUICanvas.print image.compact_name
         loop (VMGImageList.FIXED_WIDTH) ConsoleUICanvas.print ' '
         if (is_selected) ConsoleUICanvas.style.inverse_off
       endTemporarily
@@ -120,5 +133,5 @@ class VMGImageListScrollView : UIScrollView
   METHODS
     method on_draw
       ConsoleUICanvas.fill( ' ' )
-      ConsoleUICanvas.fill( display_bounds.with_width(1), '~' )
+      ConsoleUICanvas.fill( display_bounds.with_width(1), StyledCharacter('~',CharacterStyle.DIM) )
 endClass

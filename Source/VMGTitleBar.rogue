@@ -3,6 +3,7 @@ uses UI
 class VMGTitleBar : UIComponent [singleton]
   PROPERTIES
     image : VMGImage
+    zoom  : Real64
 
   METHODS
     method init
@@ -17,7 +18,26 @@ class VMGTitleBar : UIComponent [singleton]
         ConsoleUICanvas.cursor = display_bounds.position
         ConsoleUICanvas.style.inverse
         ConsoleUICanvas.print image.name
+        if (zoom)
+          local ratio : String
+          if (zoom == 1.0 or zoom == 0)
+            ratio = "1:1"
+          elseIf (zoom < 1.0)
+            ratio = "1:$"((1/zoom).format(".1"))
+            if (ratio.ends_with(".0")) ratio .= leftmost(-2)
+          else
+            ratio = "$:1"(zoom->Int32)
+          endIf
+          ConsoleUICanvas.cursor = display_bounds.top_right - XY(ratio.count,0)
+          ConsoleUICanvas.print ratio
+        endIf
         ConsoleUICanvas.style.inverse_off
+      endIf
+
+    method set_zoom( new_zoom:Real64 )
+      if (new_zoom != zoom)
+        @zoom = new_zoom
+        request_redraw
       endIf
 
     method show( image )

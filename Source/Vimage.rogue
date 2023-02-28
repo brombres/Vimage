@@ -116,6 +116,10 @@ class Vimage [singleton]
         VMGImageList.insert( VMGImage(File(filepath)) )
       endForEach
 
+      if (VMGImageList.count)
+        VMGImageList.select( VMGImageList.first_child->(as VMGImageListItem) )
+      endIf
+
       VMGUI.run
 
     method execute( cmd )
