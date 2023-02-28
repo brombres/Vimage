@@ -1,27 +1,46 @@
 class VMGKeyHandler
+  PROPERTIES
+    handler   : Function(KeyEvent)
+    new_state : VMGState
+
   METHODS
+    method init
+
+    method init( handler )
+
+    method init( new_state )
+
+    method execute
+      loop (which{Vimage.repeat_count||1})
+        on_execute
+      endLoop
+      Vimage.repeat_count = null
+
     method on( e:KeyEvent )
+      if (handler) handler(e)
+      if (new_state) VMGState.change_state( new_state )
+
+    method on_execute
       noAction
 
     method set_state( new_state:VMGState )
       VMGState.current.change_state( new_state )
 
     method set_status( text:String )
-      VMGStatusBar.text = text
+      if (Vimage.repeat_count)
+        VMGStatusBar.text = "$$"(Vimage.repeat_count,text)
+      else
+        VMGStatusBar.text = text
+      endIf
 endClass
 
 class KeyHandlerColon : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
+      Vimage.repeat_count = null
       status = ":"
       VMGUI.command.clear
       state = EnterCmdState()
-endClass
-
-class KeyHandlerDBuffer : VMGKeyHandler [singleton]
-  METHODS
-    method on( e:KeyEvent )
-      VMGState.change_state( DState() )
 endClass
 
 class KeyHandlerQBuffer : VMGKeyHandler [singleton]
@@ -34,8 +53,11 @@ endClass
 class KeyHandlerJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
+      status = "j (Down)"
+      execute
+
+    method on_execute
       if local current = VMGImageList.selected
-        status = "j (Down)"
         if (current.next)
           VMGImageList.select( current.next->(as VMGImageListItem) )
         endIf
@@ -46,15 +68,18 @@ class KeyHandlerPeriod : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       if (Vimage.cmd)
-        Vimage.cmd.execute
+        Vimage.execute( Vimage.cmd )
       endIf
 endClass
 
 class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
+      status = "J (Shift Down)"
+      execute
+
+    method on_execute
       if local current = VMGImageList.selected
-        status = "J (Shift Down)"
         if local index = VMGImageList.locate( current )
           VMGImageList.remove( current )
           VMGImageList.insert( current, index+1 )
@@ -67,6 +92,9 @@ class KeyHandlerKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "k (Up)"
+      execute
+
+    method on_execute
       if local current = VMGImageList.selected
         forEach (child in VMGImageList.children)
           if (child.next is current)
@@ -81,6 +109,9 @@ class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "K (Shift Up)"
+      execute
+
+    method on_execute
       if local current = VMGImageList.selected
         if local index = VMGImageList.locate( current )
           if (index > 0)

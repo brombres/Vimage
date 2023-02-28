@@ -95,9 +95,10 @@ endTry
 
 class Vimage [singleton]
   PROPERTIES
-    bg_color  = Color.BLACK : Color
-    clipboard : VMGImage
-    cmd       : VMGCmd
+    cmd          : VMGCmd
+    repeat_count : Int32?
+    bg_color     = Color.BLACK : Color
+    clipboard    : VMGImage
 
   METHODS
     method init( args:String[] )
@@ -112,6 +113,14 @@ class Vimage [singleton]
       endIf
 
       VMGUI.run
+
+    method execute( cmd )
+      if (repeat_count)
+        loop (repeat_count.value) cmd.execute
+        repeat_count = null
+      else
+        cmd.execute
+      endIf
 
     method parse_args( args:String[] )->Value
       local command = CommandLineParser().

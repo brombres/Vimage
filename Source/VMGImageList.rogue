@@ -25,6 +25,16 @@ class VMGImageList : UIList [singleton]
     method on_resize
       fixed_width = FIXED_WIDTH
 
+    method scroll_view->VMGImageListScrollView
+      local view = parent
+      while (view)
+        if local result = view->(as VMGImageListScrollView)
+          return result
+        endIf
+        view .= parent
+      endWhile
+      return null
+
     method select( image:VMGImage )
       forEach (child in children)
         if local item = child->(as VMGImageListItem)
@@ -44,6 +54,23 @@ class VMGImageList : UIList [singleton]
       if (item)
         item.request_redraw
         VMGUI.show( item.image )
+        localize scroll_view
+        if (scroll_view)
+          local item_bounds = item.display_bounds
+          local view_bounds = scroll_view.display_bounds
+          local delta = item_bounds.y2 - view_bounds.y2
+          if (delta > 0)
+            scroll_view.content_offset -= XY(0,delta)
+          else
+            delta = view_bounds.y1 - item_bounds.y1
+            if (delta > 0)
+              scroll_view.content_offset += XY(0,delta)
+            endIf
+          endIf
+          #if local intersection = (item.display_bounds & this.display_bounds)
+          #else
+          #endIf
+        endIf
       else
         VMGUI.show( null )
       endIf
@@ -83,4 +110,11 @@ class VMGImageListItem : UIComponent
 
     method on_resize
       fixed_size = XY( VMGImageList.FIXED_WIDTH, 1 )
+endClass
+
+class VMGImageListScrollView : UIScrollView
+  METHODS
+    method on_draw
+      ConsoleUICanvas.fill( ' ' )
+      ConsoleUICanvas.fill( display_bounds.with_width(1), '~' )
 endClass

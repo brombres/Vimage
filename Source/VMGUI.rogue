@@ -6,7 +6,7 @@ class VMGUI : ConsoleUI [singleton]
     image_list_scroller : UIScrollView
     repeat_count        : Int32?
     command             = String()
-    cmd_line_handlers        = [String:VMGCmdLineHandler]
+    cmd_line_handlers   = [String:VMGCmdLineHandler]
 
   METHODS
     method init
@@ -17,7 +17,7 @@ class VMGUI : ConsoleUI [singleton]
 
       VMGState.current.change_state( IdleState() )
 
-      image_list_scroller = UIScrollView( VMGImageList ).[ shrink_to_fit_width ]
+      image_list_scroller = VMGImageListScrollView( VMGImageList ).[ shrink_to_fit_width ]
       local layout = (image_list_scroller + VMGImageView)
       layout /= VMGTitleBar
       layout /= VMGStatusBar

@@ -8,8 +8,7 @@ class VMGCmdLineHandler
       set_status( "[Unimplemented command: $]"(keyword.appending(args)) )
 
     method execute( cmd:VMGCmd )
-      Vimage.cmd = cmd
-      cmd.execute
+      Vimage.execute( cmd )
 
     method color_string( color:Color )->String
       local parts = color.argb->String( &hex ).split( 2 )

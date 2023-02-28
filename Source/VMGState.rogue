@@ -21,8 +21,7 @@ class VMGState
       set_status( "[cancelled]", &dim )
 
     method execute( cmd:VMGCmd )
-      Vimage.cmd = cmd
-      cmd.execute
+      Vimage.execute( cmd )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -55,13 +54,33 @@ class IdleState : VMGState
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
-      key_handlers[Keycode.D] = KeyHandlerDBuffer
+      key_handlers[Keycode.D] = VMGKeyHandler( DState )
       key_handlers[Keycode.Q] = KeyHandlerQBuffer
       key_handlers[Keycode.J] = KeyHandlerJBuffer
       key_handlers[Keycode.K] = KeyHandlerKBuffer
       key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
       key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
       key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
+
+    method on( e:KeyEvent )
+      if (e.is_press)
+        if (e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
+          local digit = (e.keycode - Keycode.NUMBER_0)
+          if (Vimage.repeat_count)
+            Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
+          else
+            Vimage.repeat_count = digit
+            VMGStatusBar.builder.clear
+          endIf
+          VMGStatusBar.builder.print digit
+          VMGStatusBar.request_redraw
+          return
+        endIf
+      endIf
+      prior.on( e )
+
+    method on_enter
+      Vimage.repeat_count = null
 endClass
 
 class EnterCmdState : VMGState
@@ -183,7 +202,7 @@ class EnterCmdState : VMGState
       endUse
 endClass
 
-class DState : VMGState
+class DState : VMGState [singleton]
   METHODS
     method on_enter
       use status = VMGStatusBar

@@ -18,6 +18,7 @@ class VMGStatusBar : UIComponent [singleton]
 
     method on_use->TextCanvas
       builder.clear
+      if (Vimage.repeat_count) builder.print Vimage.repeat_count
       return builder
 
     method on_end_use( builder:TextCanvas )
