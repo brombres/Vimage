@@ -60,6 +60,10 @@ class VMGImageView : UIComponent [singleton]
 
       endIf
 
+    method mark_modified
+      is_modified = true
+      request_redraw
+
     method scroll( delta:RealXY )
       if (image)
         if (image.zoom == min_zoom)
@@ -77,9 +81,8 @@ class VMGImageView : UIComponent [singleton]
       if (new_image is image) return
       image = new_image
       min_zoom = 0
-      is_modified = true
       scale_to_fit = true
-      request_redraw
+      mark_modified
 
     method zoom_in
       if (image)
@@ -98,8 +101,7 @@ class VMGImageView : UIComponent [singleton]
           endIf
         endIf
         VMGTitleBar.zoom = image.zoom
-        is_modified = true
-        request_redraw
+        mark_modified
       endIf
 
     method zoom_out
@@ -112,7 +114,6 @@ class VMGImageView : UIComponent [singleton]
           endIf
         endIf
         VMGTitleBar.zoom = image.zoom
-        is_modified = true
-        request_redraw
+        mark_modified
       endIf
 endClass

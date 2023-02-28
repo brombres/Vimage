@@ -133,7 +133,7 @@ class KeyHandlerZ : VMGKeyHandler [singleton]
 
     method on_execute
       VMGImageView.zoom_in
-      if (VMGState.current is not ImageViewState) VMGState.change_state( ImageViewState )
+      if (VMGState.current is not EditState) VMGState.change_state( EditState )
 endClass
 
 class KeyHandlerShiftZ : VMGKeyHandler [singleton]
@@ -144,6 +144,36 @@ class KeyHandlerShiftZ : VMGKeyHandler [singleton]
 
     method on_execute
       VMGImageView.zoom_out
-      if (VMGState.current is not ImageViewState) VMGState.change_state( ImageViewState )
+      if (VMGState.current is not EditState) VMGState.change_state( EditState )
+endClass
+
+class KeyHandlerHFlip : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "f (horizontal flip)"
+      execute
+
+    method on_execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.bitmap.flip( &h )
+        img.is_modified = true
+        VMGImageView.mark_modified
+      endIf
+endClass
+
+class KeyHandlerVFlip : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "F (vertical flip)"
+      execute
+
+    method on_execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.bitmap.flip( &v )
+        img.is_modified = true
+        VMGImageView.mark_modified
+      endIf
 endClass
 

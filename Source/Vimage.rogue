@@ -12,11 +12,10 @@
 # D
 # e
 # E
-# f
-# F
+# f            - Horizontal Flip
+# F            - Vertical Flip
 # g
 # G
-# - h            - Hflip
 # h            - Left / Cursor Images<-Layers
 # H            - Left (BR Corner) / Layer moves out to become image
 # i
@@ -47,7 +46,7 @@
 # T
 # u            - UNDO
 # U
-# v            - Vflip
+# v
 # V
 # w
 # W

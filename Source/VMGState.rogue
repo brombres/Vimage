@@ -57,15 +57,17 @@ class ImageListState : VMGState [singleton]
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
-      key_handlers[Keycode.D] = VMGKeyHandler( DState )
-      key_handlers[Keycode.Q] = KeyHandlerQBuffer
-      key_handlers[Keycode.J] = KeyHandlerJBuffer
-      key_handlers[Keycode.K] = KeyHandlerKBuffer
-      key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
-      key_handlers[Keycode.J+SHIFT] = KeyHandlerShiftJBuffer
-      key_handlers[Keycode.K+SHIFT] = KeyHandlerShiftKBuffer
-      key_handlers[Keycode.Z]       = KeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT] = KeyHandlerShiftZ
+      key_handlers[Keycode.D]               = VMGKeyHandler( DState )
+      key_handlers[Keycode.F]               = KeyHandlerHFlip
+      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
+      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
+      key_handlers[Keycode.J]               = KeyHandlerJBuffer
+      key_handlers[Keycode.K]               = KeyHandlerKBuffer
+      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers[Keycode.J+SHIFT]         = KeyHandlerShiftJBuffer
+      key_handlers[Keycode.K+SHIFT]         = KeyHandlerShiftKBuffer
+      key_handlers[Keycode.Z]               = KeyHandlerZ
+      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -91,20 +93,22 @@ class ImageListState : VMGState [singleton]
       return "IMAGE LIST"
 endClass
 
-class ImageViewState : VMGState [singleton]
+class EditState : VMGState [singleton]
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
-      key_handlers[Keycode.D] = VMGKeyHandler( DState )
-      key_handlers[Keycode.Q] = KeyHandlerQBuffer
-      key_handlers[Keycode.H] = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(-0.5,0)) )
-      key_handlers[Keycode.J] = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,0.5)) )
-      key_handlers[Keycode.K] = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,-0.5)) )
-      key_handlers[Keycode.L] = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
-      key_handlers[Keycode.PERIOD] = KeyHandlerPeriod
-      key_handlers[Keycode.Z]       = KeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT] = KeyHandlerShiftZ
-      key_handlers[Keycode.ESCAPE]  = VMGKeyHandler( ImageListState )
+      key_handlers[Keycode.D]               = VMGKeyHandler( DState )
+      key_handlers[Keycode.F]               = KeyHandlerHFlip
+      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
+      key_handlers[Keycode.H]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(-0.5,0)) )
+      key_handlers[Keycode.J]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,0.5)) )
+      key_handlers[Keycode.K]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,-0.5)) )
+      key_handlers[Keycode.L]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
+      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
+      key_handlers[Keycode.Z]               = KeyHandlerZ
+      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
+      key_handlers[Keycode.ESCAPE]          = VMGKeyHandler( ImageListState )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -135,7 +139,7 @@ class ImageViewState : VMGState [singleton]
       VMGStatusBar.request_redraw
 
     method state_name->String
-      return "IMAGE VIEW"
+      return "EDIT"
 endClass
 
 class EnterCmdState : VMGState
