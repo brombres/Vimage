@@ -36,7 +36,7 @@ class VMGKeyHandler
       endIf
 endClass
 
-class KeyHandlerColon : VMGKeyHandler [singleton]
+class VMGKeyHandlerColon : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       Vimage.repeat_count = null
@@ -45,14 +45,14 @@ class KeyHandlerColon : VMGKeyHandler [singleton]
       state = EnterCmdState()
 endClass
 
-class KeyHandlerQBuffer : VMGKeyHandler [singleton]
+class VMGKeyHandlerQBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "q (quit)"
       VMGUI.is_running = false
 endClass
 
-class KeyHandlerJBuffer : VMGKeyHandler [singleton]
+class VMGKeyHandlerJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "j (down)"
@@ -66,7 +66,7 @@ class KeyHandlerJBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerPeriod : VMGKeyHandler [singleton]
+class VMGKeyHandlerPeriod : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       if (Vimage.cmd)
@@ -74,7 +74,7 @@ class KeyHandlerPeriod : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
+class VMGKeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "J (shift down)"
@@ -90,7 +90,7 @@ class KeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerKBuffer : VMGKeyHandler [singleton]
+class VMGKeyHandlerKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "k (up)"
@@ -107,7 +107,7 @@ class KeyHandlerKBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
+class VMGKeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "K (shift up)"
@@ -125,7 +125,7 @@ class KeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerZ : VMGKeyHandler [singleton]
+class VMGKeyHandlerZ : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "z (zoom in)"
@@ -136,7 +136,7 @@ class KeyHandlerZ : VMGKeyHandler [singleton]
       if (VMGState.current is not EditState) VMGState.change_state( EditState )
 endClass
 
-class KeyHandlerShiftZ : VMGKeyHandler [singleton]
+class VMGKeyHandlerShiftZ : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "z (zoom out)"
@@ -147,7 +147,7 @@ class KeyHandlerShiftZ : VMGKeyHandler [singleton]
       if (VMGState.current is not EditState) VMGState.change_state( EditState )
 endClass
 
-class KeyHandlerHFlip : VMGKeyHandler [singleton]
+class VMGKeyHandlerHFlip : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "f (horizontal flip)"
@@ -162,7 +162,7 @@ class KeyHandlerHFlip : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerVFlip : VMGKeyHandler [singleton]
+class VMGKeyHandlerVFlip : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "F (vertical flip)"
@@ -177,7 +177,7 @@ class KeyHandlerVFlip : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerRotate90CW : VMGKeyHandler [singleton]
+class VMGKeyHandlerRotate90CW : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "r (rotate 90º clockwise)"
@@ -194,7 +194,7 @@ class KeyHandlerRotate90CW : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class KeyHandlerRotate90CCW : VMGKeyHandler [singleton]
+class VMGKeyHandlerRotate90CCW : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "R (rotate 90º counter-clockwise)"
@@ -209,5 +209,29 @@ class KeyHandlerRotate90CCW : VMGKeyHandler [singleton]
         VMGImageView.mark_modified
         VMGImageView.min_zoom = 0
       endIf
+endClass
+
+class VMGKeyHandlerJoinH : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "n (join horizontal)"
+      execute
+
+    method execute
+      local cmd = VMGCmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
+endClass
+
+class VMGKeyHandlerJoinV : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "N (join vertical)"
+      execute
+
+    method execute
+      local cmd = VMGCmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
 endClass
 

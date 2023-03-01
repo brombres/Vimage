@@ -1,3 +1,5 @@
+uses Math/Best
+
 class VMGCmd
   METHODS
     method execute
@@ -48,4 +50,108 @@ class VMGCmdNew( size:XY, bg_color:Color ) : VMGCmd
       VMGImageList.request_layout
 
       status = "new image [$x$] ($)"(size.x,size.y,bg_color)
+endClass
+
+class VMGCmdJoin( dims:XY ) : VMGCmd
+  METHODS
+    method execute
+      local w = dims.x
+      local h = dims.y
+      local total = w * h
+
+      local has_images = which{ VMGImageList.count:"" || " [no images]" }
+      if (total <= 1)
+        status = "join $x$ [no effect]"(w,h)
+        return
+      elseIf (h == 1)
+        if (w == 2) status = "n (join horizontal)$"(has_images)
+        else             status = "$n (join horizontal)$"(w,has_images)
+      elseIf (w == 1)
+        if (h == 2) status = "N (join vertical)$"(has_images)
+        else             status = "$N (join vertical)$"(h,has_images)
+      elseIf (VMGImageList.count == 0)
+        status = "join $x$ [no images]"(w,h)
+        return
+      else
+        status = "join $x$"(w,h)
+      endIf
+
+      if (VMGImageList.count == 0) return
+
+      use list = WorkList<<VMGImage>>
+        loop (total)
+          local index = VMGImageList.selected.index
+          list.add( VMGImageList.selected.image )
+          VMGImageList.remove( VMGImageList.selected )
+          if (index < VMGImageList.count)
+            VMGImageList.select( index )
+          elseIf (VMGImageList.count > 0)
+            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+            escapeLoop
+          else
+            VMGImageList.select( null )
+            escapeLoop
+          endIf
+        endLoop
+
+        while (list.count < total)
+          list.add( VMGImage(Bitmap(1,1).[clear(Vimage.bg_color)]) )
+        endWhile
+
+        # Scale up elements of each row to be same height.
+        forEach (j in 0..<h)
+          local max_height = Best<<Int32>>( (a,b) => a > b )
+          forEach (i in 0..<w)
+            max_height.consider( list[j*w+i].bitmap.height )
+          endForEach
+
+          block max_height = max_height.value
+            forEach (i in 0..<w)
+              local bitmap = list[j*w+i].bitmap
+              bitmap.resize( bitmap.width*(max_height->Real64/bitmap.height), max_height )
+            endForEach
+          endBlock
+        endForEach
+
+        # Scale up elements of each column to be same width.
+        forEach (i in 0..<w)
+          local max_width = Best<<Int32>>( (a,b) => a > b )
+          forEach (j in 0..<h)
+            max_width.consider( list[j*w+i].bitmap.width )
+          endForEach
+
+          block max_width = max_width.value
+            forEach (j in 0..<h)
+              local bitmap = list[j*w+i].bitmap
+              bitmap.resize( max_width, bitmap.height*(max_width->Real64/bitmap.width) )
+            endForEach
+          endBlock
+        endForEach
+
+        local total_w = 0
+        total_w += list[ (forEach in 0..<w) ].bitmap.width
+        local total_h = 0
+        total_h += list[ (forEach in 0..<h)*w ].bitmap.height
+
+        local result = Bitmap( total_w, total_h )
+        local cursor_y = 0
+        forEach (j in 0..<h)
+          local cursor_x = 0
+          local dy : Int32
+          forEach (i in 0..<w)
+            local bitmap = list[ j*w+i ].bitmap
+            bitmap.blit( result, cursor_x, cursor_y )
+            cursor_x += bitmap.width
+            dy = bitmap.height
+          endForEach
+          cursor_y += dy
+        endForEach
+
+        local result_image = VMGImage( result )
+        local before_index = which{ VMGImageList.selected:VMGImageList.selected.index || 0 }
+        VMGImageList.insert( result_image, before_index )
+        VMGImageList.select( result_image )
+
+      endUse
+
 endClass

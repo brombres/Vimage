@@ -17,8 +17,6 @@ class VMGCmdLineHandler
       return parts.join("")
 
     method parse_color( arg:String )->Color?
-      arg .= trimmed
-
       contingent
         forEach (ch in arg)
           necessary (ch.is_number(16))
@@ -127,7 +125,7 @@ class VMGCmdLineHandler
       return @syntax
 endClass
 
-class CmdBG : VMGCmdLineHandler [singleton]
+class CmdLineBG : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
     syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
@@ -140,7 +138,7 @@ class CmdBG : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
-class CmdNew : VMGCmdLineHandler [singleton]
+class CmdLineNew : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"
 
@@ -148,7 +146,7 @@ class CmdNew : VMGCmdLineHandler [singleton]
     method execute( args:String )
       local sz : XY
 
-      if (args.trimmed.count == 0)
+      if (args.count == 0)
         sz = default_size
       else
         if local size = parse_size( args )
@@ -171,4 +169,22 @@ class CmdNew : VMGCmdLineHandler [singleton]
 
       localize default_size
       return "$x$"(default_size.x,default_size.y)
+endClass
+
+class CmdLineJoin : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "join"
+    syntax  = "[h|v|WxH]"
+
+  METHODS
+    method execute( args:String )
+      if (args == "h")
+        execute( VMGCmdJoin(XY(2,1)) )
+      elseIf (args == "v")
+        execute( VMGCmdJoin(XY(1,2)) )
+      else
+        if local size = parse_size( args )
+          execute( VMGCmdJoin(size) )
+        endIf
+      endIf
 endClass

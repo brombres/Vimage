@@ -20,8 +20,6 @@
 # H            - Left (BR Corner) / Layer moves out to become image
 # i
 # I
-# - j WxH        - un(j)oin / Split into multiple images
-# - J [h|v|WxH]  - JOIN (splice)
 # j            - Down / Next Image / Next Layer
 # J            - Down (BR Corner) / Move image/layer down 1 level
 # k            - Up / Previous Image
@@ -58,6 +56,7 @@
 # Z            - ZOOM OUT (scale / 2)
 # :bg <color>
 # :fg <color>
+# :splice [h|v|WxH]
 # :swap [argb][argb01]
 #
 # <color>

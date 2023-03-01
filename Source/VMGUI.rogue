@@ -12,8 +12,9 @@ class VMGUI : ConsoleUI [singleton]
     method init
       prior.init
 
-      register( CmdBG )
-      register( CmdNew )
+      register( CmdLineBG )
+      register( CmdLineNew )
+      register( CmdLineJoin )
 
       VMGState.current.change_state( ImageListState )
 

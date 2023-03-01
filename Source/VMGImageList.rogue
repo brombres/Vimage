@@ -26,8 +26,8 @@ class VMGImageList : UIList [singleton]
       if (e.is_consumed) return
       handle( e )
 
-    method insert( image:VMGImage )
-      insert( VMGImageListItem(image) )
+    method insert( image:VMGImage, before_index=0:Int32 )
+      insert( VMGImageListItem(image), before_index )
       request_layout
 
     method on_draw
@@ -51,6 +51,10 @@ class VMGImageList : UIList [singleton]
         view .= parent
       endWhile
       return null
+
+    method select( index:Int32 )
+      local item = this[index]->(as VMGImageListItem)
+      if (item) select( item )
 
     method select( image:VMGImage )
       forEach (child in children)
@@ -102,6 +106,9 @@ class VMGImageListItem : UIComponent
       on_resize
 
     method deselect
+
+    method index->Int32
+      return which{ VMGImageList.locate(this) || -1 }
 
     method is_selected->Logical
       return VMGImageList.selected is this
