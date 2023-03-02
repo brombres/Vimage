@@ -133,7 +133,17 @@ class VMGKeyHandlerZ : VMGKeyHandler [singleton]
 
     method on_execute
       VMGImageView.zoom_in
-      if (VMGState.current is not EditState) VMGState.change_state( EditState )
+      if (VMGImageView.image)
+        if (VMGImageView.image.zoom == VMGImageView.default_zoom)
+          if (VMGState.current is not ImageListState)
+            VMGState.change_state( ImageListState )
+          endIf
+        else
+          if (VMGState.current is not ZoomState)
+            VMGState.change_state( ZoomState )
+          endIf
+        endIf
+      endIf
 endClass
 
 class VMGKeyHandlerShiftZ : VMGKeyHandler [singleton]
@@ -144,7 +154,17 @@ class VMGKeyHandlerShiftZ : VMGKeyHandler [singleton]
 
     method on_execute
       VMGImageView.zoom_out
-      if (VMGState.current is not EditState) VMGState.change_state( EditState )
+      if (VMGImageView.image)
+        if (VMGImageView.image.zoom == VMGImageView.default_zoom)
+          if (VMGState.current is not ImageListState)
+            VMGState.change_state( ImageListState )
+          endIf
+        else
+          if (VMGState.current is not ZoomState)
+            VMGState.change_state( ZoomState )
+          endIf
+        endIf
+      endIf
 endClass
 
 class VMGKeyHandlerHFlip : VMGKeyHandler [singleton]

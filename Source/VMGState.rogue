@@ -97,7 +97,7 @@ class ImageListState : VMGState [singleton]
       return "IMAGE LIST"
 endClass
 
-class EditState : VMGState [singleton]
+class ZoomState : VMGState [singleton]
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = VMGKeyHandlerColon
@@ -147,7 +147,7 @@ class EditState : VMGState [singleton]
       VMGStatusBar.request_redraw
 
     method state_name->String
-      return "EDIT"
+      return "ZOOM"
 endClass
 
 class EnterCmdState : VMGState

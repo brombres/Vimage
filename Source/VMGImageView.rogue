@@ -8,6 +8,8 @@ class VMGImageView : UIComponent [singleton]
     canvas         : TextCanvas
     scale_to_fit   = true
     min_zoom       : Real64
+    max_zoom       : Real64
+    default_zoom   : Real64
     is_modified    : Logical
     visible_bounds : Box
 
@@ -27,7 +29,9 @@ class VMGImageView : UIComponent [singleton]
           else
             local scale = ((display_bounds.size->RealXY*RealXY(1,2)) / image.bitmap.size->RealXY).min
             new_size = ((image.bitmap.size->RealXY * scale) + RealXY(0.5,0.5))->XY
-            min_zoom = new_size.x->Real64 / image.bitmap.width
+            default_zoom = (new_size.x->Real64 / image.bitmap.width)
+            min_zoom = default_zoom.or_smaller( 1.0 )
+            max_zoom = which{ default_zoom>1.0:default_zoom || 1.0 }
             if (image.zoom)
               if (image.zoom < min_zoom)
                 image.zoom = min_zoom
@@ -36,18 +40,18 @@ class VMGImageView : UIComponent [singleton]
                 new_size = ((image.bitmap.size->RealXY * image.zoom) + RealXY(0.5,0.5))->XY
               endIf
             else
-              image.zoom = min_zoom
+              image.zoom = default_zoom
             endIf
           endIf
           VMGTitleBar.zoom = image.zoom
           display_image = image.bitmap.resized( new_size )
           if (new_size.y & 1)
-            display_image.expand( 0, 0, 0, 1, Color.BLACK )
+            display_image.expand( 0, 0, 0, 1, Color.LIGHT_GRAY )
           endIf
           canvas = ANSIBitmap( display_image )->TextCanvas
         endIf
 
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_LIGHT_GRAY) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
@@ -56,7 +60,7 @@ class VMGImageView : UIComponent [singleton]
         endTemporarily
 
       else
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_BLACK) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_LIGHT_GRAY) )
 
       endIf
 
@@ -66,7 +70,7 @@ class VMGImageView : UIComponent [singleton]
 
     method scroll( delta:RealXY )
       if (image)
-        if (image.zoom == min_zoom)
+        if (image.zoom == default_zoom)
           image.view_center = RealXY(0.5,0.5)
         elseIf (image.zoom)
           delta *= display_bounds.size / (image.bitmap.size * image.zoom)
@@ -76,27 +80,28 @@ class VMGImageView : UIComponent [singleton]
       endIf
 
     method show( new_image:VMGImage )
-      if (image and image.zoom == min_zoom) image.zoom = 0
+      if (image and image.zoom == default_zoom) image.zoom = 0
 
       if (new_image is image) return
       image = new_image
       min_zoom = 0
+      default_zoom = 0
       scale_to_fit = true
       mark_modified
 
     method zoom_in
       if (image)
-        if (image.zoom < 1.0)
+        if (image.zoom < max_zoom)
           image.zoom *= 2
-          if (image.zoom >= 1.0)
-            image.zoom = 1.0
+          if (image.zoom >= max_zoom)
+            image.zoom = max_zoom
           else
             local n = 0
-            while (image.zoom < 1.0)
+            while (image.zoom < max_zoom)
               ++n
               image.zoom *= 2
             endWhile
-            image.zoom = 1.0
+            image.zoom = max_zoom
             loop (n) image.zoom /= 2
           endIf
         endIf
