@@ -2,7 +2,7 @@ uses Bitmap
 
 class VMGImage
   PROPERTIES
-    file        : File
+    file        : File?
     bitmap      : Bitmap
     name        : String
     zoom        : Real64
@@ -13,10 +13,10 @@ class VMGImage
     method init( bitmap, name=null )
 
     method init( file )
-      if local bitmap = Bitmap( file )
-        init( bitmap, file.filepath )
+      if local bitmap = Bitmap( file.value )
+        init( bitmap, file.value.filepath )
       else
-        init( Bitmap(16,16), file.filepath )
+        init( Bitmap(16,16), file.value.filepath )
       endIf
 
     method compact_name->String

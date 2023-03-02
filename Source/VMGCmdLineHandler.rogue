@@ -249,3 +249,53 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
       status = ''[swap: expected [a|r|g|b|0|1] pair (e.g. 'swap rb' or 'swap g0')]''
       return (0,0)
 endClass
+
+
+class CmdLineWrite : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "w"
+
+  METHODS
+    method execute( args:String )
+      if (not VMGImageView.image)
+        status = "[w: no current image]"
+        return
+      endIf
+
+      if (args == "")
+        if (VMGImageView.image.file)
+          args = VMGImageView.image.file.value.filepath
+        else
+          status = "[w: missing filepath]"
+          return
+        endIf
+      else
+        which (File(args).extension.to_lowercase)
+          case "png", "jpg", "jpeg"
+            noAction
+          others
+            args += ".png"
+        endWhich
+      endIf
+
+      local file = File( args )
+      VMGImageView.image.file = file
+      local bitmap = VMGImageView.image.bitmap
+      which (File(args).extension.to_lowercase)
+        case "png"
+          file.save( bitmap.to_png_bytes )
+        case "jpg", ".jpeg"
+          file.save( bitmap.to_jpeg_bytes )
+      endWhich
+      status = ''"$" [$x$, $ bytes] written''(args,bitmap.width,bitmap.height,file.size.format(","))
+
+    method syntax->String
+      if (VMGUI.command.after_first(' ').count?) return "filepath.[png|jpg]"
+
+      if (VMGImageView.image and VMGImageView.image.file)
+        return "[$]"(VMGImageView.image.file.value.filepath)
+      else
+        return "filepath.[png|jpg]"
+      endIf
+endClass
+
