@@ -45,7 +45,7 @@ endRoutine
 
 routine rogo_run
   # Runs this project.
-  execute "$ *.jpg *.jpeg"(exe_file.esc)
+  execute "$ *.png"(exe_file.esc)
 endRoutine
 
 routine rogo_debug

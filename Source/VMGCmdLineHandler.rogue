@@ -188,3 +188,64 @@ class CmdLineJoin : VMGCmdLineHandler [singleton]
         endIf
       endIf
 endClass
+
+class CmdLineSwap : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "swap"
+    syntax  = "[a|r|g|b][a|r|g|b|0|1]"
+
+  METHODS
+    method execute( args:String )
+      local (a,b) = parse_channels( args )
+
+      if ((a or b) and VMGImageView.image)
+        local bitmap = VMGImageView.image.bitmap
+        status = "swap $$"("bgra01"[a],"bgra01"[b])
+
+        if (b < 4)
+          local a_shift = a * 8
+          local b_shift = b * 8
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            a = (color.argb :>>>: a_shift) & 0xFF
+            b = (color.argb :>>>: b_shift) & 0xFF
+            local argb = color.argb & !(0xFF:<<:a_shift) & !(0xFF:<<:b_shift)
+            argb |= (a :<<: b_shift) | (b :<<: a_shift)
+            rewriter.write( Color(argb) )
+          endForEach
+        else
+          # Replace color channel with all 0's or all 1's
+          local a_shift = a * 8
+          b = which{ b==4:0 || 255 } :<<: a_shift
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            local argb = color.argb & !(0xFF:<<:a_shift)
+            argb |= b
+            rewriter.write( Color(argb) )
+          endForEach
+        endIf
+
+        VMGImageView.mark_modified
+      endIf
+
+    method parse_channels( args:String )->(Int32,Int32)
+      # Returns a channel index pair. Each value:
+      #   b -> 0
+      #   g -> 1
+      #   r -> 2
+      #   a -> 3
+      #   0 -> 4
+      #   1 -> 5
+      if (args.count == 2)
+        if local a_index = "bgra01".locate( args[0] )
+          if local b_index = "bgra01".locate( args[1] )
+            if (a_index >= 4 and b_index >= 4)
+              status = ''[swap: at least one channel [a|r|g|b] must be specified]''
+            endIf
+            if (a_index >= 4 and b_index < 4) swapValues( a_index, b_index )
+            return (a_index,b_index)
+          endIf
+        endIf
+      endIf
+
+      status = ''[swap: expected [a|r|g|b|0|1] pair (e.g. 'swap rb' or 'swap g0')]''
+      return (0,0)
+endClass
