@@ -96,7 +96,7 @@ class VMGCmdLineHandler
       return null
 
     method parse_size( arg:String )->XY?
-      local pair = arg.split('x')
+      local pair = arg.split(' ')
       if (pair.count == 2)
         local x = pair.first->Int32
         local y = pair.last->Int32
@@ -165,16 +165,16 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
       return VMGImageView.size * XY(1,2)
 
     method syntax->String
-      if (VMGUI.command.after_first(' ').count?) return "WxH"
+      if (VMGUI.command.after_first(' ').count?) return "W H"
 
       localize default_size
-      return "$x$"(default_size.x,default_size.y)
+      return "$ $"(default_size.x,default_size.y)
 endClass
 
 class CmdLineJoin : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"
-    syntax  = "[h|v|WxH]"
+    syntax  = "[h|v|W H]"
 
   METHODS
     method execute( args:String )
