@@ -200,7 +200,7 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
 
       if ((a or b) and VMGImageView.image)
         local bitmap = VMGImageView.image.bitmap
-        status = "swap $$"("bgra01"[a],"bgra01"[b])
+        status = "swap channels $<>$"("bgra01"[a],"bgra01"[b])
 
         if (b < 4)
           local a_shift = a * 8
