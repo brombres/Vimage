@@ -156,6 +156,71 @@ class VMGCmdSplice( dims:XY ) : VMGCmd
 
 endClass
 
+class VMGCmdSplit( dims:XY ) : VMGCmd
+  METHODS
+    method execute
+      local tiles_wide = dims.x
+      local tiles_high = dims.y
+      local total = tiles_wide * tiles_high
+
+      local image  : VMGImage
+      local bitmap : Bitmap
+
+      use builder = VMGStatusBar
+        builder.print "split $x$ -> $ images"(tiles_wide,tiles_high,total)
+        if (VMGImageList.count == 0)
+          builder.print " [no images]"
+          return
+        elseIf (tiles_wide < 1 or tiles_high < 1)
+          builder.print " [invalid split count]"
+          return
+        else
+          image = VMGImageList.selected.image
+          bitmap = image.bitmap
+          if (bitmap.width % tiles_wide)
+            builder.print " [image width must be an even multiple of $]"(tiles_wide)
+            return
+          endIf
+          if (bitmap.height % tiles_high)
+            builder.print " [image height must be an even multiple of $]"(tiles_high)
+            return
+          endIf
+        endIf
+      endUse
+
+      local index = VMGImageList.selected.index
+      local digits = 1
+      local limit = 10
+      while (limit < total)
+        ++digits
+        limit *= 10
+      endWhile
+      local fmt = "0$"(digits)
+
+      local w = bitmap.width / tiles_wide
+      local h = bitmap.height / tiles_high
+
+      forEach (j in tiles_high-1 downTo 0)
+        forEach (i in tiles_wide-1 downTo 0)
+          local seq = j*tiles_wide + i
+          local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
+          local img : VMGImage
+          if (image.file)
+            img = VMGImage( tile, image.file.value.appending("-$"(seq.format(fmt))) )
+          elseIf (image.name)
+            img = VMGImage( tile, "$-$"(image.name,seq.format(fmt)) )
+          else
+            img = VMGImage( tile, seq.format(fmt) )
+          endIf
+          VMGImageList.insert( img, index )
+        endForEach
+      endForEach
+
+      VMGImageList.remove( VMGImageList.selected )
+      VMGImageList.select( index )
+
+endClass
+
 class VMGCmdSwap( a:Int32, b:Int32 ) : VMGCmd
   METHODS
     method execute

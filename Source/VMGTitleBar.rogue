@@ -17,7 +17,7 @@ class VMGTitleBar : UIComponent [singleton]
       if (image)
         ConsoleUICanvas.cursor = display_bounds.position
         ConsoleUICanvas.style.inverse
-        ConsoleUICanvas.print image.name
+        ConsoleUICanvas.print image
         if (zoom)
           local ratio : String
           if (zoom == 1.0 or zoom == 0)

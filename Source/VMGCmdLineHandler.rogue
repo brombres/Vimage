@@ -189,6 +189,18 @@ class CmdLineSplice : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineSplit : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "split"
+    syntax  = "W H"
+
+  METHODS
+    method execute( args:String )
+      if local size = parse_size( args )
+        execute( VMGCmdSplit(size) )
+      endIf
+endClass
+
 class CmdLineSwap : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "swap"

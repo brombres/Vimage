@@ -12,6 +12,9 @@ class VMGImage
   METHODS
     method init( bitmap, name=null )
 
+    method init( bitmap, file )
+      if (file) name = file.value.filepath
+
     method init( file )
       if local bitmap = Bitmap( file.value )
         init( bitmap, file.value.filepath )
@@ -27,12 +30,9 @@ class VMGImage
       endIf
       return dims
 
-    method name->String
-      local dims = "[$x$]"(bitmap.width,bitmap.height)
-      if (@name) return "$ $"(@name,dims)
-      return dims
-
     method to->String
-      return name
+      local dims = "[$x$]"(bitmap.width,bitmap.height)
+      if (name) return "$ $"(name,dims)
+      return dims
 endClass
 
