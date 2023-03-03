@@ -197,34 +197,7 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       local (a,b) = parse_channels( args )
-
-      if ((a or b) and VMGImageView.image)
-        local bitmap = VMGImageView.image.bitmap
-        status = "swap channels $<>$"("bgra01"[a],"bgra01"[b])
-
-        if (b < 4)
-          local a_shift = a * 8
-          local b_shift = b * 8
-          forEach (color in rewriter=bitmap.pixels.rewriter)
-            a = (color.argb :>>>: a_shift) & 0xFF
-            b = (color.argb :>>>: b_shift) & 0xFF
-            local argb = color.argb & !(0xFF:<<:a_shift) & !(0xFF:<<:b_shift)
-            argb |= (a :<<: b_shift) | (b :<<: a_shift)
-            rewriter.write( Color(argb) )
-          endForEach
-        else
-          # Replace color channel with all 0's or all 1's
-          local a_shift = a * 8
-          b = which{ b==4:0 || 255 } :<<: a_shift
-          forEach (color in rewriter=bitmap.pixels.rewriter)
-            local argb = color.argb & !(0xFF:<<:a_shift)
-            argb |= b
-            rewriter.write( Color(argb) )
-          endForEach
-        endIf
-
-        VMGImageView.mark_modified
-      endIf
+      execute( VMGCmdSwap(a,b) )
 
     method parse_channels( args:String )->(Int32,Int32)
       # Returns a channel index pair. Each value:
