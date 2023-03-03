@@ -52,7 +52,7 @@ class VMGCmdNew( size:XY, bg_color:Color ) : VMGCmd
       status = "new image [$x$] ($)"(size.x,size.y,bg_color)
 endClass
 
-class VMGCmdJoin( dims:XY ) : VMGCmd
+class VMGCmdSplice( dims:XY ) : VMGCmd
   METHODS
     method execute
       local w = dims.x
@@ -61,19 +61,19 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
 
       local has_images = which{ VMGImageList.count:"" || " [no images]" }
       if (total <= 1)
-        status = "join $x$ [no effect]"(w,h)
+        status = "s (splice) $x$ [no effect]"(w,h)
         return
       elseIf (h == 1)
-        if (w == 2) status = "n (join horizontal)$"(has_images)
-        else             status = "$n (join horizontal)$"(w,has_images)
+        if (w == 2) status = "s (splice horizontal)$"(has_images)
+        else        status = "$s (splice horizontal)$"(w,has_images)
       elseIf (w == 1)
-        if (h == 2) status = "N (join vertical)$"(has_images)
-        else             status = "$N (join vertical)$"(h,has_images)
+        if (h == 2) status = "S (splice vertical)$"(has_images)
+        else        status = "$S (splice vertical)$"(h,has_images)
       elseIf (VMGImageList.count == 0)
-        status = "join $x$ [no images]"(w,h)
+        status = "splice $x$ [no images]"(w,h)
         return
       else
-        status = "join $x$"(w,h)
+        status = "splice $x$"(w,h)
       endIf
 
       if (VMGImageList.count == 0) return

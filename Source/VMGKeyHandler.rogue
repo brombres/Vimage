@@ -231,26 +231,26 @@ class VMGKeyHandlerRotate90CCW : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class VMGKeyHandlerJoinH : VMGKeyHandler [singleton]
+class VMGKeyHandlerSpliceH : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "n (join horizontal)"
+      status = "s (splice horizontal)"
       execute
 
     method execute
-      local cmd = VMGCmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
+      local cmd = VMGCmdSplice( XY( which{Vimage.repeat_count||2}, 1 ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
 
-class VMGKeyHandlerJoinV : VMGKeyHandler [singleton]
+class VMGKeyHandlerSpliceV : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "N (join vertical)"
+      status = "S (splice vertical)"
       execute
 
     method execute
-      local cmd = VMGCmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
+      local cmd = VMGCmdSplice( XY( 1, which{Vimage.repeat_count||2} ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass

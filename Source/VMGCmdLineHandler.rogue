@@ -171,20 +171,20 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
       return "$ $"(default_size.x,default_size.y)
 endClass
 
-class CmdLineJoin : VMGCmdLineHandler [singleton]
+class CmdLineSplice : VMGCmdLineHandler [singleton]
   PROPERTIES
-    keyword = "join"
+    keyword = "splice"
     syntax  = "[h|v|W H]"
 
   METHODS
     method execute( args:String )
       if (args == "h")
-        execute( VMGCmdJoin(XY(2,1)) )
+        execute( VMGCmdSplice(XY(2,1)) )
       elseIf (args == "v")
-        execute( VMGCmdJoin(XY(1,2)) )
+        execute( VMGCmdSplice(XY(1,2)) )
       else
         if local size = parse_size( args )
-          execute( VMGCmdJoin(size) )
+          execute( VMGCmdSplice(size) )
         endIf
       endIf
 endClass

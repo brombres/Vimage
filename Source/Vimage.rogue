@@ -28,7 +28,7 @@
 # L            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
 # m
 # M
-# n [WxH]      - New [previous/default size]
+# n
 # N
 # o pattern    - Open file or files; inserts above current buffer
 # O            - Open using built-in file dialog
@@ -38,8 +38,8 @@
 # Q            - Quit (close) all buffers
 # r            - Rotate 90º CW
 # R            - Rotate 90º CCW
-# s
-# S
+# s            - Splice horizontal (2x1)
+# S            - Splice vertical (1x2)
 # t            - S(T)ACK - cur buffer becomes layer of image underneath
 # T
 # u            - UNDO
@@ -56,7 +56,7 @@
 # Z            - ZOOM OUT (scale / 2)
 # :bg <color>
 # :fg <color>
-# :splice [h|v|WxH]
+# :splice W H
 # :swap [argb][argb01]
 #
 # <color>

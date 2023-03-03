@@ -14,7 +14,7 @@ class VMGUI : ConsoleUI [singleton]
 
       register( CmdLineBG )
       register( CmdLineNew )
-      register( CmdLineJoin )
+      register( CmdLineSplice )
       register( CmdLineSwap )
       register( CmdLineWrite )
 
