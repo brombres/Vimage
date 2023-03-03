@@ -62,14 +62,14 @@ class ImageListState : VMGState [singleton]
       key_handlers[Keycode.F+SHIFT]         = VMGKeyHandlerVFlip
       key_handlers[Keycode.J]               = VMGKeyHandlerJBuffer
       key_handlers[Keycode.K]               = VMGKeyHandlerKBuffer
+      key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
+      key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
       key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
       key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
       key_handlers[Keycode.J+SHIFT]         = VMGKeyHandlerShiftJBuffer
       key_handlers[Keycode.K+SHIFT]         = VMGKeyHandlerShiftKBuffer
       key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
       key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
-      key_handlers[Keycode.S]               = VMGKeyHandlerSpliceH
-      key_handlers[Keycode.S+SHIFT]         = VMGKeyHandlerSpliceV
       key_handlers[Keycode.Z]               = VMGKeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
 
@@ -108,12 +108,12 @@ class ZoomState : VMGState [singleton]
       key_handlers[Keycode.J]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,0.5)) )
       key_handlers[Keycode.K]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,-0.5)) )
       key_handlers[Keycode.L]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
+      key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
+      key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
       key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
       key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
       key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
       key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
-      key_handlers[Keycode.S]               = VMGKeyHandlerSpliceH
-      key_handlers[Keycode.S+SHIFT]         = VMGKeyHandlerSpliceV
       key_handlers[Keycode.Z]               = VMGKeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
       key_handlers[Keycode.ESCAPE]          = VMGKeyHandler( ImageListState )
