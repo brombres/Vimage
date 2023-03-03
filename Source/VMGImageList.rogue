@@ -2,7 +2,7 @@ uses UI
 
 class VMGImageList : UIList [singleton]
   DEFINITIONS
-    FIXED_WIDTH = 16
+    FIXED_WIDTH = 21
 
   PROPERTIES
     selected : VMGImageListItem
@@ -138,7 +138,12 @@ endClass
 
 class VMGImageListScrollView : UIScrollView
   METHODS
+    method after_draw
+      local bounds = display_bounds.with_width(1) + XY(VMGImageList.FIXED_WIDTH-1,0)
+      ConsoleUICanvas.fill( bounds, '\[2502]' )
+
     method on_draw
       ConsoleUICanvas.fill( ' ' )
-      ConsoleUICanvas.fill( display_bounds.with_width(1), StyledCharacter('~',CharacterStyle.DIM) )
+      local bounds = display_bounds.with_width(1)
+      ConsoleUICanvas.fill( bounds, StyledCharacter('~',CharacterStyle.DIM) )
 endClass
