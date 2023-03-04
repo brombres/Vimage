@@ -64,6 +64,7 @@ class ImageListState : VMGState [singleton]
       key_handlers[Keycode.K]               = VMGKeyHandlerKBuffer
       key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
       key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
+      key_handlers[Keycode.P]               = VMGKeyHandlerPaste
       key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
       key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
       key_handlers[Keycode.J+SHIFT]         = VMGKeyHandlerShiftJBuffer
@@ -110,6 +111,7 @@ class ZoomState : VMGState [singleton]
       key_handlers[Keycode.L]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
       key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
       key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
+      key_handlers[Keycode.P]               = VMGKeyHandlerPaste
       key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
       key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
       key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW

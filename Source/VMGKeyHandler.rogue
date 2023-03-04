@@ -66,6 +66,18 @@ class VMGKeyHandlerJBuffer : VMGKeyHandler [singleton]
       endIf
 endClass
 
+class VMGKeyHandlerPaste : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      if (Vimage.clipboard)
+        local cmd = VMGCmdPaste( which{Vimage.repeat_count||1} )
+        Vimage.repeat_count = null
+        Vimage.execute( cmd )
+      else
+        status = "$p (paste) [empty clipboard]"(Vimage.repeat_count_string)
+      endIf
+endClass
+
 class VMGKeyHandlerPeriod : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )

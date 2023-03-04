@@ -156,6 +156,21 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
 
 endClass
 
+class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd
+  METHODS
+    method execute
+        status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
+        local bitmap = Vimage.clipboard.bitmap.cloned
+        if (VMGImageList.selected)
+          local before_index = VMGImageList.selected.index
+          VMGImageList.insert( VMGImage(bitmap), before_index )
+          VMGImageList.select( before_index )
+        else
+          VMGImageList.add( VMGImage(bitmap) )
+          VMGImageList.select( 0 )
+        endIf
+endClass
+
 class VMGCmdSplit( dims:XY ) : VMGCmd
   METHODS
     method execute

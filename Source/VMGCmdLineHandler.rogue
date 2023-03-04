@@ -24,7 +24,7 @@ class VMGCmdLineHandler
 
         which (arg.count)
           case 0
-            set_status( "[$: missing color specification]"(keyword) )
+            set_status( "$ [missing color specification]"(keyword) )
             return null
           case 1  # V        -> 0xFFVVVVVV
             local v = arg->Int32( &base=16 )
@@ -107,7 +107,7 @@ class VMGCmdLineHandler
           return null
         endIf
       else
-        set_status( "[$: missing size specification]"(keyword) )
+        set_status( "$ [missing size specification]"(keyword) )
         return null
       endIf
 
@@ -223,7 +223,7 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
         if local a_index = "bgra01".locate( args[0] )
           if local b_index = "bgra01".locate( args[1] )
             if (a_index >= 4 and b_index >= 4)
-              status = ''[swap: at least one channel [a|r|g|b] must be specified]''
+              status = ''swap [at least one channel [a|r|g|b] must be specified]''
             endIf
             if (a_index >= 4 and b_index < 4) swapValues( a_index, b_index )
             return (a_index,b_index)
@@ -231,7 +231,7 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
         endIf
       endIf
 
-      status = ''[swap: expected [a|r|g|b|0|1] pair (e.g. 'swap rb' or 'swap g0')]''
+      status = ''swap [expected [a|r|g|b|0|1] pair (e.g. 'swap rb' or 'swap g0')]''
       return (0,0)
 endClass
 
@@ -243,7 +243,7 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if (not VMGImageView.image)
-        status = "[w: no current image]"
+        status = "w [no current image]"
         return
       endIf
 
@@ -251,7 +251,7 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
         if (VMGImageView.image.file)
           args = VMGImageView.image.file.value.filepath
         else
-          status = "[w: missing filepath]"
+          status = "w [missing filepath]"
           return
         endIf
       else
@@ -265,6 +265,8 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
 
       local file = File( args )
       VMGImageView.image.file = file
+      VMGImageView.image.name = file.filepath
+      VMGImageView.request_redraw
       local bitmap = VMGImageView.image.bitmap
       which (File(args).extension.to_lowercase)
         case "png"

@@ -151,4 +151,8 @@ class Vimage [singleton]
                |OPTIONS
                |  --help, -h, -?
                |    Show this help text.
+
+    method repeat_count_string->String
+      if (repeat_count) return repeat_count.value + ""
+      else              return ""
 endClass
