@@ -16,11 +16,11 @@ class VMGCmdCopy( a:String, b:String ) : VMGCmd
   METHODS
     method execute
       if (not VMGImageList.selected)
-        status = "copy $ -> $ [no images]"(a,b)
+        status = "copy channels $ -> $ [no images]"(a,b)
         return
       endIf
 
-      status = "copy $ -> $"(a,b)
+      status = "copy channels $ -> $"(a,b)
       local bitmap = VMGImageList.selected.image.bitmap
 
       if (a.count == 1 and "bgra".contains(a))
@@ -67,7 +67,7 @@ class VMGCmdDD : VMGCmd [singleton]
           VMGImageList.select( null )
         endIf
       else
-        set_status( "[dd: nothing to delete]" )
+        set_status( "dd [no image to delete]" )
       endIf
 endClass
 
@@ -295,3 +295,15 @@ class VMGCmdSwap( a:Int32, b:Int32 ) : VMGCmd
         VMGImageView.mark_modified
       endIf
 endClass
+
+class VMGCmdYY : VMGCmd [singleton]
+  METHODS
+    method execute
+      if (VMGImageList.selected)
+        set_status( "yy (copy image to clipboard)" )
+        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+      else
+        set_status( "yy [no image to copy]" )
+      endIf
+endClass
+
