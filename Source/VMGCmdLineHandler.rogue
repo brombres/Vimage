@@ -246,7 +246,7 @@ endClass
 class CmdLineSwap : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "swap"
-    syntax  = "[a|r|g|b][a|r|g|b|0|1]"
+    syntax  = "[a|r|g|b] [a|r|g|b]"
 
   METHODS
     method execute( args:String )
@@ -259,21 +259,17 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
       #   g -> 1
       #   r -> 2
       #   a -> 3
-      #   0 -> 4
-      #   1 -> 5
-      if (args.count == 2)
-        if local a_index = "bgra01".locate( args[0] )
-          if local b_index = "bgra01".locate( args[1] )
-            if (a_index >= 4 and b_index >= 4)
-              status = ''swap [at least one channel [a|r|g|b] must be specified]''
+      block args = args.split(' ')
+        if (args.count == 2 and args[0].count == 1 and args[1].count == 1)
+          if local a_index = "bgra".locate( args[0] )
+            if local b_index = "bgra".locate( args[1] )
+              return (a_index,b_index)
             endIf
-            if (a_index >= 4 and b_index < 4) swapValues( a_index, b_index )
-            return (a_index,b_index)
           endIf
         endIf
-      endIf
+      endBlock
 
-      status = ''swap [expected [a|r|g|b|0|1] pair (e.g. 'swap rb' or 'swap g0')]''
+      status = ''swap [expected [a|r|g|b] pair (e.g. 'swap r b')]''
       return (0,0)
 endClass
 
