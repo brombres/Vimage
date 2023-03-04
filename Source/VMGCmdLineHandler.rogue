@@ -138,6 +138,48 @@ class CmdLineBG : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineCopy : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "copy"
+    syntax  = "source:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
+
+  METHODS
+    method execute( args:String )
+      block args = args.split(' ')
+        if (args.count == 2)
+          local a = parse_channels( args.first )
+          local b = parse_channels( args.last, &allow_multiple )
+          if (not a or not b) return
+          execute( VMGCmdCopy(a,b) )
+        else
+          status = "copy [expected <source-channel> <destination-channels>]"
+        endIf
+      endBlock
+
+    method parse_channels( args:String, &allow_multiple )->String
+      if (allow_multiple)
+        local channels = 0
+        forEach (ch in args)
+          if (not "bgra".locate(ch))
+            status = ''copy [illegal destination channel specification '$']''(ch)
+            return null
+          endIf
+        endForEach
+      elseIf (args.count == 1)
+        if (not "bgra".locate(args) and not args[0].is_number(&base=16))
+          status = ''copy [illegal source channel or value specification '$']''(args[0])
+          return null
+        endIf
+      else
+        if (args->Int32(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
+          status = ''copy [illegal source channel or value specification '$']''(args)
+          return null
+        endIf
+      endIf
+
+      return args
+endClass
+
 class CmdLineNew : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"

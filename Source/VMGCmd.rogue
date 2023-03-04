@@ -12,6 +12,45 @@ class VMGCmd
       endUse
 endClass
 
+class VMGCmdCopy( a:String, b:String ) : VMGCmd
+  METHODS
+    method execute
+      if (not VMGImageList.selected)
+        status = "copy $ -> $ [no images]"(a,b)
+        return
+      endIf
+
+      status = "copy $ -> $"(a,b)
+      local bitmap = VMGImageList.selected.image.bitmap
+
+      if (a.count == 1 and "bgra".contains(a))
+        local a_shift = ("bgra".locate(a).value :<<: 3)
+        forEach (dest_channel in b)
+          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            local a = (color.argb :>>>: a_shift) & 0xFF
+            local b = (color.argb :>>>: b_shift) & 0xFF
+            local argb = color.argb & !(0xFF:<<:b_shift)
+            argb |= (a :<<: b_shift)
+            rewriter.write( Color(argb) )
+          endForEach
+        endForEach
+      else
+        # Replace color channel with constant value 00-ff
+        local a = a->Int32(&base=16)
+        forEach (dest_channel in b)
+          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            local argb = color.argb & !(0xFF:<<:b_shift)
+            argb |= a
+            rewriter.write( Color(argb) )
+          endForEach
+        endForEach
+      endIf
+
+      VMGImageView.mark_modified
+endClass
+
 class VMGCmdDD : VMGCmd [singleton]
   METHODS
     method execute
