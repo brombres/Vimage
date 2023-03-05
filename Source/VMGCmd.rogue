@@ -307,3 +307,19 @@ class VMGCmdYY : VMGCmd [singleton]
       endIf
 endClass
 
+class VMGCmdYP : VMGCmd [singleton]
+  METHODS
+    method execute
+      if (VMGImageList.selected)
+        set_status( "yp (yank and paste / duplicate)" )
+        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+
+        local bitmap = Vimage.clipboard.bitmap.cloned
+        local before_index = VMGImageList.selected.index
+        VMGImageList.insert( VMGImage(bitmap), before_index )
+        VMGImageList.select( before_index )
+      else
+        set_status( "yp [no image to duplicate]" )
+      endIf
+endClass
+

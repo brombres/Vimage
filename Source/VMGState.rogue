@@ -308,7 +308,7 @@ class YState : VMGState [singleton]
       use status = VMGStatusBar
         status.print 'y'
         status.style.dim
-        status.print "[y]"
+        status.print "[p|y]"
         status.style.dim_off
       endUse
 
@@ -318,6 +318,9 @@ class YState : VMGState [singleton]
           cancel
         elseIf (e.unicode == 'y')
           execute( VMGCmdYY )
+          state = ImageListState
+        elseIf (e.unicode == 'p')
+          execute( VMGCmdYP )
           state = ImageListState
         else
           set_status( "[invalid command 'y$']"(e.unicode) )
