@@ -125,6 +125,7 @@ class Vimage [singleton]
       VMGUI.run
 
     method execute( cmd )
+      cmd.update_status
       if (repeat_count)
         loop (repeat_count.value) cmd.execute
         repeat_count = null
