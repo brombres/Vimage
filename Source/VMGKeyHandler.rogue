@@ -243,6 +243,18 @@ class VMGKeyHandlerRotate90CCW : VMGKeyHandler [singleton]
       endIf
 endClass
 
+class VMGKeyHandlerStack : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "s (stack images)"
+      execute
+
+    method execute
+      local cmd = VMGCmdStack( which{Vimage.repeat_count||2} )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
+endClass
+
 class VMGKeyHandlerJoinH : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )

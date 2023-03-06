@@ -95,6 +95,7 @@ class Vimage [singleton]
   PROPERTIES
     cmd          : VMGCmd
     repeat_count : Int32?
+    anchor       = Anchor.CENTER
     bg_color     = Color.BLACK : Color
     clipboard    : VMGImage
 

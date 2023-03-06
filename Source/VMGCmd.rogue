@@ -275,6 +275,62 @@ class VMGCmdSplit( dims:XY ) : VMGCmd
 
 endClass
 
+class VMGCmdStack( n:Int32 ) : VMGCmd
+  METHODS
+    method execute
+      local available : Int32
+      use status = VMGStatusBar
+        if (n != 1) status.print n
+        status.print "t (stack images)"
+        if (VMGImageList.selected)
+          available = VMGImageList.count - VMGImageList.selected.index
+          if (VMGImageList.count) status.print " [not enough images]"
+        else
+          status.print " [no images]"
+        endIf
+      endUse
+      if (n <= 1 or available < n) return
+
+      local bitmap = VMGImageList.selected.image.bitmap
+
+      use list = WorkList<<VMGImage>>
+        loop (n)
+          local index = VMGImageList.selected.index
+          list.add( VMGImageList.selected.image )
+          VMGImageList.remove( VMGImageList.selected )
+          if (index < VMGImageList.count)
+            VMGImageList.select( index )
+          elseIf (VMGImageList.count > 0)
+            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+            escapeLoop
+          else
+            VMGImageList.select( null )
+            escapeLoop
+          endIf
+        endLoop
+
+        local largest_width  = Best<<Int32>>( (a,b) => a > b )
+        local largest_height = Best<<Int32>>( (a,b) => a > b )
+        largest_width.consider( (forEach in list).bitmap.width )
+        largest_height.consider( (forEach in list).bitmap.height )
+        (forEach in list).bitmap.crop( largest_width.value, largest_height.value, Vimage.anchor, Vimage.bg_color )
+
+        local result = list.remove_first.bitmap
+        forEach (image in list)
+          result.blit( image.bitmap, 0, 0, BitmapBlitFn.ALPHA )
+          result = image.bitmap
+        endForEach
+
+        local result_image = VMGImage( result )
+        local before_index = which{ VMGImageList.selected:VMGImageList.selected.index || 0 }
+        VMGImageList.insert( result_image, before_index )
+        VMGImageList.select( result_image )
+
+      endUse
+
+      VMGImageView.mark_modified
+endClass
+
 class VMGCmdSwap( a:Int32, b:Int32 ) : VMGCmd
   METHODS
     method execute

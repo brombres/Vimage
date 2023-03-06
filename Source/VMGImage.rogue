@@ -22,6 +22,11 @@ class VMGImage
         init( Bitmap(16,16), file.value.filepath )
       endIf
 
+    method cloned_bitmap->Bitmap
+      # Editing commands operate on copies of bitmap objects for undo chain purposes.
+      bitmap .= cloned
+      return bitmap
+
     method compact_name->String
       local dims = "[$x$]"(bitmap.width,bitmap.height)
       if (@name)
