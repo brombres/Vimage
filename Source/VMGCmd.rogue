@@ -135,6 +135,8 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
 
       if (VMGImageList.count == 0) return
 
+      local original_index = VMGImageList.selected.index
+
       use list = WorkList<<VMGImage>>
         loop (total)
           local index = VMGImageList.selected.index
@@ -155,66 +157,90 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
           list.add( VMGImage(Bitmap(1,1).[clear(Vimage.bg_color)]) )
         endWhile
 
-        # Scale up elements of each row to be same height.
-        forEach (j in 0..<h)
-          local max_height = Best<<Int32>>( (a,b) => a > b )
-          forEach (i in 0..<w)
-            max_height.consider( list[j*w+i].bitmap.height )
-          endForEach
-
-          block max_height = max_height.value
-            forEach (i in 0..<w)
-              local bitmap = list[j*w+i].bitmap
-              local new_size = XY( bitmap.width*(max_height->Real64/bitmap.height), max_height )
-              if (new_size != bitmap.size)
-                list[j*w+i].cloned_bitmap.resize( new_size )
-              endIf
-            endForEach
-          endBlock
+        # Find largest width and largest height
+        local max_width = Best<<Int32>>( (a,b) => a > b )
+        local max_height = Best<<Int32>>( (a,b) => a > b )
+        forEach (item in list)
+          max_width.consider( item.bitmap.width )
+          max_height.consider( item.bitmap.height )
         endForEach
 
-        # Scale up elements of each column to be same width.
-        forEach (i in 0..<w)
-          local max_width = Best<<Int32>>( (a,b) => a > b )
-          forEach (j in 0..<h)
-            max_width.consider( list[j*w+i].bitmap.width )
-          endForEach
+        local tile_w = max_width.value
+        local tile_h = max_height.value
 
-          block max_width = max_width.value
-            forEach (j in 0..<h)
-              local bitmap = list[j*w+i].bitmap
-              local new_size = XY( max_width, bitmap.height*(max_width->Real64/bitmap.width) )
-              list[j*w+i].cloned_bitmap.resize( new_size )
-            endForEach
-          endBlock
-        endForEach
+        # Reshape all images to be max width and height
+        local cmd = VMGCmdFit( tile_w, tile_h )
+        cmd.execute( (forEach in list) )
 
-        local total_w = 0
-        total_w += list[ (forEach in 0..<w) ].bitmap.width
-        local total_h = 0
-        total_h += list[ (forEach in 0..<h)*w ].bitmap.height
+        local total_w = tile_w * w
+        local total_h = tile_h * h
 
         local result = Bitmap( total_w, total_h )
         local cursor_y = 0
         forEach (j in 0..<h)
           local cursor_x = 0
-          local dy : Int32
           forEach (i in 0..<w)
             local bitmap = list[ j*w+i ].bitmap
             bitmap.blit( result, cursor_x, cursor_y )
-            cursor_x += bitmap.width
-            dy = bitmap.height
+            cursor_x += tile_w
           endForEach
-          cursor_y += dy
+          cursor_y += tile_h
         endForEach
 
         local result_image = VMGImage( result )
-        local before_index = which{ VMGImageList.selected:VMGImageList.selected.index || 0 }
-        VMGImageList.insert( result_image, before_index )
+        VMGImageList.insert( result_image, original_index )
         VMGImageList.select( result_image )
 
       endUse
 
+endClass
+
+class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
+  METHODS
+    method update_status
+      use status = VMGStatusBar
+        status.print "fit (resize to fit) "
+        if (width and height)
+          status.print "$x$"(width,height)
+        elseIf (width)
+          status.print "width $"(width)
+        elseIf (height)
+          status.print "height $"(height)
+        endIf
+        if (not VMGImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not VMGImageList.selected) return
+      execute( VMGImageList.selected )
+
+    method execute( image:VMGImage )
+      if (width)
+        local width = this.width.value
+        if (height)
+          local height = this.height.value
+          if (image.bitmap.size == XY(width,height)) return
+
+          local bitmap = image.cloned_bitmap
+          bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
+          VMGImageView.mark_modified
+        else
+          local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          if (image.bitmap.size == new_size) return
+
+          local bitmap = image.cloned_bitmap
+          bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
+          VMGImageView.mark_modified
+        endIf
+      elseIf (height)
+        local height = this.height.value
+        local new_size = XY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        if (image.bitmap.size == new_size) return
+
+        local bitmap = image.cloned_bitmap
+        bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
+        VMGImageView.mark_modified
+      endIf
 endClass
 
 class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd
@@ -343,6 +369,8 @@ class VMGCmdStack( n:Int32 ) : VMGCmd
 
       local bitmap = VMGImageList.selected.image.bitmap
 
+      local original_index = VMGImageList.selected.index
+
       use list = WorkList<<VMGImage>>
         loop (n)
           local index = VMGImageList.selected.index
@@ -372,8 +400,7 @@ class VMGCmdStack( n:Int32 ) : VMGCmd
         endForEach
 
         local result_image = VMGImage( result )
-        local before_index = which{ VMGImageList.selected:VMGImageList.selected.index || 0 }
-        VMGImageList.insert( result_image, before_index )
+        VMGImageList.insert( result_image, original_index )
         VMGImageList.select( result_image )
 
       endUse
