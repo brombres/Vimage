@@ -297,6 +297,53 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
       VMGImageView.show( image )
 endClass
 
+class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
+  METHODS
+    method update_status
+      use status = VMGStatusBar
+        status.print "resize "
+        if (width and height)
+          status.print "$x$"(width,height)
+        elseIf (width)
+          status.print "width $"(width)
+        elseIf (height)
+          status.print "height $"(height)
+        endIf
+        if (not VMGImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not VMGImageList.selected) return
+      execute( VMGImageList.selected.image )
+
+    method execute( image:VMGImage )
+      if (width)
+        local width = this.width.value
+        if (height)
+          local height = this.height.value
+          if (image.bitmap.size == XY(width,height)) return
+
+          local bitmap = image.cloned_bitmap
+          bitmap.resize( width, height )
+        else
+          local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          if (image.bitmap.size == new_size) return
+
+          local bitmap = image.cloned_bitmap
+          bitmap.resize( new_size.x, new_size.y )
+        endIf
+      elseIf (height)
+        local height = this.height.value
+        local new_size = XY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        if (image.bitmap.size == new_size) return
+
+        local bitmap = image.cloned_bitmap
+        bitmap.resize( new_size.x, new_size.y )
+      endIf
+
+      VMGImageView.show( image )
+endClass
+
 class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd
   METHODS
     method update_status

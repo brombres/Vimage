@@ -293,6 +293,21 @@ class CmdLineSplit : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineResize : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "resize"
+    syntax  = "[WxH|Wx|xH]"
+
+  METHODS
+    method execute( args:String )
+      local (w,h) = parse_size_either_or( args )
+      if (w or h)
+        execute( VMGCmdResize(w,h) )
+      else
+        status = "resize [missing size specification]"
+      endIf
+endClass
+
 class CmdLineSwap : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "swap"
