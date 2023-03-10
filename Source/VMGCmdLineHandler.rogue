@@ -200,6 +200,21 @@ class CmdLineCopy : VMGCmdLineHandler [singleton]
       return args
 endClass
 
+class CmdLineFill : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "fill"
+    syntax  = "[WxH|Wx|xH]"
+
+  METHODS
+    method execute( args:String )
+      local (w,h) = parse_size_either_or( args )
+      if (w or h)
+        execute( VMGCmdFill(w,h) )
+      else
+        status = "fill [missing size specification]"
+      endIf
+endClass
+
 class CmdLineFit : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "fit"
