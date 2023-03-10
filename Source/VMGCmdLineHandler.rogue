@@ -103,13 +103,33 @@ class VMGCmdLineHandler
         if (x->String == pair.first and y->String == pair.last)
           return XY(x,y)
         else
-          set_status( "[Syntax error: invalid size '$']"(arg) )
+          set_status( "$ [invalid size '$']"(keyword,arg) )
           return null
         endIf
       else
-        set_status( "$ [missing size specification]"(keyword) )
+        set_status( "$ [missing or invalid size specification]"(keyword) )
         return null
       endIf
+
+    method parse_size_either_or( arg:String )->(width:Int32?,height:Int32?)
+      local pair = arg.split('x')
+      if (pair.count == 2)
+        contingent
+          necessary (pair.first != "" or pair.last != "")
+          necessary (pair.first == "" or pair.first->Int32->String == pair.first)
+          necessary (pair.last == "" or pair.last->Int32->String == pair.last)
+
+          if (pair.first == "")
+            return (width:null,height:pair.last->Int32)
+          else
+            if (pair.last == "") return (width:pair.first->Int32,height:null)
+            else                 return (width:pair.first->Int32,height:pair.last->Int32)
+          endIf
+        endContingent
+      endIf
+
+      set_status( "$ [missing or invalid size specification '$']"(keyword,arg) )
+      return (width:null,height:null)
 
     method set_state( new_state:VMGState )
       VMGState.current.change_state( new_state )
@@ -180,6 +200,39 @@ class CmdLineCopy : VMGCmdLineHandler [singleton]
       return args
 endClass
 
+class CmdLineFit : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "fit"
+    syntax  = "[WxH|Wx|xH]"
+
+  METHODS
+    method execute( args:String )
+      local (w,h) = parse_size_either_or( args )
+      if (w or h)
+        execute( VMGCmdFit(w,h) )
+      else
+        status = "fit [missing size specification]"
+      endIf
+endClass
+
+class CmdLineJoin : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "join"
+    syntax  = "[h|v|WxH]"
+
+  METHODS
+    method execute( args:String )
+      if (args == "h")
+        execute( VMGCmdJoin(XY(2,1)) )
+      elseIf (args == "v")
+        execute( VMGCmdJoin(XY(1,2)) )
+      else
+        if local size = parse_size( args )
+          execute( VMGCmdJoin(size) )
+        endIf
+      endIf
+endClass
+
 class CmdLineNew : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"
@@ -211,24 +264,6 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
 
       localize default_size
       return "$x$"(default_size.x,default_size.y)
-endClass
-
-class CmdLineJoin : VMGCmdLineHandler [singleton]
-  PROPERTIES
-    keyword = "join"
-    syntax  = "[h|v|WxH]"
-
-  METHODS
-    method execute( args:String )
-      if (args == "h")
-        execute( VMGCmdJoin(XY(2,1)) )
-      elseIf (args == "v")
-        execute( VMGCmdJoin(XY(1,2)) )
-      else
-        if local size = parse_size( args )
-          execute( VMGCmdJoin(size) )
-        endIf
-      endIf
 endClass
 
 class CmdLineSplit : VMGCmdLineHandler [singleton]

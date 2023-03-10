@@ -79,7 +79,6 @@ class VMGImageView : UIComponent [singleton]
     method show( new_image:VMGImage )
       if (image and image.zoom == default_zoom) image.zoom = 0
 
-      if (new_image is image) return
       image = new_image
       min_zoom = 0
       default_zoom = 0

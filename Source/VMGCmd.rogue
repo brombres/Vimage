@@ -212,7 +212,7 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
 
     method execute
       if (not VMGImageList.selected) return
-      execute( VMGImageList.selected )
+      execute( VMGImageList.selected.image )
 
     method execute( image:VMGImage )
       if (width)
@@ -222,15 +222,17 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
+          local x_scale = width->Real64 / image.bitmap.size.x
+          local y_scale = height->Real64 / image.bitmap.size.y
+          local scale = x_scale.or_smaller( y_scale )
+          bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
-          VMGImageView.mark_modified
         else
           local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
-          bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
-          VMGImageView.mark_modified
+          bitmap.resize( new_size.x, new_size.y )
         endIf
       elseIf (height)
         local height = this.height.value
@@ -238,9 +240,10 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
-        bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
-        VMGImageView.mark_modified
+        bitmap.resize( new_size.x, new_size.y )
       endIf
+
+      VMGImageView.show( image )
 endClass
 
 class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd
