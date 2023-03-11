@@ -4,7 +4,6 @@ uses UI
 class VMGImageView : UIComponent [singleton]
   PROPERTIES
     image          : VMGImage
-    display_image  : Bitmap
     canvas         : TextCanvas
     scale_to_fit   = true
     min_zoom       : Real64
@@ -44,15 +43,17 @@ class VMGImageView : UIComponent [singleton]
             endIf
           endIf
           VMGTitleBar.zoom = image.zoom
-          display_image = image.bitmap.resized( new_size )
-          canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DEFAULT )
+          canvas = image.text_canvas( new_size, display_bounds )
+          #local display_image = image.bitmap.resized( new_size )
+          #canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DEFAULT )
         endIf
 
         ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DEFAULT) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
-          local pos = Box( display_bounds.center - (sz*image.view_center), sz ).clamped( display_bounds ).top_left
+          #local pos = Box( display_bounds.center - (sz*image.view_center), sz ).clamped( display_bounds ).top_left
+          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
 
@@ -73,6 +74,7 @@ class VMGImageView : UIComponent [singleton]
           delta *= display_bounds.size / (image.bitmap.size * image.zoom)
           image.view_center = (image.view_center + delta).clamped( 0.0, 1.0 )
         endIf
+        is_modified = true
         request_redraw
       endIf
 
