@@ -15,6 +15,35 @@ class VMGCmd
       noAction
 endClass
 
+class VMGCmdAspect( size:XY ) : VMGCmd
+  METHODS
+    method update_status
+      use status = VMGStatusBar
+        status.print "resize "
+        status.print size.x
+        status.print ':'
+        status.print size.y
+        if (not VMGImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not VMGImageList.selected) return
+      execute( VMGImageList.selected.image )
+
+    method execute( image:VMGImage )
+      local w = image.bitmap.width
+      local h = image.bitmap.height
+      local adjusted_height = (w->Real64 / size.x) * size.y : Int32
+      local adjusted_width  = (h->Real64 / size.y) * size.x : Int32
+      if (adjusted_width == w and adjusted_height == h) return
+
+      local bitmap = image.cloned_bitmap
+      if (adjusted_width < w) bitmap.crop( adjusted_width, h,  Vimage.anchor, Vimage.bg_color )
+      else                    bitmap.crop( w, adjusted_height, Vimage.anchor, Vimage.bg_color )
+
+      VMGImageView.show( image )
+endClass
+
 class VMGCmdCopy( a:String, b:String ) : VMGCmd
   METHODS
     method update_status

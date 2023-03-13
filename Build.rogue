@@ -30,6 +30,7 @@ augment Build
     BUILD_MODE       = "debug"
     LAUNCHER_FOLDER  = "/usr/local/bin"
     ROGUEC_FLAGS     = ""
+    #CC_ARGS_UNIX     = "Source/ObjC.m -I /System/Libraries/Frameworks -framework Foundation"
     CC_ARGS_UNIX     = ""
     CC_LINK_UNIX     = ""
     CC_ARGS_WINDOWS  = ""
@@ -45,7 +46,11 @@ endRoutine
 
 routine rogo_run
   # Runs this project.
-  execute "$ *.png"(exe_file.esc)
+  local files = Files(".")
+  files.add( "*.png" )
+  files.add( "*.jpg" )
+  files.add( "*.jpeg" )
+  execute exe_file.esc.appending( files->String[].join(' ') )
 endRoutine
 
 routine rogo_debug

@@ -12,6 +12,7 @@ class VMGUI : ConsoleUI [singleton]
     method init
       prior.init
 
+      register( CmdLineAspect )
       register( CmdLineBG )
       register( CmdLineCopy )
       register( CmdLineFill )

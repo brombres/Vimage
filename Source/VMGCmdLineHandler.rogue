@@ -95,6 +95,22 @@ class VMGCmdLineHandler
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
 
+    method parse_ratio( arg:String )->XY?
+      local pair = arg.split(':')
+      if (pair.count == 2)
+        local x = pair.first->Int32
+        local y = pair.last->Int32
+        if (x->String == pair.first and y->String == pair.last)
+          return XY(x,y)
+        else
+          set_status( "$ [invalid aspect ratio '$']"(keyword,arg) )
+          return null
+        endIf
+      else
+        set_status( "$ [missing or invalid aspect ratio specification]"(keyword) )
+        return null
+      endIf
+
     method parse_size( arg:String )->XY?
       local pair = arg.split('x')
       if (pair.count == 2)
@@ -143,6 +159,60 @@ class VMGCmdLineHandler
 
     method syntax->String
       return @syntax
+endClass
+
+class CmdLineAspect : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "aspect"
+
+  METHODS
+    method execute( args:String )
+      if local size = parse_ratio( args )
+        execute( VMGCmdAspect(size) )
+      else
+        status = "aspect [missing or invalid size specification]"
+      endIf
+
+    method syntax->String
+      if (not VMGImageList.selected) return "WxH"
+      local bitmap = VMGImageList.selected.image.bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+
+      local result = String()
+      result.print "[W:H|"
+      result.print w
+      result.print ':'
+      result.print h
+      local min_w = w
+      local min_h = h
+      while (min_w % 2 == 0 and min_h % 2 == 0)
+        min_w /= 2
+        min_h /= 2
+      endWhile
+
+      local repeat = true
+      while (repeat)
+        repeat = false
+        forEach (d in 3..min_w.sqrt)
+          if (min_w % d == 0 and min_h % d == 0)
+            min_w /= d
+            min_h /= d
+            repeat = true
+            escapeForEach
+          endIf
+        endForEach
+      endWhile
+
+      if (min_w != w)
+        result.print '|'
+        result.print min_w
+        result.print ':'
+        result.print min_h
+      endIf
+      result.print ']'
+      return result
+
 endClass
 
 class CmdLineBG : VMGCmdLineHandler [singleton]

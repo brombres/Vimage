@@ -84,7 +84,10 @@ $include VMGStatusBar
 $include VMGTitleBar
 $include VMGUI
 
+#nativeHeader @|#include "../Source/ObjC-Interface.h"
+
 try
+  #native @|ObjC_check_file( "Test.txt" );
   Vimage.init( System.command_line_arguments )
 catch (error:Error)
   Console.error.println error
