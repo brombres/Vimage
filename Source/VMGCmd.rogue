@@ -160,10 +160,10 @@ class VMGCmdDD : VMGCmd [singleton]
       endIf
 endClass
 
-class VMGCmdNew( size:XY, bg_color:Color ) : VMGCmd
+class VMGCmdNew( size:XY ) : VMGCmd
   METHODS
     method update_status
-      status = "new image [$x$] ($)"(size.x,size.y,bg_color)
+      status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
 
     method execute
       local before_index = 0
@@ -173,7 +173,7 @@ class VMGCmdNew( size:XY, bg_color:Color ) : VMGCmd
         endIf
       endIf
 
-      local bitmap = Bitmap( size ).[ clear(bg_color) ]
+      local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
       local image  = VMGImage( bitmap )
       local item   = VMGImageListItem( image )
       VMGImageList.insert( item, before_index )

@@ -350,7 +350,7 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
         endIf
       endIf
 
-      execute( VMGCmdNew(sz,Vimage.bg_color) )
+      execute( VMGCmdNew(sz) )
 
     method default_size->XY
       if local selected = VMGImageList.selected

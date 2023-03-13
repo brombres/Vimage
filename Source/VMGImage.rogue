@@ -27,6 +27,16 @@ class VMGImage
         init( Bitmap(16,16), file.value.filepath )
       endIf
 
+    method init( info:Value )
+      if (info//filepath) file = File(info//filepath->String)
+      bitmap = info//bitmap.to<<Bitmap>>
+      name = which{ info//name:info//name->String || null }
+      zoom = info//zoom
+      view_center = XY( info//view_center//x, info//view_center//y )
+      is_modified = info//is_modified
+
+      cached_text_canvas = null
+
     method cloned_bitmap->Bitmap
       # Editing commands operate on copies of bitmap objects for undo chain purposes.
       bitmap .= cloned
@@ -74,5 +84,16 @@ class VMGImage
       local dims = "[$x$]"(bitmap.width,bitmap.height)
       if (name) return "$ $"(name,dims)
       return dims
+
+    method to->Value
+      return ...
+      @{
+        filepath:which{file:file.value.filepath||null},
+        bitmap:Value(bitmap),
+        :name,
+        :zoom,
+        view_center:{x:view_center.x,y:view_center.y},
+        :is_modified
+      }
 endClass
 

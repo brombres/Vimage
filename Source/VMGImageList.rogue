@@ -95,7 +95,31 @@ class VMGImageList : UIList [singleton]
       else
         VMGUI.show( null )
       endIf
-endClass
+
+    method to->Value
+      local result = ...
+      @{
+        selected_index:which{ selected:selected.index || -1 },
+        :is_dim
+      }
+
+      local images = @[]
+      forEach (child in children)
+        images.add( child->(as VMGImageListItem).image->Value )
+      endForEach
+      result//images = images
+
+      return result
+
+    method unpack( state:Value )
+      clear
+      is_dim = state//is_dim
+      forEach (image_info in state//images)
+        add( VMGImageListItem(VMGImage(image_info)) )
+      endForEach
+      if (state//selected_index < count) select( state//selected_index->Int32 )
+
+endClass  # VMGImageList
 
 class VMGImageListItem : UIComponent
   PROPERTIES

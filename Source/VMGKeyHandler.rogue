@@ -13,10 +13,11 @@ class VMGKeyHandler
     method init( handler, new_state )
 
     method execute
-      loop (which{Vimage.repeat_count||1})
+      local n = which{ Vimage.repeat_count || 1 }
+      Vimage.repeat_count = null
+      loop (n)
         on_execute
       endLoop
-      Vimage.repeat_count = null
 
     method on( e:KeyEvent )
       if (handler) handler(e)
@@ -95,6 +96,7 @@ class VMGKeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
     method on_execute
       if local current = VMGImageList.selected
         if local index = VMGImageList.locate( current )
+          Vimage.save_undo
           VMGImageList.remove( current )
           VMGImageList.insert( current, index+1 )
           VMGImageList.request_layout
@@ -129,6 +131,7 @@ class VMGKeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
       if local current = VMGImageList.selected
         if local index = VMGImageList.locate( current )
           if (index > 0)
+            Vimage.save_undo
             VMGImageList.remove( current )
             VMGImageList.insert( current, index-1 )
             VMGImageList.request_layout
@@ -258,7 +261,7 @@ endClass
 class VMGKeyHandlerJoinH : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "s (join horizontal)"
+      status = "n (join horizontal)"
       execute
 
     method execute
@@ -270,12 +273,22 @@ endClass
 class VMGKeyHandlerJoinV : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "S (join vertical)"
+      status = "N (join vertical)"
       execute
 
     method execute
       local cmd = VMGCmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
+endClass
+
+class VMGKeyHandlerUndo : VMGKeyHandler [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      status = "u (undo)"
+      execute
+
+    method on_execute
+      Vimage.undo
 endClass
 

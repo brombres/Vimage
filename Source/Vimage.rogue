@@ -101,6 +101,7 @@ class Vimage [singleton]
     anchor       = Anchor.CENTER
     bg_color     = Color.BLACK : Color
     clipboard    : VMGImage
+    undo_stack   = @[]
 
   METHODS
     method init( args:String[] )
@@ -128,6 +129,7 @@ class Vimage [singleton]
       VMGUI.run
 
     method execute( cmd )
+      save_undo
       cmd.update_status
       if (repeat_count)
         loop (repeat_count.value) cmd.execute
@@ -160,4 +162,13 @@ class Vimage [singleton]
     method repeat_count_string->String
       if (repeat_count) return repeat_count.value + ""
       else              return ""
+
+    method save_undo
+      local state  = VMGImageList->Value
+      undo_stack.add( state )
+
+    method undo
+      if (undo_stack.is_empty) return
+      VMGImageList.unpack( undo_stack.remove_last )
+
 endClass

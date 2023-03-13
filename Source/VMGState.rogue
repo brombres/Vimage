@@ -72,6 +72,7 @@ class ImageListState : VMGState [singleton]
       key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
       key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
       key_handlers[Keycode.T]               = VMGKeyHandlerStack
+      key_handlers[Keycode.U]               = VMGKeyHandlerUndo
       key_handlers[Keycode.Y]               = VMGKeyHandler( YState )
       key_handlers[Keycode.Z]               = VMGKeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
@@ -118,6 +119,7 @@ class ZoomState : VMGState [singleton]
       key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
       key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
       key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
+      key_handlers[Keycode.U]               = VMGKeyHandlerUndo
       key_handlers[Keycode.Y]               = VMGKeyHandler( YState )
       key_handlers[Keycode.Z]               = VMGKeyHandlerZ
       key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
