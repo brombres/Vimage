@@ -270,6 +270,22 @@ class CmdLineCopy : VMGCmdLineHandler [singleton]
       return args
 endClass
 
+class CmdLineCrop : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "crop"
+    syntax  = "[WxH|Wx|xH]"
+
+  METHODS
+    method execute( args:String )
+      local (w,h) = parse_size_either_or( args )
+      if (w or h)
+        execute( VMGCmdCrop(w,h) )
+      else
+        status = "crop [missing or invalid size specification]"
+      endIf
+
+endClass
+
 class CmdLineFill : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"
@@ -281,7 +297,7 @@ class CmdLineFill : VMGCmdLineHandler [singleton]
       if (w or h)
         execute( VMGCmdFill(w,h) )
       else
-        status = "fill [missing size specification]"
+        status = "fill [missing or invalid size specification]"
       endIf
 endClass
 
@@ -296,7 +312,7 @@ class CmdLineFit : VMGCmdLineHandler [singleton]
       if (w or h)
         execute( VMGCmdFit(w,h) )
       else
-        status = "fit [missing size specification]"
+        status = "fit [missing or invalid size specification]"
       endIf
 endClass
 
@@ -374,7 +390,7 @@ class CmdLineResize : VMGCmdLineHandler [singleton]
       if (w or h)
         execute( VMGCmdResize(w,h) )
       else
-        status = "resize [missing size specification]"
+        status = "resize [missing or invalid size specification]"
       endIf
 endClass
 
