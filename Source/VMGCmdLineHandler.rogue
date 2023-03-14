@@ -1,3 +1,5 @@
+uses Geometry
+
 class VMGCmdLineHandler
   PROPERTIES
     keyword : String
@@ -15,6 +17,28 @@ class VMGCmdLineHandler
       parts[1] .= to_lowercase
       parts[3] .= to_lowercase
       return parts.join("")
+
+    method parse_anchor( args:String )->Anchor?
+      if (args == "") return Vimage.anchor
+
+      if (args.count == 2) args = "$ $"(args[0],args[1])
+
+      local x = 0.5
+      local y = 0.5
+      forEach (word in args.split(' '))
+        which (word)
+          case "top","t":    y = 0.0
+          case "bottom","b": y = 1.0
+          case "left","l":   x = 0.0
+          case "right","r":  x = 1.0
+          case "center","c": noAction
+          others
+            status = "anchor [invalid anchor specifier '$']"(word)
+            return null
+        endWhich
+      endForEach
+
+      return Anchor(RealXY(x,y))
 
     method parse_color( arg:String )->Color?
       contingent
@@ -159,6 +183,34 @@ class VMGCmdLineHandler
 
     method syntax->String
       return @syntax
+endClass
+
+class CmdLineAnchor : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "anchor"
+    syntax = "[center|top|bottom|left|right|c|t|b|l|r]+"
+
+  METHODS
+    method execute( args:String )
+      if local anchor = parse_anchor( args )
+        Vimage.anchor = anchor
+
+        use status = VMGStatusBar
+          status.print "anchor"
+          if (Vimage.anchor.position == RealXY(0.5,0.5))
+            status.print " center"
+          else
+            which (Vimage.anchor.position.y)
+              case 0.0: status.print " top"
+              case 1.0: status.print " bottom"
+            endWhich
+            which (Vimage.anchor.position.x)
+              case 0.0: status.print " left"
+              case 1.0: status.print " right"
+            endWhich
+          endIf
+        endUse
+      endIf
 endClass
 
 class CmdLineAspect : VMGCmdLineHandler [singleton]
