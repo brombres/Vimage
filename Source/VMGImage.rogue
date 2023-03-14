@@ -6,7 +6,7 @@ class VMGImage
     bitmap      : Bitmap
     name        : String
     zoom        : Real64
-    view_center = RealXY(0.5,0.5)
+    camera      = RealXY(0.5,0.5)
     is_modified : Logical
 
     cached_text_canvas    : TextCanvas
@@ -32,7 +32,7 @@ class VMGImage
       bitmap = info//bitmap.to<<Bitmap>>
       name = which{ info//name:info//name->String || null }
       zoom = info//zoom
-      view_center = XY( info//view_center//x, info//view_center//y )
+      camera = XY( info//camera//x, info//camera//y )
       is_modified = info//is_modified
 
       cached_text_canvas = null
@@ -50,19 +50,22 @@ class VMGImage
       endIf
       return dims
 
+    method size->XY
+      return bitmap.size
+
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
       if (cached_text_canvas and bitmap_size == cached_bitmap_size and display_bounds == cached_display_bounds and
-          view_center == cached_view_center)
+        camera == cached_view_center)
         return cached_text_canvas
       endIf
 
       cached_bitmap_size = bitmap_size
       cached_display_bounds = display_bounds
-      cached_view_center = view_center
+      cached_view_center = camera
 
       local canvas_size = bitmap_size / XY(1,2)
 
-      local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*view_center)).clamped_high(XY.zero), canvas_size )
+      local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
       canvas_bounds .= clamped( Box(display_bounds.size) )
       local bitmap_bounds = canvas_bounds * XY(1,2)
       local piece_size = ((display_bounds.size * XY(1,2) / zoom) + XY(0.5,0.5))->XY.clamped_high( bitmap.size )
@@ -92,7 +95,7 @@ class VMGImage
         bitmap:Value(bitmap),
         :name,
         :zoom,
-        view_center:{x:view_center.x,y:view_center.y},
+        camera:{x:camera.x,y:camera.y},
         :is_modified
       }
 endClass

@@ -3,14 +3,16 @@ uses UI
 
 class VMGImageView : UIComponent [singleton]
   PROPERTIES
-    image          : VMGImage
-    canvas         : TextCanvas
-    scale_to_fit   = true
-    min_zoom       : Real64
-    max_zoom       : Real64
-    default_zoom   : Real64
-    is_modified    : Logical
-    visible_bounds : Box
+    image            : VMGImage
+    canvas           : TextCanvas
+    scale_to_fit     = true
+    min_zoom         : Real64
+    max_zoom         : Real64
+    default_zoom     : Real64
+    is_modified      : Logical
+    visible_bounds   : Box
+    camera_bounds_tl : RealXY
+    camera_bounds_br : RealXY
 
   METHODS
     method init
@@ -34,7 +36,7 @@ class VMGImageView : UIComponent [singleton]
             if (image.zoom)
               if (image.zoom < min_zoom)
                 image.zoom = min_zoom
-                image.view_center = RealXY(0.5,0.5)
+                image.camera = RealXY(0.5,0.5)
               else
                 new_size = ((image.bitmap.size->RealXY * image.zoom) + RealXY(0.5,0.5))->XY
               endIf
@@ -42,6 +44,12 @@ class VMGImageView : UIComponent [singleton]
               image.zoom = default_zoom
             endIf
           endIf
+
+          local sz = (display_bounds.size * XY(1,2) / image.zoom).clamped_high( image.size ) / image.size
+          camera_bounds_tl = sz / 2
+          camera_bounds_br = RealXY(1,1) - sz/2
+          image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
+
           VMGTitleBar.zoom = image.zoom
           canvas = image.text_canvas( new_size, display_bounds )
           #local display_image = image.bitmap.resized( new_size )
@@ -52,7 +60,7 @@ class VMGImageView : UIComponent [singleton]
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
-          #local pos = Box( display_bounds.center - (sz*image.view_center), sz ).clamped( display_bounds ).top_left
+          #local pos = Box( display_bounds.center - (sz*image.camera), sz ).clamped( display_bounds ).top_left
           local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
@@ -69,10 +77,10 @@ class VMGImageView : UIComponent [singleton]
     method scroll( delta:RealXY )
       if (image)
         if (image.zoom == default_zoom)
-          image.view_center = RealXY(0.5,0.5)
+          image.camera = RealXY(0.5,0.5)
         elseIf (image.zoom)
           delta *= display_bounds.size / (image.bitmap.size * image.zoom)
-          image.view_center = (image.view_center + delta).clamped( 0.0, 1.0 )
+          image.camera = (image.camera + delta).clamped( 0.0, 1.0 )
         endIf
         is_modified = true
         request_redraw
@@ -113,7 +121,7 @@ class VMGImageView : UIComponent [singleton]
           image.zoom /= 2
           if (image.zoom < min_zoom)
             image.zoom = min_zoom
-            image.view_center = RealXY(0.5,0.5)
+            image.camera = RealXY(0.5,0.5)
           endIf
         endIf
         VMGTitleBar.zoom = image.zoom
