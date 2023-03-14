@@ -12,6 +12,7 @@ class VMGUI : ConsoleUI [singleton]
     method init
       prior.init
 
+      #register( CmdLineAnchor )
       register( CmdLineAspect )
       register( CmdLineBG )
       register( CmdLineCopy )
@@ -35,6 +36,9 @@ class VMGUI : ConsoleUI [singleton]
 
     method on( e:KeyEvent )
       VMGState.current.on( e )
+
+    method on_resize
+      VMGImageView.show( VMGImageView.image )
 
     method register( cmd_handler:VMGCmdLineHandler )
       cmd_line_handlers[cmd_handler.keyword] = cmd_handler

@@ -570,10 +570,9 @@ class VMGCmdStack( n:Int32 ) : VMGCmd
         largest_height.consider( (forEach in list).bitmap.height )
         (forEach in list).bitmap.crop( largest_width.value, largest_height.value, Vimage.anchor, Vimage.bg_color )
 
-        local result = list.remove_first.bitmap
-        forEach (image in list)
-          result.blit( image.bitmap, 0, 0, BitmapBlitFn.ALPHA )
-          result = image.bitmap
+        local result = list.remove_last.cloned_bitmap
+        forEach (image in list step -1)
+          image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
         endForEach
 
         local result_image = VMGImage( result )

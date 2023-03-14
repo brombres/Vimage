@@ -157,7 +157,7 @@ class ZoomState : VMGState [singleton]
       return "ZOOM"
 endClass
 
-class EnterCmdState : VMGState
+class EnterCmdLineState : VMGState
   METHODS
     method find_commands( keyword:String )->VMGCmdLineHandler[]
       local cmds = VMGCmdLineHandler[]

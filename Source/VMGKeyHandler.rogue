@@ -43,7 +43,7 @@ class VMGKeyHandlerColon : VMGKeyHandler [singleton]
       Vimage.repeat_count = null
       status = ":"
       VMGUI.command.clear
-      state = EnterCmdState()
+      state = EnterCmdLineState()
 endClass
 
 class VMGKeyHandlerQBuffer : VMGKeyHandler [singleton]
