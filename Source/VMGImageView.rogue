@@ -53,10 +53,10 @@ class VMGImageView : UIComponent [singleton]
           VMGTitleBar.zoom = image.zoom
           canvas = image.text_canvas( new_size, display_bounds )
           #local display_image = image.bitmap.resized( new_size )
-          #canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DEFAULT )
+          #canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
         endIf
 
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DEFAULT) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DARK_GRAY) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
@@ -66,7 +66,7 @@ class VMGImageView : UIComponent [singleton]
         endTemporarily
 
       else
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DEFAULT) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DARK_GRAY) )
 
       endIf
 

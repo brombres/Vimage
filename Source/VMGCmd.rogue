@@ -19,7 +19,7 @@ class VMGCmdAspect( size:XY ) : VMGCmd
   METHODS
     method update_status
       use status = VMGStatusBar
-        status.print "resize "
+        status.print "crop to have aspect ratio "
         status.print size.x
         status.print ':'
         status.print size.y

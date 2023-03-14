@@ -80,7 +80,8 @@ class VMGImage
       endIf
       local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
       piece.resize( piece_size*zoom )
-      cached_text_canvas = ANSIBitmap( piece )->TextCanvas( &bg=CharacterStyle.BG_DEFAULT )
+
+      cached_text_canvas = ANSIBitmap( piece )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
       return cached_text_canvas
 
     method to->String
