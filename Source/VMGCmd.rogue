@@ -160,27 +160,6 @@ class VMGCmdDD : VMGCmd [singleton]
       endIf
 endClass
 
-class VMGCmdNew( size:XY ) : VMGCmd
-  METHODS
-    method update_status
-      status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
-
-    method execute
-      local before_index = 0
-      if (VMGImageList.selected)
-        if local index = VMGImageList.locate( VMGImageList.selected )
-          before_index = index
-        endIf
-      endIf
-
-      local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
-      local image  = VMGImage( bitmap )
-      local item   = VMGImageListItem( image )
-      VMGImageList.insert( item, before_index )
-      VMGImageList.select( item )
-      VMGImageList.request_layout
-endClass
-
 class VMGCmdJoin( dims:XY ) : VMGCmd
   METHODS
     method update_status
@@ -373,6 +352,85 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
       VMGImageView.show( image )
 endClass
 
+class VMGCmdFlipH : VMGCmd [singleton]
+  METHODS
+    method update_status
+      if (VMGImageList.selected)
+        status = "f (flip horizontal)"
+      else
+        status = "f (flip horizontal) [no images]"
+      endIf
+
+    method execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.cloned_bitmap.flip( &h )
+        VMGImageView.mark_modified
+      endIf
+endClass
+
+class VMGCmdFlipV : VMGCmd [singleton]
+  METHODS
+    method update_status
+      if (VMGImageList.selected)
+        status = "F (flip vertical)"
+      else
+        status = "F (flip vertical) [no images]"
+      endIf
+
+    method execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.cloned_bitmap.flip( &v )
+        VMGImageView.mark_modified
+      endIf
+endClass
+
+class VMGCmdNew( size:XY ) : VMGCmd
+  METHODS
+    method update_status
+      status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
+
+    method execute
+      local before_index = 0
+      if (VMGImageList.selected)
+        if local index = VMGImageList.locate( VMGImageList.selected )
+          before_index = index
+        endIf
+      endIf
+
+      local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
+      local image  = VMGImage( bitmap )
+      local item   = VMGImageListItem( image )
+      VMGImageList.insert( item, before_index )
+      VMGImageList.select( item )
+      VMGImageList.request_layout
+endClass
+
+class VMGCmdQuit : VMGCmd [singleton]
+  METHODS
+    method update_status
+      status = "quit"
+
+    method execute
+      if (VMGImageList.selected)
+        if (VMGImageList.count > 1)
+          if (VMGImageList.selected is VMGImageList.last_child)
+            VMGImageList.remove( VMGImageList.selected )
+            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+          else
+            local index = VMGImageList.selected.index
+            VMGImageList.remove( VMGImageList.selected )
+            VMGImageList.select( index )
+          endIf
+        else
+          VMGUI.is_running = false
+        endIf
+      else
+        VMGUI.is_running = false
+      endIf
+endClass
+
 class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
   METHODS
     method update_status
@@ -418,6 +476,44 @@ class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
       endIf
 
       VMGImageView.show( image )
+endClass
+
+class VMGCmdRotateCW : VMGCmd [singleton]
+  METHODS
+    method update_status
+      if (VMGImageList.selected)
+        status = "r (rotate 90º clockwise)"
+      else
+        status = "r (rotate 90º clockwise) [no images]"
+      endIf
+
+    method execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.cloned_bitmap.rotate_90( &cw )
+        img.zoom = 0
+        VMGImageView.mark_modified
+        VMGImageView.min_zoom = 0
+      endIf
+endClass
+
+class VMGCmdRotateCCW : VMGCmd [singleton]
+  METHODS
+    method update_status
+      if (VMGImageList.selected)
+        status = "r (rotate 90º counter-clockwise)"
+      else
+        status = "r (rotate 90º counter-clockwise) [no images]"
+      endIf
+
+    method execute
+      if (VMGImageList.selected)
+        local img = VMGImageList.selected.image
+        img.cloned_bitmap.rotate_90( &ccw )
+        img.zoom = 0
+        VMGImageView.mark_modified
+        VMGImageView.min_zoom = 0
+      endIf
 endClass
 
 class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd

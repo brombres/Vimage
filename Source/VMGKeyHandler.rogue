@@ -185,65 +185,37 @@ endClass
 class VMGKeyHandlerHFlip : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "f (horizontal flip)"
       execute
 
     method on_execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
-        img.bitmap.flip( &h )
-        img.is_modified = true
-        VMGImageView.mark_modified
-      endIf
+      Vimage.execute( VMGCmdFlipH )
 endClass
 
 class VMGKeyHandlerVFlip : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "F (vertical flip)"
       execute
 
     method on_execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
-        img.bitmap.flip( &v )
-        img.is_modified = true
-        VMGImageView.mark_modified
-      endIf
+      Vimage.execute( VMGCmdFlipV )
 endClass
 
 class VMGKeyHandlerRotate90CW : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "r (rotate 90º clockwise)"
       execute
 
     method on_execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
-        img.bitmap.rotate_90( &cw )
-        img.is_modified = true
-        img.zoom = 0
-        VMGImageView.mark_modified
-        VMGImageView.min_zoom = 0
-      endIf
+      Vimage.execute( VMGCmdRotateCW )
 endClass
 
 class VMGKeyHandlerRotate90CCW : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
-      status = "R (rotate 90º counter-clockwise)"
       execute
 
     method on_execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
-        img.bitmap.rotate_90( &ccw )
-        img.is_modified = true
-        img.zoom = 0
-        VMGImageView.mark_modified
-        VMGImageView.min_zoom = 0
-      endIf
+      Vimage.execute( VMGCmdRotateCCW )
 endClass
 
 class VMGKeyHandlerStack : VMGKeyHandler [singleton]

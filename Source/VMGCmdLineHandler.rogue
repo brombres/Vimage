@@ -419,6 +419,25 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
       return "$x$"(default_size.x,default_size.y)
 endClass
 
+class CmdLineQuit : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "quit"
+
+  METHODS
+    method execute( args:String )
+      execute( VMGCmdQuit )
+
+endClass
+
+class CmdLineQuitAll : VMGCmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "qall"
+
+  METHODS
+    method execute( args:String )
+
+endClass
+
 class CmdLineSplit : VMGCmdLineHandler [singleton]
   PROPERTIES
     keyword = "split"
@@ -483,14 +502,14 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
 
   METHODS
     method execute( args:String )
-      if (not VMGImageView.image)
+      if (not VMGImageList.selected)
         status = "w [no current image]"
         return
       endIf
 
       if (args == "")
-        if (VMGImageView.image.file)
-          args = VMGImageView.image.file.value.filepath
+        if (VMGImageList.selected.image.file)
+          args = VMGImageList.selected.image.file.value.filepath
         else
           status = "w [missing filepath]"
           return
@@ -505,10 +524,10 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
       endIf
 
       local file = File( args )
-      VMGImageView.image.file = file
-      VMGImageView.image.name = file.filepath
-      VMGImageView.request_redraw
-      local bitmap = VMGImageView.image.bitmap
+      local image = VMGImageList.selected.image
+      image.file = file
+      image.name = file.filepath
+      local bitmap = image.bitmap
       which (File(args).extension.to_lowercase)
         case "png"
           file.save( bitmap.to_png_bytes )
@@ -516,6 +535,8 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
           file.save( bitmap.to_jpeg_bytes )
       endWhich
       status = ''"$" [$x$, $ bytes] written''(args,bitmap.width,bitmap.height,file.size.format(","))
+
+      image.is_modified = false
 
     method syntax->String
       if (VMGUI.command.after_first(' ').count?) return "filepath.[png|jpg]"

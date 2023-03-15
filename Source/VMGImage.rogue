@@ -40,15 +40,29 @@ class VMGImage
     method cloned_bitmap->Bitmap
       # Editing commands operate on copies of bitmap objects for undo chain purposes.
       bitmap .= cloned
+      is_modified = true
       return bitmap
 
     method compact_name->String
-      local dims = "[$x$]"(bitmap.width,bitmap.height)
-      if (@name)
-        local brief_name = File(@name).filename.before_last('.')
-        return "$ $"(brief_name,dims)
+      local result = String()
+      result.print( which{is_modified:'*'||' '} )
+      if (name)
+        result.print File(name).filename.before_last('.')
+        result.print ' '
       endIf
-      return dims
+      result.print '['
+      result.print bitmap.width
+      result.print 'x'
+      result.print bitmap.height
+      result.print ']'
+      return result
+
+
+    method set_is_modified( setting:Logical )
+      if (is_modified != setting)
+        if (this is VMGImageList.selected.image) VMGImageList.selected.request_redraw
+      endIf
+      @is_modified = setting
 
     method size->XY
       return bitmap.size
@@ -85,9 +99,13 @@ class VMGImage
       return cached_text_canvas
 
     method to->String
-      local dims = "[$x$]"(bitmap.width,bitmap.height)
-      if (name) return "$ $"(name,dims)
-      return dims
+      if (name)
+        return "$$ [$x$]"(which{is_modified:"*"||""},name,bitmap.width,bitmap.height)
+      elseIf (is_modified)
+        return "*[$x$]"(bitmap.width,bitmap.height)
+      else
+        return "[$x$]"(bitmap.width,bitmap.height)
+      endIf
 
     method to->Value
       return ...
