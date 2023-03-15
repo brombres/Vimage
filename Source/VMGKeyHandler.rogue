@@ -1,3 +1,5 @@
+module Vimage
+
 class VMGKeyHandler
   PROPERTIES
     handler   : Function(KeyEvent)

@@ -1,3 +1,4 @@
+module Vimage
 uses Console/ConsoleUI
 uses UI
 

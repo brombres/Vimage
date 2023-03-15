@@ -1,3 +1,4 @@
+module Vimage
 uses UI
 
 class VMGImageList : UIList [singleton]

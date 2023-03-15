@@ -1,3 +1,4 @@
+module Vimage
 uses Console/ANSIBitmap
 uses UI
 

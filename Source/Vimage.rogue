@@ -68,10 +68,13 @@ $define DATE    "February 19, 2023"
 
 $requireRogue "2.12"
 
+module Vimage
+
 uses Console/CommandLineParser
 uses Bitmap
 uses Bitmap/IO
 uses Epilog
+uses UI
 
 $include VMGCmd
 $include VMGCmdLineHandler

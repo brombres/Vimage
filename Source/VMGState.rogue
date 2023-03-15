@@ -1,3 +1,5 @@
+module Vimage
+
 class VMGState
   DEFINITIONS
     SHIFT   = (1:<<:16)
@@ -108,10 +110,10 @@ class ZoomState : VMGState [singleton]
       key_handlers[Keycode.D]               = VMGKeyHandler( DState )
       key_handlers[Keycode.F]               = VMGKeyHandlerHFlip
       key_handlers[Keycode.F+SHIFT]         = VMGKeyHandlerVFlip
-      key_handlers[Keycode.H]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(-0.5,0)) )
-      key_handlers[Keycode.J]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,0.5)) )
-      key_handlers[Keycode.K]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0,-0.5)) )
-      key_handlers[Keycode.L]               = VMGKeyHandler( (e) => VMGImageView.scroll(RealXY(0.5,0)) )
+      key_handlers[Keycode.H]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(-0.5,0)) )
+      key_handlers[Keycode.J]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0,0.5)) )
+      key_handlers[Keycode.K]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0,-0.5)) )
+      key_handlers[Keycode.L]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0.5,0)) )
       key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
       key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
       key_handlers[Keycode.P]               = VMGKeyHandlerPaste

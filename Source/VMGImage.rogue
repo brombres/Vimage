@@ -1,3 +1,4 @@
+module Vimage
 uses Bitmap
 
 class VMGImage
