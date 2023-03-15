@@ -163,11 +163,11 @@ class EnterCmdLineState : VMGState
   METHODS
     method find_commands( keyword:String )->VMGCmdLineHandler[]
       local cmds = VMGCmdLineHandler[]
-      forEach (cmd in VMGUI.cmd_line_handlers)
+      forEach (cmd in VimageUI.cmd_line_handlers)
         if (cmd.keyword == keyword) cmds.add( cmd )
       endForEach
       if (cmds.is_empty)
-        forEach (cmd in VMGUI.cmd_line_handlers)
+        forEach (cmd in VimageUI.cmd_line_handlers)
           if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
         endForEach
       endIf
@@ -178,41 +178,41 @@ class EnterCmdLineState : VMGState
         if (e.is_press(Keycode.ESCAPE))
           cancel
         elseIf (e.unicode >= 33 and e.unicode != 127)
-          VMGUI.command.print e.unicode
-          update_status( VMGUI.command )
+          VimageUI.command.print e.unicode
+          update_status( VimageUI.command )
         elseIf (e.keycode == Keycode.BACKSPACE or e.keycode == Keycode.DELETE)
-          if (VMGUI.command.count)
-            VMGUI.command.remove_last
-            update_status( VMGUI.command )
+          if (VimageUI.command.count)
+            VimageUI.command.remove_last
+            update_status( VimageUI.command )
           endIf
         elseIf (e.keycode == Keycode.SPACE or e.keycode == Keycode.TAB or e.keycode == Keycode.ENTER)
-          if (VMGUI.command.count == 0)
+          if (VimageUI.command.count == 0)
             if (e.keycode == Keycode.ENTER) cancel
             return
           endIf
 
-          local cmds = find_commands( VMGUI.command.before_first(' ') )
+          local cmds = find_commands( VimageUI.command.before_first(' ') )
           which (cmds.count)
             case 0
               if (e.keycode == Keycode.SPACE)
-                VMGUI.command.print ' '
+                VimageUI.command.print ' '
               elseIf (e.keycode != Keycode.TAB)
                 state = ImageListState
                 set_status( "[invalid command]" )
               endIf
 
             case 1
-              local keyword = VMGUI.command.before_first(' ')
-              local args = VMGUI.command.after_first( ' ' ).trimmed
+              local keyword = VimageUI.command.before_first(' ')
+              local args = VimageUI.command.after_first( ' ' ).trimmed
 
               if (keyword == cmds.first.keyword)
-                VMGUI.command.print ' '
+                VimageUI.command.print ' '
               else
-                VMGUI.command.clear
-                VMGUI.command.print cmds.first.keyword
-                VMGUI.command.print ' '
-                VMGUI.command.print args
-                update_status( VMGUI.command )
+                VimageUI.command.clear
+                VimageUI.command.print cmds.first.keyword
+                VimageUI.command.print ' '
+                VimageUI.command.print args
+                update_status( VimageUI.command )
               endIf
 
               if (e.keycode == Keycode.ENTER)

@@ -85,7 +85,7 @@ $include VMGKeyHandler
 $include VMGState
 $include VMGStatusBar
 $include VMGTitleBar
-$include VMGUI
+$include VimageUI
 
 #nativeHeader @|#include "../Source/ObjC-Interface.h"
 
@@ -129,7 +129,7 @@ class Vimage [singleton]
         VMGImageList.select( VMGImageList.first_child->(as VMGImageListItem) )
       endIf
 
-      VMGUI.run
+      VimageUI.run
 
     method execute( cmd )
       save_undo

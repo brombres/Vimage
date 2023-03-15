@@ -44,7 +44,7 @@ class VMGKeyHandlerColon : VMGKeyHandler [singleton]
     method on( e:KeyEvent )
       Vimage.repeat_count = null
       status = ":"
-      VMGUI.command.clear
+      VimageUI.command.clear
       state = EnterCmdLineState()
 endClass
 
@@ -52,7 +52,7 @@ class VMGKeyHandlerQBuffer : VMGKeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "q (quit)"
-      VMGUI.is_running = false
+      VimageUI.is_running = false
 endClass
 
 class VMGKeyHandlerJBuffer : VMGKeyHandler [singleton]

@@ -414,7 +414,7 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
       return VMGImageView.size * XY(1,2)
 
     method syntax->String
-      if (VMGUI.command.after_first(' ').count?) return "WxH"
+      if (VimageUI.command.after_first(' ').count?) return "WxH"
 
       localize default_size
       return "$x$"(default_size.x,default_size.y)
@@ -540,7 +540,7 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
       image.is_modified = false
 
     method syntax->String
-      if (VMGUI.command.after_first(' ').count?) return "filepath.[png|jpg]"
+      if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg]"
 
       if (VMGImageView.image and VMGImageView.image.file)
         return "[$]"(VMGImageView.image.file.value.filepath)

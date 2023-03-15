@@ -425,10 +425,10 @@ class VMGCmdQuit : VMGCmd [singleton]
             VMGImageList.select( index )
           endIf
         else
-          VMGUI.is_running = false
+          VimageUI.is_running = false
         endIf
       else
-        VMGUI.is_running = false
+        VimageUI.is_running = false
       endIf
 endClass
 

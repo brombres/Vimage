@@ -75,7 +75,7 @@ class VMGImageList : UIList [singleton]
       selected = item
       if (item)
         item.request_redraw
-        VMGUI.show( item.image )
+        VimageUI.show( item.image )
         localize scroll_view
         if (scroll_view)
           local item_bounds = item.display_bounds
@@ -94,7 +94,7 @@ class VMGImageList : UIList [singleton]
           #endIf
         endIf
       else
-        VMGUI.show( null )
+        VimageUI.show( null )
       endIf
 
     method to->Value
