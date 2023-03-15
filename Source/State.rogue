@@ -1,6 +1,6 @@
 module Vimage
 
-class VMGState
+class State
   DEFINITIONS
     SHIFT   = (1:<<:16)
     CONTROL = (2:<<:16)
@@ -8,21 +8,21 @@ class VMGState
     OS      = (8:<<:16)
 
   GLOBAL PROPERTIES
-    current = VMGState()
+    current = State()
 
   GLOBAL METHODS
-    method change_state( new_state:VMGState )
+    method change_state( new_state:State )
       current.set_state( new_state )
 
   PROPERTIES
-    key_handlers = [Int32:VMGKeyHandler]
+    key_handlers = [Int32:KeyHandler]
 
   METHODS
     method cancel
       state = ImageListState
       set_status( "[cancelled]", &dim )
 
-    method execute( cmd:VMGCmd )
+    method execute( cmd:Cmd )
       Vimage.execute( cmd )
 
     method on( e:KeyEvent )
@@ -39,13 +39,13 @@ class VMGState
     method on_leave
       noAction
 
-    method set_state( new_state:VMGState )
+    method set_state( new_state:State )
       current.on_leave
       current = new_state
       current.on_enter
 
     method set_status( text:String, &dim )
-      use builder = VMGStatusBar
+      use builder = StatusBar
         if (dim) builder.style.dim
         builder.print text
         if (dim) builder.style.dim_off
@@ -55,29 +55,29 @@ class VMGState
       return ""
 endClass
 
-class ImageListState : VMGState [singleton]
+class ImageListState : State [singleton]
   METHODS
     method init
-      key_handlers[Keycode.SEMICOLON+SHIFT] = VMGKeyHandlerColon
-      key_handlers[Keycode.D]               = VMGKeyHandler( DState )
-      key_handlers[Keycode.F]               = VMGKeyHandlerHFlip
-      key_handlers[Keycode.F+SHIFT]         = VMGKeyHandlerVFlip
-      key_handlers[Keycode.J]               = VMGKeyHandlerJBuffer
-      key_handlers[Keycode.K]               = VMGKeyHandlerKBuffer
-      key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
-      key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
-      key_handlers[Keycode.P]               = VMGKeyHandlerPaste
-      key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
-      key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
-      key_handlers[Keycode.J+SHIFT]         = VMGKeyHandlerShiftJBuffer
-      key_handlers[Keycode.K+SHIFT]         = VMGKeyHandlerShiftKBuffer
-      key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
-      key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
-      key_handlers[Keycode.T]               = VMGKeyHandlerStack
-      key_handlers[Keycode.U]               = VMGKeyHandlerUndo
-      key_handlers[Keycode.Y]               = VMGKeyHandler( YState )
-      key_handlers[Keycode.Z]               = VMGKeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
+      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
+      key_handlers[Keycode.D]               = KeyHandler( DState )
+      key_handlers[Keycode.F]               = KeyHandlerHFlip
+      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
+      key_handlers[Keycode.J]               = KeyHandlerJBuffer
+      key_handlers[Keycode.K]               = KeyHandlerKBuffer
+      key_handlers[Keycode.N]               = KeyHandlerJoinH
+      key_handlers[Keycode.N+SHIFT]         = KeyHandlerJoinV
+      key_handlers[Keycode.P]               = KeyHandlerPaste
+      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
+      key_handlers[Keycode.J+SHIFT]         = KeyHandlerShiftJBuffer
+      key_handlers[Keycode.K+SHIFT]         = KeyHandlerShiftKBuffer
+      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
+      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
+      key_handlers[Keycode.T]               = KeyHandlerStack
+      key_handlers[Keycode.U]               = KeyHandlerUndo
+      key_handlers[Keycode.Y]               = KeyHandler( YState )
+      key_handlers[Keycode.Z]               = KeyHandlerZ
+      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -87,10 +87,10 @@ class ImageListState : VMGState [singleton]
             Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
           else
             Vimage.repeat_count = digit
-            VMGStatusBar.builder.clear
+            StatusBar.builder.clear
           endIf
-          VMGStatusBar.builder.print digit
-          VMGStatusBar.request_redraw
+          StatusBar.builder.print digit
+          StatusBar.request_redraw
           return
         endIf
       endIf
@@ -103,29 +103,29 @@ class ImageListState : VMGState [singleton]
       return "IMAGE LIST"
 endClass
 
-class ZoomState : VMGState [singleton]
+class ZoomState : State [singleton]
   METHODS
     method init
-      key_handlers[Keycode.SEMICOLON+SHIFT] = VMGKeyHandlerColon
-      key_handlers[Keycode.D]               = VMGKeyHandler( DState )
-      key_handlers[Keycode.F]               = VMGKeyHandlerHFlip
-      key_handlers[Keycode.F+SHIFT]         = VMGKeyHandlerVFlip
-      key_handlers[Keycode.H]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(-0.5,0)) )
-      key_handlers[Keycode.J]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0,0.5)) )
-      key_handlers[Keycode.K]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0,-0.5)) )
-      key_handlers[Keycode.L]               = VMGKeyHandler( (e) => Vimage::VMGImageView.scroll(RealXY(0.5,0)) )
-      key_handlers[Keycode.N]               = VMGKeyHandlerJoinH
-      key_handlers[Keycode.N+SHIFT]         = VMGKeyHandlerJoinV
-      key_handlers[Keycode.P]               = VMGKeyHandlerPaste
-      key_handlers[Keycode.PERIOD]          = VMGKeyHandlerPeriod
-      key_handlers[Keycode.Q]               = VMGKeyHandlerQBuffer
-      key_handlers[Keycode.R]               = VMGKeyHandlerRotate90CW
-      key_handlers[Keycode.R+SHIFT]         = VMGKeyHandlerRotate90CCW
-      key_handlers[Keycode.U]               = VMGKeyHandlerUndo
-      key_handlers[Keycode.Y]               = VMGKeyHandler( YState )
-      key_handlers[Keycode.Z]               = VMGKeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT]         = VMGKeyHandlerShiftZ
-      key_handlers[Keycode.ESCAPE]          = VMGKeyHandler( ImageListState )
+      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
+      key_handlers[Keycode.D]               = KeyHandler( DState )
+      key_handlers[Keycode.F]               = KeyHandlerHFlip
+      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
+      key_handlers[Keycode.H]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(-0.5,0)) )
+      key_handlers[Keycode.J]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,0.5)) )
+      key_handlers[Keycode.K]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,-0.5)) )
+      key_handlers[Keycode.L]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0.5,0)) )
+      key_handlers[Keycode.N]               = KeyHandlerJoinH
+      key_handlers[Keycode.N+SHIFT]         = KeyHandlerJoinV
+      key_handlers[Keycode.P]               = KeyHandlerPaste
+      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
+      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
+      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
+      key_handlers[Keycode.U]               = KeyHandlerUndo
+      key_handlers[Keycode.Y]               = KeyHandler( YState )
+      key_handlers[Keycode.Z]               = KeyHandlerZ
+      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
+      key_handlers[Keycode.ESCAPE]          = KeyHandler( ImageListState )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -135,10 +135,10 @@ class ZoomState : VMGState [singleton]
             Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
           else
             Vimage.repeat_count = digit
-            VMGStatusBar.builder.clear
+            StatusBar.builder.clear
           endIf
-          VMGStatusBar.builder.print digit
-          VMGStatusBar.request_redraw
+          StatusBar.builder.print digit
+          StatusBar.request_redraw
           return
         endIf
       endIf
@@ -146,23 +146,23 @@ class ZoomState : VMGState [singleton]
 
     method on_enter
       Vimage.repeat_count = null
-      VMGImageList.is_dim = true
-      VMGImageList.request_redraw
-      VMGStatusBar.request_redraw
+      ImageList.is_dim = true
+      ImageList.request_redraw
+      StatusBar.request_redraw
 
     method on_leave
-      VMGImageList.is_dim = false
-      VMGImageList.request_redraw
-      VMGStatusBar.request_redraw
+      ImageList.is_dim = false
+      ImageList.request_redraw
+      StatusBar.request_redraw
 
     method state_name->String
       return "ZOOM"
 endClass
 
-class EnterCmdLineState : VMGState
+class EnterCmdLineState : State
   METHODS
-    method find_commands( keyword:String )->VMGCmdLineHandler[]
-      local cmds = VMGCmdLineHandler[]
+    method find_commands( keyword:String )->CmdLineHandler[]
+      local cmds = CmdLineHandler[]
       forEach (cmd in VimageUI.cmd_line_handlers)
         if (cmd.keyword == keyword) cmds.add( cmd )
       endForEach
@@ -227,7 +227,7 @@ class EnterCmdLineState : VMGState
       endIf
 
     method update_status( cmd_line:String )
-      use builder = VMGStatusBar
+      use builder = StatusBar
         builder.print ':'
 
         local keyword = cmd_line.before_first(' ')
@@ -283,10 +283,10 @@ class EnterCmdLineState : VMGState
       endUse
 endClass
 
-class DState : VMGState [singleton]
+class DState : State [singleton]
   METHODS
     method on_enter
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print 'd'
         status.style.dim
         status.print "[d]"
@@ -298,7 +298,7 @@ class DState : VMGState [singleton]
         if (e.keycode == Keycode.ESCAPE)
           cancel
         elseIf (e.unicode == 'd')
-          execute( VMGCmdDD )
+          execute( CmdDD )
           state = ImageListState
         else
           set_status( "[invalid command 'd$']"(e.unicode) )
@@ -307,10 +307,10 @@ class DState : VMGState [singleton]
       endIf
 endClass
 
-class YState : VMGState [singleton]
+class YState : State [singleton]
   METHODS
     method on_enter
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print 'y'
         status.style.dim
         status.print "[p|y]"
@@ -322,10 +322,10 @@ class YState : VMGState [singleton]
         if (e.keycode == Keycode.ESCAPE)
           cancel
         elseIf (e.unicode == 'y')
-          execute( VMGCmdYY )
+          execute( CmdYY )
           state = ImageListState
         elseIf (e.unicode == 'p')
-          execute( VMGCmdYP )
+          execute( CmdYP )
           state = ImageListState
         else
           set_status( "[invalid command 'y$']"(e.unicode) )

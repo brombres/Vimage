@@ -1,12 +1,12 @@
 module Vimage
 uses UI
 
-class VMGImageList : UIList [singleton]
+class ImageList : UIList [singleton]
   DEFINITIONS
     FIXED_WIDTH = 21
 
   PROPERTIES
-    selected : VMGImageListItem
+    selected : ImageListItem
     is_dim   : Logical
 
   METHODS
@@ -14,8 +14,8 @@ class VMGImageList : UIList [singleton]
       prior.init
       on_resize
 
-    method add( image:VMGImage )
-      add( VMGImageListItem(image) )
+    method add( image:Image )
+      add( ImageListItem(image) )
       request_layout
 
     method after_draw
@@ -27,8 +27,8 @@ class VMGImageList : UIList [singleton]
       if (e.is_consumed) return
       handle( e )
 
-    method insert( image:VMGImage, before_index=0:Int32 )
-      insert( VMGImageListItem(image), before_index )
+    method insert( image:Image, before_index=0:Int32 )
+      insert( ImageListItem(image), before_index )
       request_layout
 
     method on_draw
@@ -43,10 +43,10 @@ class VMGImageList : UIList [singleton]
       scroll_view.request_redraw
       }#
 
-    method scroll_view->VMGImageListScrollView
+    method scroll_view->ImageListScrollView
       local view = parent
       while (view)
-        if local result = view->(as VMGImageListScrollView)
+        if local result = view->(as ImageListScrollView)
           return result
         endIf
         view .= parent
@@ -54,12 +54,12 @@ class VMGImageList : UIList [singleton]
       return null
 
     method select( index:Int32 )
-      local item = this[index]->(as VMGImageListItem)
+      local item = this[index]->(as ImageListItem)
       if (item) select( item )
 
-    method select( image:VMGImage )
+    method select( image:Image )
       forEach (child in children)
-        if local item = child->(as VMGImageListItem)
+        if local item = child->(as ImageListItem)
           if (item.image is image)
             select( item )
             return
@@ -67,7 +67,7 @@ class VMGImageList : UIList [singleton]
         endIf
       endForEach
 
-    method select( item:VMGImageListItem ) [preferred]
+    method select( item:ImageListItem ) [preferred]
       if (selected)
         selected.deselect
         selected.request_redraw
@@ -106,7 +106,7 @@ class VMGImageList : UIList [singleton]
 
       local images = @[]
       forEach (child in children)
-        images.add( child->(as VMGImageListItem).image->Value )
+        images.add( child->(as ImageListItem).image->Value )
       endForEach
       result//images = images
 
@@ -116,15 +116,15 @@ class VMGImageList : UIList [singleton]
       clear
       is_dim = state//is_dim
       forEach (image_info in state//images)
-        add( VMGImageListItem(VMGImage(image_info)) )
+        add( ImageListItem(Image(image_info)) )
       endForEach
       if (state//selected_index < count) select( state//selected_index->Int32 )
 
-endClass  # VMGImageList
+endClass  # ImageList
 
-class VMGImageListItem : UIComponent
+class ImageListItem : UIComponent
   PROPERTIES
-    image : VMGImage
+    image : Image
 
   METHODS
     method init( image )
@@ -133,16 +133,16 @@ class VMGImageListItem : UIComponent
     method deselect
 
     method index->Int32
-      return which{ VMGImageList.locate(this) || -1 }
+      return which{ ImageList.locate(this) || -1 }
 
     method is_selected->Logical
-      return VMGImageList.selected is this
+      return ImageList.selected is this
 
     method on( e:PointerEvent )
       if (this.contains(e))
         if (e.is_release)
-          VMGImageList.select( this )
-          VMGStatusBar.text = "Select $"(image)
+          ImageList.select( this )
+          StatusBar.text = "Select $"(image)
         endIf
       endIf
 
@@ -153,18 +153,18 @@ class VMGImageListItem : UIComponent
         ConsoleUICanvas.cursor = display_bounds.position
         if (is_selected) ConsoleUICanvas.style.inverse
         ConsoleUICanvas.print image.compact_name
-        loop (VMGImageList.FIXED_WIDTH) ConsoleUICanvas.print ' '
+        loop (ImageList.FIXED_WIDTH) ConsoleUICanvas.print ' '
         if (is_selected) ConsoleUICanvas.style.inverse_off
       endTemporarily
 
     method on_resize
-      fixed_size = XY( VMGImageList.FIXED_WIDTH, 1 )
+      fixed_size = XY( ImageList.FIXED_WIDTH, 1 )
 endClass
 
-class VMGImageListScrollView : UIScrollView
+class ImageListScrollView : UIScrollView
   METHODS
     method after_draw
-      local bounds = display_bounds.with_width(1) + XY(VMGImageList.FIXED_WIDTH-1,0)
+      local bounds = display_bounds.with_width(1) + XY(ImageList.FIXED_WIDTH-1,0)
       ConsoleUICanvas.fill( bounds, '\[2502]' )
 
     method on_draw

@@ -1,7 +1,7 @@
 module Vimage
 uses Geometry
 
-class VMGCmdLineHandler
+class CmdLineHandler
   PROPERTIES
     keyword : String
     syntax  : String
@@ -10,7 +10,7 @@ class VMGCmdLineHandler
     method execute( args:String )
       set_status( "[Unimplemented command: $]"(keyword.appending(args)) )
 
-    method execute( cmd:VMGCmd )
+    method execute( cmd:Cmd )
       Vimage.execute( cmd )
 
     method color_string( color:Color )->String
@@ -172,11 +172,11 @@ class VMGCmdLineHandler
       set_status( "$ [missing or invalid size specification '$']"(keyword,arg) )
       return (width:null,height:null)
 
-    method set_state( new_state:VMGState )
-      VMGState.current.change_state( new_state )
+    method set_state( new_state:State )
+      State.current.change_state( new_state )
 
     method set_status( text:String, &dim )
-      use builder = VMGStatusBar
+      use builder = StatusBar
         if (dim) builder.style.dim
         builder.print text
         if (dim) builder.style.dim_off
@@ -186,7 +186,7 @@ class VMGCmdLineHandler
       return @syntax
 endClass
 
-class CmdLineAnchor : VMGCmdLineHandler [singleton]
+class CmdLineAnchor : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "anchor"
     syntax = "[center|top|bottom|left|right|c|t|b|l|r]+"
@@ -196,7 +196,7 @@ class CmdLineAnchor : VMGCmdLineHandler [singleton]
       if local anchor = parse_anchor( args )
         Vimage.anchor = anchor
 
-        use status = VMGStatusBar
+        use status = StatusBar
           status.print "anchor"
           if (Vimage.anchor.position == RealXY(0.5,0.5))
             status.print " center"
@@ -214,21 +214,21 @@ class CmdLineAnchor : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
-class CmdLineAspect : VMGCmdLineHandler [singleton]
+class CmdLineAspect : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "aspect"
 
   METHODS
     method execute( args:String )
       if local size = parse_ratio( args )
-        execute( VMGCmdAspect(size) )
+        execute( CmdAspect(size) )
       else
         status = "aspect [missing or invalid size specification]"
       endIf
 
     method syntax->String
-      if (not VMGImageList.selected) return "WxH"
-      local bitmap = VMGImageList.selected.image.bitmap
+      if (not ImageList.selected) return "WxH"
+      local bitmap = ImageList.selected.image.bitmap
       local w = bitmap.width
       local h = bitmap.height
 
@@ -268,7 +268,7 @@ class CmdLineAspect : VMGCmdLineHandler [singleton]
 
 endClass
 
-class CmdLineBG : VMGCmdLineHandler [singleton]
+class CmdLineBG : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
     syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
@@ -281,7 +281,7 @@ class CmdLineBG : VMGCmdLineHandler [singleton]
       endIf
 endClass
 
-class CmdLineCopy : VMGCmdLineHandler [singleton]
+class CmdLineCopy : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "copy"
     syntax  = "source:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
@@ -293,7 +293,7 @@ class CmdLineCopy : VMGCmdLineHandler [singleton]
           local a = parse_channels( args.first )
           local b = parse_channels( args.last, &allow_multiple )
           if (not a or not b) return
-          execute( VMGCmdCopy(a,b) )
+          execute( CmdCopy(a,b) )
         else
           status = "copy [expected <source-channel> <destination-channels>]"
         endIf
@@ -323,7 +323,7 @@ class CmdLineCopy : VMGCmdLineHandler [singleton]
       return args
 endClass
 
-class CmdLineCrop : VMGCmdLineHandler [singleton]
+class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
     syntax  = "[WxH|Wx|xH]"
@@ -332,14 +332,14 @@ class CmdLineCrop : VMGCmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( VMGCmdCrop(w,h) )
+        execute( CmdCrop(w,h) )
       else
         status = "crop [missing or invalid size specification]"
       endIf
 
 endClass
 
-class CmdLineFill : VMGCmdLineHandler [singleton]
+class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"
     syntax  = "[WxH|Wx|xH]"
@@ -348,13 +348,13 @@ class CmdLineFill : VMGCmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( VMGCmdFill(w,h) )
+        execute( CmdFill(w,h) )
       else
         status = "fill [missing or invalid size specification]"
       endIf
 endClass
 
-class CmdLineFit : VMGCmdLineHandler [singleton]
+class CmdLineFit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fit"
     syntax  = "[WxH|Wx|xH]"
@@ -363,13 +363,13 @@ class CmdLineFit : VMGCmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( VMGCmdFit(w,h) )
+        execute( CmdFit(w,h) )
       else
         status = "fit [missing or invalid size specification]"
       endIf
 endClass
 
-class CmdLineJoin : VMGCmdLineHandler [singleton]
+class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"
     syntax  = "[h|v|WxH]"
@@ -377,17 +377,17 @@ class CmdLineJoin : VMGCmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if (args == "h")
-        execute( VMGCmdJoin(XY(2,1)) )
+        execute( CmdJoin(XY(2,1)) )
       elseIf (args == "v")
-        execute( VMGCmdJoin(XY(1,2)) )
+        execute( CmdJoin(XY(1,2)) )
       else
         if local size = parse_size( args )
-          execute( VMGCmdJoin(size) )
+          execute( CmdJoin(size) )
         endIf
       endIf
 endClass
 
-class CmdLineNew : VMGCmdLineHandler [singleton]
+class CmdLineNew : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"
 
@@ -403,15 +403,15 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
         endIf
       endIf
 
-      execute( VMGCmdNew(sz) )
+      execute( CmdNew(sz) )
 
     method default_size->XY
-      if local selected = VMGImageList.selected
+      if local selected = ImageList.selected
         if local image = selected.image
           return image.bitmap.size
         endIf
       endIf
-      return VMGImageView.size * XY(1,2)
+      return ImageView.size * XY(1,2)
 
     method syntax->String
       if (VimageUI.command.after_first(' ').count?) return "WxH"
@@ -420,17 +420,17 @@ class CmdLineNew : VMGCmdLineHandler [singleton]
       return "$x$"(default_size.x,default_size.y)
 endClass
 
-class CmdLineQuit : VMGCmdLineHandler [singleton]
+class CmdLineQuit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "quit"
 
   METHODS
     method execute( args:String )
-      execute( VMGCmdQuit )
+      execute( CmdQuit )
 
 endClass
 
-class CmdLineQuitAll : VMGCmdLineHandler [singleton]
+class CmdLineQuitAll : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "qall"
 
@@ -439,7 +439,7 @@ class CmdLineQuitAll : VMGCmdLineHandler [singleton]
 
 endClass
 
-class CmdLineSplit : VMGCmdLineHandler [singleton]
+class CmdLineSplit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "split"
     syntax  = "WxH"
@@ -447,11 +447,11 @@ class CmdLineSplit : VMGCmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if local size = parse_size( args )
-        execute( VMGCmdSplit(size) )
+        execute( CmdSplit(size) )
       endIf
 endClass
 
-class CmdLineResize : VMGCmdLineHandler [singleton]
+class CmdLineResize : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "resize"
     syntax  = "[WxH|Wx|xH]"
@@ -460,13 +460,13 @@ class CmdLineResize : VMGCmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( VMGCmdResize(w,h) )
+        execute( CmdResize(w,h) )
       else
         status = "resize [missing or invalid size specification]"
       endIf
 endClass
 
-class CmdLineSwap : VMGCmdLineHandler [singleton]
+class CmdLineSwap : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "swap"
     syntax  = "[a|r|g|b] [a|r|g|b]"
@@ -474,7 +474,7 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       local (a,b) = parse_channels( args )
-      execute( VMGCmdSwap(a,b) )
+      execute( CmdSwap(a,b) )
 
     method parse_channels( args:String )->(Int32,Int32)
       # Returns a channel index pair. Each value:
@@ -497,20 +497,20 @@ class CmdLineSwap : VMGCmdLineHandler [singleton]
 endClass
 
 
-class CmdLineWrite : VMGCmdLineHandler [singleton]
+class CmdLineWrite : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "w"
 
   METHODS
     method execute( args:String )
-      if (not VMGImageList.selected)
+      if (not ImageList.selected)
         status = "w [no current image]"
         return
       endIf
 
       if (args == "")
-        if (VMGImageList.selected.image.file)
-          args = VMGImageList.selected.image.file.value.filepath
+        if (ImageList.selected.image.file)
+          args = ImageList.selected.image.file.value.filepath
         else
           status = "w [missing filepath]"
           return
@@ -525,7 +525,7 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
       endIf
 
       local file = File( args )
-      local image = VMGImageList.selected.image
+      local image = ImageList.selected.image
       image.file = file
       image.name = file.filepath
       local bitmap = image.bitmap
@@ -542,8 +542,8 @@ class CmdLineWrite : VMGCmdLineHandler [singleton]
     method syntax->String
       if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg]"
 
-      if (VMGImageView.image and VMGImageView.image.file)
-        return "[$]"(VMGImageView.image.file.value.filepath)
+      if (ImageView.image and ImageView.image.file)
+        return "[$]"(ImageView.image.file.value.filepath)
       else
         return "filepath.[png|jpg]"
       endIf

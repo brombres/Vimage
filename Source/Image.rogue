@@ -1,7 +1,7 @@
 module Vimage
 uses Bitmap
 
-class VMGImage
+class Image
   PROPERTIES
     file        : File?
     bitmap      : Bitmap
@@ -61,7 +61,7 @@ class VMGImage
 
     method set_is_modified( setting:Logical )
       if (is_modified != setting)
-        if (this is VMGImageList.selected.image) VMGImageList.selected.request_redraw
+        if (this is ImageList.selected.image) ImageList.selected.request_redraw
       endIf
       @is_modified = setting
 

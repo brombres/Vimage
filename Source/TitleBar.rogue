@@ -1,9 +1,9 @@
 module Vimage
 uses UI
 
-class VMGTitleBar : UIComponent [singleton]
+class TitleBar : UIComponent [singleton]
   PROPERTIES
-    image : VMGImage
+    image : Image
     zoom  : Real64
 
   METHODS

@@ -2,9 +2,9 @@ module Vimage
 uses Console/ANSIBitmap
 uses UI
 
-class VMGImageView : UIComponent [singleton]
+class ImageView : UIComponent [singleton]
   PROPERTIES
-    image            : VMGImage
+    image            : Image
     canvas           : TextCanvas
     scale_to_fit     = true
     min_zoom         : Real64
@@ -51,7 +51,7 @@ class VMGImageView : UIComponent [singleton]
           camera_bounds_br = RealXY(1,1) - sz/2
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
-          VMGTitleBar.zoom = image.zoom
+          TitleBar.zoom = image.zoom
           canvas = image.text_canvas( new_size, display_bounds )
           #local display_image = image.bitmap.resized( new_size )
           #canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
@@ -87,7 +87,7 @@ class VMGImageView : UIComponent [singleton]
         request_redraw
       endIf
 
-    method show( new_image:VMGImage )
+    method show( new_image:Image )
       if (image and image.zoom == default_zoom) image.zoom = 0
 
       image = new_image
@@ -112,7 +112,7 @@ class VMGImageView : UIComponent [singleton]
             loop (n) image.zoom /= 2
           endIf
         endIf
-        VMGTitleBar.zoom = image.zoom
+        TitleBar.zoom = image.zoom
         mark_modified
       endIf
 
@@ -125,7 +125,7 @@ class VMGImageView : UIComponent [singleton]
             image.camera = RealXY(0.5,0.5)
           endIf
         endIf
-        VMGTitleBar.zoom = image.zoom
+        TitleBar.zoom = image.zoom
         mark_modified
       endIf
 endClass

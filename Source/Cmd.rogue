@@ -1,12 +1,12 @@
 module Vimage
 uses Math/Best
 
-class VMGCmd
+class Cmd
   METHODS
     method execute
 
     method set_status( text:String, &dim )
-      use status = VMGStatusBar
+      use status = StatusBar
         if (dim) status.style.dim
         status.print text
         if (dim) status.style.dim_off
@@ -16,22 +16,22 @@ class VMGCmd
       noAction
 endClass
 
-class VMGCmdAspect( size:XY ) : VMGCmd
+class CmdAspect( size:XY ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "crop to have aspect ratio "
         status.print size.x
         status.print ':'
         status.print size.y
-        if (not VMGImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no images]"
       endUse
 
     method execute
-      if (not VMGImageList.selected) return
-      execute( VMGImageList.selected.image )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
 
-    method execute( image:VMGImage )
+    method execute( image:Image )
       local w = image.bitmap.width
       local h = image.bitmap.height
       local adjusted_height = (w->Real64 / size.x) * size.y : Int32
@@ -42,13 +42,13 @@ class VMGCmdAspect( size:XY ) : VMGCmd
       if (adjusted_width < w) bitmap.crop( adjusted_width, h,  Vimage.anchor, Vimage.bg_color )
       else                    bitmap.crop( w, adjusted_height, Vimage.anchor, Vimage.bg_color )
 
-      VMGImageView.show( image )
+      ImageView.show( image )
 endClass
 
-class VMGCmdCopy( a:String, b:String ) : VMGCmd
+class CmdCopy( a:String, b:String ) : Cmd
   METHODS
     method update_status
-      if (not VMGImageList.selected)
+      if (not ImageList.selected)
         status = "copy channels $ -> $ [no images]"(a,b)
         return
       endIf
@@ -56,11 +56,11 @@ class VMGCmdCopy( a:String, b:String ) : VMGCmd
       status = "copy channels $ -> $"(a,b)
 
     method execute
-      if (not VMGImageList.selected)
+      if (not ImageList.selected)
         return
       endIf
 
-      local bitmap = VMGImageList.selected.image.cloned_bitmap
+      local bitmap = ImageList.selected.image.cloned_bitmap
 
       if (a.count == 1 and "bgra".contains(a))
         local a_shift = ("bgra".locate(a).value :<<: 3)
@@ -87,13 +87,13 @@ class VMGCmdCopy( a:String, b:String ) : VMGCmd
         endForEach
       endIf
 
-      VMGImageView.mark_modified
+      ImageView.mark_modified
 endClass
 
-class VMGCmdCrop( width:Int32?, height:Int32? ) : VMGCmd
+class CmdCrop( width:Int32?, height:Int32? ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "crop "
         if (width and height)
           status.print "$x$"(width,height)
@@ -102,14 +102,14 @@ class VMGCmdCrop( width:Int32?, height:Int32? ) : VMGCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not VMGImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no images]"
       endUse
 
     method execute
-      if (not VMGImageList.selected) return
-      execute( VMGImageList.selected.image )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
 
-    method execute( image:VMGImage )
+    method execute( image:Image )
       if (width)
         local width = this.width.value
         if (height)
@@ -134,40 +134,40 @@ class VMGCmdCrop( width:Int32?, height:Int32? ) : VMGCmd
         bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
       endIf
 
-      VMGImageView.show( image )
+      ImageView.show( image )
 endClass
 
-class VMGCmdDD : VMGCmd [singleton]
+class CmdDD : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         set_status( "dd (delete image and copy to clipboard)" )
       else
         set_status( "dd [no image to delete]" )
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
-        local next = VMGImageList.selected.next
-        VMGImageList.remove( VMGImageList.selected )
+      if (ImageList.selected)
+        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
+        local next = ImageList.selected.next
+        ImageList.remove( ImageList.selected )
         if (next)
-          VMGImageList.select( next->(as VMGImageListItem) )
-        elseIf (VMGImageList.count)
-          VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+          ImageList.select( next->(as ImageListItem) )
+        elseIf (ImageList.count)
+          ImageList.select( ImageList.last_child->(as ImageListItem) )
         else
-          VMGImageList.select( null )
+          ImageList.select( null )
         endIf
       endIf
 endClass
 
-class VMGCmdJoin( dims:XY ) : VMGCmd
+class CmdJoin( dims:XY ) : Cmd
   METHODS
     method update_status
       local w = dims.x
       local h = dims.y
       local total = w * h
-      local has_images = which{ VMGImageList.count:"" || " [no images]" }
+      local has_images = which{ ImageList.count:"" || " [no images]" }
       if (total <= 1)
         status = "s (join) $x$ [no effect]"(w,h)
         return
@@ -177,7 +177,7 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
       elseIf (w == 1)
         if (h == 2) status = "S (join vertical)$"(has_images)
         else        status = "$S (join vertical)$"(h,has_images)
-      elseIf (VMGImageList.count == 0)
+      elseIf (ImageList.count == 0)
         status = "join $x$ [no images]"(w,h)
         return
       else
@@ -189,28 +189,28 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
       local h = dims.y
       local total = w * h
 
-      if (VMGImageList.count == 0) return
+      if (ImageList.count == 0) return
 
-      local original_index = VMGImageList.selected.index
+      local original_index = ImageList.selected.index
 
-      use list = WorkList<<VMGImage>>
+      use list = WorkList<<Image>>
         loop (total)
-          local index = VMGImageList.selected.index
-          list.add( VMGImageList.selected.image )
-          VMGImageList.remove( VMGImageList.selected )
-          if (index < VMGImageList.count)
-            VMGImageList.select( index )
-          elseIf (VMGImageList.count > 0)
-            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+          local index = ImageList.selected.index
+          list.add( ImageList.selected.image )
+          ImageList.remove( ImageList.selected )
+          if (index < ImageList.count)
+            ImageList.select( index )
+          elseIf (ImageList.count > 0)
+            ImageList.select( ImageList.last_child->(as ImageListItem) )
             escapeLoop
           else
-            VMGImageList.select( null )
+            ImageList.select( null )
             escapeLoop
           endIf
         endLoop
 
         while (list.count < total)
-          list.add( VMGImage(Bitmap(1,1).[clear(Vimage.bg_color)]) )
+          list.add( Image(Bitmap(1,1).[clear(Vimage.bg_color)]) )
         endWhile
 
         # Find largest width and largest height
@@ -225,7 +225,7 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
         local tile_h = max_height.value
 
         # Reshape all images to be max width and height
-        local cmd = VMGCmdFit( tile_w, tile_h )
+        local cmd = CmdFit( tile_w, tile_h )
         cmd.execute( (forEach in list) )
 
         local total_w = tile_w * w
@@ -243,18 +243,18 @@ class VMGCmdJoin( dims:XY ) : VMGCmd
           cursor_y += tile_h
         endForEach
 
-        local result_image = VMGImage( result )
-        VMGImageList.insert( result_image, original_index )
-        VMGImageList.select( result_image )
+        local result_image = Image( result )
+        ImageList.insert( result_image, original_index )
+        ImageList.select( result_image )
 
       endUse
 
 endClass
 
-class VMGCmdFill( width:Int32?, height:Int32? ) : VMGCmd
+class CmdFill( width:Int32?, height:Int32? ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "fill (resize to fill) "
         if (width and height)
           status.print "$x$"(width,height)
@@ -263,14 +263,14 @@ class VMGCmdFill( width:Int32?, height:Int32? ) : VMGCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not VMGImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no images]"
       endUse
 
     method execute
-      if (not VMGImageList.selected) return
-      execute( VMGImageList.selected.image )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
 
-    method execute( image:VMGImage )
+    method execute( image:Image )
       if (width)
         local width = this.width.value
         if (height)
@@ -299,13 +299,13 @@ class VMGCmdFill( width:Int32?, height:Int32? ) : VMGCmd
         bitmap.resize( new_size.x, new_size.y )
       endIf
 
-      VMGImageView.show( image )
+      ImageView.show( image )
 endClass
 
-class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
+class CmdFit( width:Int32?, height:Int32? ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "fit (resize to fit) "
         if (width and height)
           status.print "$x$"(width,height)
@@ -314,14 +314,14 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not VMGImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no images]"
       endUse
 
     method execute
-      if (not VMGImageList.selected) return
-      execute( VMGImageList.selected.image )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
 
-    method execute( image:VMGImage )
+    method execute( image:Image )
       if (width)
         local width = this.width.value
         if (height)
@@ -350,79 +350,79 @@ class VMGCmdFit( width:Int32?, height:Int32? ) : VMGCmd
         bitmap.resize( new_size.x, new_size.y )
       endIf
 
-      VMGImageView.show( image )
+      ImageView.show( image )
 endClass
 
-class VMGCmdFlipH : VMGCmd [singleton]
+class CmdFlipH : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         status = "f (flip horizontal)"
       else
         status = "f (flip horizontal) [no images]"
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
+      if (ImageList.selected)
+        local img = ImageList.selected.image
         img.cloned_bitmap.flip( &h )
-        VMGImageView.mark_modified
+        ImageView.mark_modified
       endIf
 endClass
 
-class VMGCmdFlipV : VMGCmd [singleton]
+class CmdFlipV : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         status = "F (flip vertical)"
       else
         status = "F (flip vertical) [no images]"
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
+      if (ImageList.selected)
+        local img = ImageList.selected.image
         img.cloned_bitmap.flip( &v )
-        VMGImageView.mark_modified
+        ImageView.mark_modified
       endIf
 endClass
 
-class VMGCmdNew( size:XY ) : VMGCmd
+class CmdNew( size:XY ) : Cmd
   METHODS
     method update_status
       status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
 
     method execute
       local before_index = 0
-      if (VMGImageList.selected)
-        if local index = VMGImageList.locate( VMGImageList.selected )
+      if (ImageList.selected)
+        if local index = ImageList.locate( ImageList.selected )
           before_index = index
         endIf
       endIf
 
       local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
-      local image  = VMGImage( bitmap )
-      local item   = VMGImageListItem( image )
-      VMGImageList.insert( item, before_index )
-      VMGImageList.select( item )
-      VMGImageList.request_layout
+      local image  = Image( bitmap )
+      local item   = ImageListItem( image )
+      ImageList.insert( item, before_index )
+      ImageList.select( item )
+      ImageList.request_layout
 endClass
 
-class VMGCmdQuit : VMGCmd [singleton]
+class CmdQuit : Cmd [singleton]
   METHODS
     method update_status
       status = "quit"
 
     method execute
-      if (VMGImageList.selected)
-        if (VMGImageList.count > 1)
-          if (VMGImageList.selected is VMGImageList.last_child)
-            VMGImageList.remove( VMGImageList.selected )
-            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+      if (ImageList.selected)
+        if (ImageList.count > 1)
+          if (ImageList.selected is ImageList.last_child)
+            ImageList.remove( ImageList.selected )
+            ImageList.select( ImageList.last_child->(as ImageListItem) )
           else
-            local index = VMGImageList.selected.index
-            VMGImageList.remove( VMGImageList.selected )
-            VMGImageList.select( index )
+            local index = ImageList.selected.index
+            ImageList.remove( ImageList.selected )
+            ImageList.select( index )
           endIf
         else
           VimageUI.is_running = false
@@ -432,10 +432,10 @@ class VMGCmdQuit : VMGCmd [singleton]
       endIf
 endClass
 
-class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
+class CmdResize( width:Int32?, height:Int32? ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "resize "
         if (width and height)
           status.print "$x$"(width,height)
@@ -444,14 +444,14 @@ class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not VMGImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no images]"
       endUse
 
     method execute
-      if (not VMGImageList.selected) return
-      execute( VMGImageList.selected.image )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
 
-    method execute( image:VMGImage )
+    method execute( image:Image )
       if (width)
         local width = this.width.value
         if (height)
@@ -476,81 +476,81 @@ class VMGCmdResize( width:Int32?, height:Int32? ) : VMGCmd
         bitmap.resize( new_size.x, new_size.y )
       endIf
 
-      VMGImageView.show( image )
+      ImageView.show( image )
 endClass
 
-class VMGCmdRotateCW : VMGCmd [singleton]
+class CmdRotateCW : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         status = "r (rotate 90º clockwise)"
       else
         status = "r (rotate 90º clockwise) [no images]"
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
+      if (ImageList.selected)
+        local img = ImageList.selected.image
         img.cloned_bitmap.rotate_90( &cw )
         img.zoom = 0
-        VMGImageView.mark_modified
-        VMGImageView.min_zoom = 0
+        ImageView.mark_modified
+        ImageView.min_zoom = 0
       endIf
 endClass
 
-class VMGCmdRotateCCW : VMGCmd [singleton]
+class CmdRotateCCW : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         status = "r (rotate 90º counter-clockwise)"
       else
         status = "r (rotate 90º counter-clockwise) [no images]"
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        local img = VMGImageList.selected.image
+      if (ImageList.selected)
+        local img = ImageList.selected.image
         img.cloned_bitmap.rotate_90( &ccw )
         img.zoom = 0
-        VMGImageView.mark_modified
-        VMGImageView.min_zoom = 0
+        ImageView.mark_modified
+        ImageView.min_zoom = 0
       endIf
 endClass
 
-class VMGCmdPaste( repeat_count:Int32 ) : VMGCmd
+class CmdPaste( repeat_count:Int32 ) : Cmd
   METHODS
     method update_status
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
 
     method execute
       local bitmap = Vimage.clipboard.bitmap.cloned
-      if (VMGImageList.selected)
-        local before_index = VMGImageList.selected.index
-        VMGImageList.insert( VMGImage(bitmap), before_index )
-        VMGImageList.select( before_index )
+      if (ImageList.selected)
+        local before_index = ImageList.selected.index
+        ImageList.insert( Image(bitmap), before_index )
+        ImageList.select( before_index )
       else
-        VMGImageList.add( VMGImage(bitmap) )
-        VMGImageList.select( 0 )
+        ImageList.add( Image(bitmap) )
+        ImageList.select( 0 )
       endIf
 endClass
 
-class VMGCmdSplit( dims:XY ) : VMGCmd
+class CmdSplit( dims:XY ) : Cmd
   METHODS
     method update_status
       local tiles_wide = dims.x
       local tiles_high = dims.y
       local total = tiles_wide * tiles_high
 
-      use status = VMGStatusBar
+      use status = StatusBar
         status.print "split $x$ -> $ images"(tiles_wide,tiles_high,total)
-        if (VMGImageList.count == 0)
+        if (ImageList.count == 0)
           status.print " [no images]"
           return
         elseIf (tiles_wide < 1 or tiles_high < 1)
           status.print " [invalid split count]"
           return
         else
-          local image = VMGImageList.selected.image
+          local image = ImageList.selected.image
           local bitmap = image.bitmap
           if (bitmap.width % tiles_wide)
             status.print " [image width must be an even multiple of $]"(tiles_wide)
@@ -569,15 +569,15 @@ class VMGCmdSplit( dims:XY ) : VMGCmd
       local tiles_high = dims.y
       local total = tiles_wide * tiles_high
 
-      local image  : VMGImage
+      local image  : Image
       local bitmap : Bitmap
 
-      if (VMGImageList.count == 0)
+      if (ImageList.count == 0)
         return
       elseIf (tiles_wide < 1 or tiles_high < 1)
         return
       else
-        image = VMGImageList.selected.image
+        image = ImageList.selected.image
         bitmap = image.bitmap
         if (bitmap.width % tiles_wide)
           return
@@ -587,7 +587,7 @@ class VMGCmdSplit( dims:XY ) : VMGCmd
         endIf
       endIf
 
-      local index = VMGImageList.selected.index
+      local index = ImageList.selected.index
       local digits = 1
       local limit = 10
       while (limit < total)
@@ -603,31 +603,31 @@ class VMGCmdSplit( dims:XY ) : VMGCmd
         forEach (i in tiles_wide-1 downTo 0)
           local seq = j*tiles_wide + i
           local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
-          local img : VMGImage
+          local img : Image
           if (image.file)
-            img = VMGImage( tile, image.file.value.appending("-$"(seq.format(fmt))) )
+            img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) )
           elseIf (image.name)
-            img = VMGImage( tile, "$-$"(image.name,seq.format(fmt)) )
+            img = Image( tile, "$-$"(image.name,seq.format(fmt)) )
           else
-            img = VMGImage( tile, seq.format(fmt) )
+            img = Image( tile, seq.format(fmt) )
           endIf
-          VMGImageList.insert( img, index )
+          ImageList.insert( img, index )
         endForEach
       endForEach
 
-      VMGImageList.remove( VMGImageList.selected )
-      VMGImageList.select( index )
+      ImageList.remove( ImageList.selected )
+      ImageList.select( index )
 
 endClass
 
-class VMGCmdStack( n:Int32 ) : VMGCmd
+class CmdStack( n:Int32 ) : Cmd
   METHODS
     method update_status
-      use status = VMGStatusBar
+      use status = StatusBar
         if (n != 2) status.print n
         status.print "t (stack images)"
-        if (VMGImageList.selected)
-          local available = VMGImageList.count - VMGImageList.selected.index
+        if (ImageList.selected)
+          local available = ImageList.count - ImageList.selected.index
           if (n > available) status.print " [not enough images]"
         else
           status.print " [no images]"
@@ -636,27 +636,27 @@ class VMGCmdStack( n:Int32 ) : VMGCmd
 
     method execute
       local available : Int32
-      if (VMGImageList.selected)
-        available = VMGImageList.count - VMGImageList.selected.index
+      if (ImageList.selected)
+        available = ImageList.count - ImageList.selected.index
       endIf
       if (n <= 1 or available < n) return
 
-      local bitmap = VMGImageList.selected.image.bitmap
+      local bitmap = ImageList.selected.image.bitmap
 
-      local original_index = VMGImageList.selected.index
+      local original_index = ImageList.selected.index
 
-      use list = WorkList<<VMGImage>>
+      use list = WorkList<<Image>>
         loop (n)
-          local index = VMGImageList.selected.index
-          list.add( VMGImageList.selected.image )
-          VMGImageList.remove( VMGImageList.selected )
-          if (index < VMGImageList.count)
-            VMGImageList.select( index )
-          elseIf (VMGImageList.count > 0)
-            VMGImageList.select( VMGImageList.last_child->(as VMGImageListItem) )
+          local index = ImageList.selected.index
+          list.add( ImageList.selected.image )
+          ImageList.remove( ImageList.selected )
+          if (index < ImageList.count)
+            ImageList.select( index )
+          elseIf (ImageList.count > 0)
+            ImageList.select( ImageList.last_child->(as ImageListItem) )
             escapeLoop
           else
-            VMGImageList.select( null )
+            ImageList.select( null )
             escapeLoop
           endIf
         endLoop
@@ -672,23 +672,23 @@ class VMGCmdStack( n:Int32 ) : VMGCmd
           image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
         endForEach
 
-        local result_image = VMGImage( result )
-        VMGImageList.insert( result_image, original_index )
-        VMGImageList.select( result_image )
+        local result_image = Image( result )
+        ImageList.insert( result_image, original_index )
+        ImageList.select( result_image )
 
       endUse
 
-      VMGImageView.mark_modified
+      ImageView.mark_modified
 endClass
 
-class VMGCmdSwap( a:Int32, b:Int32 ) : VMGCmd
+class CmdSwap( a:Int32, b:Int32 ) : Cmd
   METHODS
     method update_status
       status = "swap channels $<>$"("bgra"[a],"bgra"[b])
 
     method execute
-      if ((a or b) and VMGImageView.image)
-        local bitmap = VMGImageView.image.bitmap
+      if ((a or b) and ImageView.image)
+        local bitmap = ImageView.image.bitmap
 
         local a_shift = a * 8
         local b_shift = b * 8
@@ -700,42 +700,42 @@ class VMGCmdSwap( a:Int32, b:Int32 ) : VMGCmd
           rewriter.write( Color(argb) )
         endForEach
 
-        VMGImageView.mark_modified
+        ImageView.mark_modified
       endIf
 endClass
 
-class VMGCmdYY : VMGCmd [singleton]
+class CmdYY : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         set_status( "yy (copy image to clipboard)" )
       else
         set_status( "yy [no image to copy]" )
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+      if (ImageList.selected)
+        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
       endIf
 endClass
 
-class VMGCmdYP : VMGCmd [singleton]
+class CmdYP : Cmd [singleton]
   METHODS
     method update_status
-      if (VMGImageList.selected)
+      if (ImageList.selected)
         set_status( "yp (yank and paste / duplicate)" )
       else
         set_status( "yp [no image to duplicate]" )
       endIf
 
     method execute
-      if (VMGImageList.selected)
-        Vimage.clipboard = VMGImageList.selected->(as VMGImageListItem).image
+      if (ImageList.selected)
+        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
 
         local bitmap = Vimage.clipboard.bitmap.cloned
-        local before_index = VMGImageList.selected.index
-        VMGImageList.insert( VMGImage(bitmap), before_index )
-        VMGImageList.select( before_index )
+        local before_index = ImageList.selected.index
+        ImageList.insert( Image(bitmap), before_index )
+        ImageList.select( before_index )
       endIf
 endClass
 

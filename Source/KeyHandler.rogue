@@ -1,9 +1,9 @@
 module Vimage
 
-class VMGKeyHandler
+class KeyHandler
   PROPERTIES
     handler   : Function(KeyEvent)
-    new_state : VMGState
+    new_state : State
 
   METHODS
     method init
@@ -23,23 +23,23 @@ class VMGKeyHandler
 
     method on( e:KeyEvent )
       if (handler) handler(e)
-      if (new_state) VMGState.change_state( new_state )
+      if (new_state) State.change_state( new_state )
 
     method on_execute
       noAction
 
-    method set_state( new_state:VMGState )
-      VMGState.current.change_state( new_state )
+    method set_state( new_state:State )
+      State.current.change_state( new_state )
 
     method set_status( text:String )
       if (Vimage.repeat_count)
-        VMGStatusBar.text = "$$"(Vimage.repeat_count,text)
+        StatusBar.text = "$$"(Vimage.repeat_count,text)
       else
-        VMGStatusBar.text = text
+        StatusBar.text = text
       endIf
 endClass
 
-class VMGKeyHandlerColon : VMGKeyHandler [singleton]
+class KeyHandlerColon : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       Vimage.repeat_count = null
@@ -48,32 +48,32 @@ class VMGKeyHandlerColon : VMGKeyHandler [singleton]
       state = EnterCmdLineState()
 endClass
 
-class VMGKeyHandlerQBuffer : VMGKeyHandler [singleton]
+class KeyHandlerQBuffer : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "q (quit)"
       VimageUI.is_running = false
 endClass
 
-class VMGKeyHandlerJBuffer : VMGKeyHandler [singleton]
+class KeyHandlerJBuffer : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "j (down)"
       execute
 
     method on_execute
-      if local current = VMGImageList.selected
+      if local current = ImageList.selected
         if (current.next)
-          VMGImageList.select( current.next->(as VMGImageListItem) )
+          ImageList.select( current.next->(as ImageListItem) )
         endIf
       endIf
 endClass
 
-class VMGKeyHandlerPaste : VMGKeyHandler [singleton]
+class KeyHandlerPaste : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       if (Vimage.clipboard)
-        local cmd = VMGCmdPaste( which{Vimage.repeat_count||1} )
+        local cmd = CmdPaste( which{Vimage.repeat_count||1} )
         Vimage.repeat_count = null
         Vimage.execute( cmd )
       else
@@ -81,7 +81,7 @@ class VMGKeyHandlerPaste : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class VMGKeyHandlerPeriod : VMGKeyHandler [singleton]
+class KeyHandlerPeriod : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       if (Vimage.cmd)
@@ -89,174 +89,174 @@ class VMGKeyHandlerPeriod : VMGKeyHandler [singleton]
       endIf
 endClass
 
-class VMGKeyHandlerShiftJBuffer : VMGKeyHandler [singleton]
+class KeyHandlerShiftJBuffer : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "J (shift down)"
       execute
 
     method on_execute
-      if local current = VMGImageList.selected
-        if local index = VMGImageList.locate( current )
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
           Vimage.save_undo
-          VMGImageList.remove( current )
-          VMGImageList.insert( current, index+1 )
-          VMGImageList.request_layout
+          ImageList.remove( current )
+          ImageList.insert( current, index+1 )
+          ImageList.request_layout
         endIf
       endIf
 endClass
 
-class VMGKeyHandlerKBuffer : VMGKeyHandler [singleton]
+class KeyHandlerKBuffer : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "k (up)"
       execute
 
     method on_execute
-      if local current = VMGImageList.selected
-        forEach (child in VMGImageList.children)
+      if local current = ImageList.selected
+        forEach (child in ImageList.children)
           if (child.next is current)
-            VMGImageList.select( child->(as VMGImageListItem) )
+            ImageList.select( child->(as ImageListItem) )
             escapeForEach
           endIf
         endForEach
       endIf
 endClass
 
-class VMGKeyHandlerShiftKBuffer : VMGKeyHandler [singleton]
+class KeyHandlerShiftKBuffer : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "K (shift up)"
       execute
 
     method on_execute
-      if local current = VMGImageList.selected
-        if local index = VMGImageList.locate( current )
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
           if (index > 0)
             Vimage.save_undo
-            VMGImageList.remove( current )
-            VMGImageList.insert( current, index-1 )
-            VMGImageList.request_layout
+            ImageList.remove( current )
+            ImageList.insert( current, index-1 )
+            ImageList.request_layout
           endIf
         endIf
       endIf
 endClass
 
-class VMGKeyHandlerZ : VMGKeyHandler [singleton]
+class KeyHandlerZ : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "z (zoom in)"
       execute
 
     method on_execute
-      VMGImageView.zoom_in
-      if (VMGImageView.image)
-        if (VMGImageView.image.zoom == VMGImageView.default_zoom)
-          if (VMGState.current is not ImageListState)
-            VMGState.change_state( ImageListState )
+      ImageView.zoom_in
+      if (ImageView.image)
+        if (ImageView.image.zoom == ImageView.default_zoom)
+          if (State.current is not ImageListState)
+            State.change_state( ImageListState )
           endIf
         else
-          if (VMGState.current is not ZoomState)
-            VMGState.change_state( ZoomState )
+          if (State.current is not ZoomState)
+            State.change_state( ZoomState )
           endIf
         endIf
       endIf
 endClass
 
-class VMGKeyHandlerShiftZ : VMGKeyHandler [singleton]
+class KeyHandlerShiftZ : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "z (zoom out)"
       execute
 
     method on_execute
-      VMGImageView.zoom_out
-      if (VMGImageView.image)
-        if (VMGImageView.image.zoom == VMGImageView.default_zoom)
-          if (VMGState.current is not ImageListState)
-            VMGState.change_state( ImageListState )
+      ImageView.zoom_out
+      if (ImageView.image)
+        if (ImageView.image.zoom == ImageView.default_zoom)
+          if (State.current is not ImageListState)
+            State.change_state( ImageListState )
           endIf
         else
-          if (VMGState.current is not ZoomState)
-            VMGState.change_state( ZoomState )
+          if (State.current is not ZoomState)
+            State.change_state( ZoomState )
           endIf
         endIf
       endIf
 endClass
 
-class VMGKeyHandlerHFlip : VMGKeyHandler [singleton]
+class KeyHandlerHFlip : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       execute
 
     method on_execute
-      Vimage.execute( VMGCmdFlipH )
+      Vimage.execute( CmdFlipH )
 endClass
 
-class VMGKeyHandlerVFlip : VMGKeyHandler [singleton]
+class KeyHandlerVFlip : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       execute
 
     method on_execute
-      Vimage.execute( VMGCmdFlipV )
+      Vimage.execute( CmdFlipV )
 endClass
 
-class VMGKeyHandlerRotate90CW : VMGKeyHandler [singleton]
+class KeyHandlerRotate90CW : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       execute
 
     method on_execute
-      Vimage.execute( VMGCmdRotateCW )
+      Vimage.execute( CmdRotateCW )
 endClass
 
-class VMGKeyHandlerRotate90CCW : VMGKeyHandler [singleton]
+class KeyHandlerRotate90CCW : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       execute
 
     method on_execute
-      Vimage.execute( VMGCmdRotateCCW )
+      Vimage.execute( CmdRotateCCW )
 endClass
 
-class VMGKeyHandlerStack : VMGKeyHandler [singleton]
+class KeyHandlerStack : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "s (stack images)"
       execute
 
     method execute
-      local cmd = VMGCmdStack( which{Vimage.repeat_count||2} )
+      local cmd = CmdStack( which{Vimage.repeat_count||2} )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
 
-class VMGKeyHandlerJoinH : VMGKeyHandler [singleton]
+class KeyHandlerJoinH : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "n (join horizontal)"
       execute
 
     method execute
-      local cmd = VMGCmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
+      local cmd = CmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
 
-class VMGKeyHandlerJoinV : VMGKeyHandler [singleton]
+class KeyHandlerJoinV : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "N (join vertical)"
       execute
 
     method execute
-      local cmd = VMGCmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
+      local cmd = CmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
 
-class VMGKeyHandlerUndo : VMGKeyHandler [singleton]
+class KeyHandlerUndo : KeyHandler [singleton]
   METHODS
     method on( e:KeyEvent )
       status = "u (undo)"

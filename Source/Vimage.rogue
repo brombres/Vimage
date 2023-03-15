@@ -76,15 +76,15 @@ uses Bitmap/IO
 uses Epilog
 uses UI
 
-$include VMGCmd
-$include VMGCmdLineHandler
-$include VMGImage
-$include VMGImageList
-$include VMGImageView
-$include VMGKeyHandler
-$include VMGState
-$include VMGStatusBar
-$include VMGTitleBar
+$include Cmd
+$include CmdLineHandler
+$include Image
+$include ImageList
+$include ImageView
+$include KeyHandler
+$include State
+$include StatusBar
+$include TitleBar
 $include VimageUI
 
 #nativeHeader @|#include "../Source/ObjC-Interface.h"
@@ -99,11 +99,11 @@ endTry
 
 class Vimage [singleton]
   PROPERTIES
-    cmd          : VMGCmd
+    cmd          : Cmd
     repeat_count : Int32?
     anchor       = Anchor.CENTER
     bg_color     = Color.BLACK : Color
-    clipboard    : VMGImage
+    clipboard    : Image
     undo_stack   = @[]
 
   METHODS
@@ -122,11 +122,11 @@ class Vimage [singleton]
       filenames.sort( (a,b)=>a.compare_to(b,&ignore_case) < 0 )
 
       forEach (filepath in filenames)
-        VMGImageList.add( VMGImage(File(filepath)) )
+        ImageList.add( Image(File(filepath)) )
       endForEach
 
-      if (VMGImageList.count)
-        VMGImageList.select( VMGImageList.first_child->(as VMGImageListItem) )
+      if (ImageList.count)
+        ImageList.select( ImageList.first_child->(as ImageListItem) )
       endIf
 
       VimageUI.run
@@ -167,11 +167,11 @@ class Vimage [singleton]
       else              return ""
 
     method save_undo
-      local state  = VMGImageList->Value
+      local state  = ImageList->Value
       undo_stack.add( state )
 
     method undo
       if (undo_stack.is_empty) return
-      VMGImageList.unpack( undo_stack.remove_last )
+      ImageList.unpack( undo_stack.remove_last )
 
 endClass

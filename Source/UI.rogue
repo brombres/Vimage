@@ -1,0 +1,52 @@
+module Vimage
+uses Console/ConsoleUI
+uses UI
+
+class UI : ConsoleUI [singleton]
+  PROPERTIES
+    image_list_scroller : UIScrollView
+    repeat_count        : Int32?
+    command             = String()
+    cmd_line_handlers   = [String:CmdLineHandler]
+
+  METHODS
+    method init
+      prior.init
+
+      register( CmdLineAnchor )
+      register( CmdLineAspect )
+      register( CmdLineBG )
+      register( CmdLineCopy )
+      register( CmdLineCrop )
+      register( CmdLineFill )
+      register( CmdLineFit )
+      register( CmdLineJoin )
+      register( CmdLineNew )
+      register( CmdLineQuit )
+      register( CmdLineResize )
+      register( CmdLineSplit )
+      register( CmdLineSwap )
+      register( CmdLineWrite )
+
+      State.current.change_state( ImageListState )
+
+      image_list_scroller = ImageListScrollView( ImageList ).[ shrink_to_fit_width ]
+      local layout = (image_list_scroller + ImageView)
+      layout /= TitleBar
+      layout /= StatusBar
+      add( layout )
+
+    method on( e:KeyEvent )
+      State.current.on( e )
+
+    method on_resize
+      ImageView.show( ImageView.image )
+
+    method register( cmd_handler:CmdLineHandler )
+      cmd_line_handlers[cmd_handler.keyword] = cmd_handler
+
+    method show( image:Image )
+      TitleBar.show( image )
+      ImageView.show( image )
+
+endClass
