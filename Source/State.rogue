@@ -16,6 +16,7 @@ class State
 
   PROPERTIES
     key_handlers = [Int32:KeyHandler]
+    key_handlers_2 = [Int32:Cmd]
 
   METHODS
     method cancel
@@ -28,6 +29,10 @@ class State
     method on( e:KeyEvent )
       if (e.is_press)
         if local handler = key_handlers[ (e.modifier_key_state:<<:16) | e.keycode ]
+          handler.on( e )
+          return
+        endIf
+        if local handler = key_handlers_2[ (e.modifier_key_state:<<:16) | e.keycode ]
           handler.on( e )
           return
         endIf
@@ -55,29 +60,35 @@ class State
       return ""
 endClass
 
-class ImageListState : State [singleton]
+class StandardState : State
   METHODS
     method init
-      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
-      key_handlers[Keycode.D]               = KeyHandler( DState )
-      key_handlers[Keycode.F]               = KeyHandlerHFlip
-      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
-      key_handlers[Keycode.J]               = KeyHandlerJBuffer
-      key_handlers[Keycode.K]               = KeyHandlerKBuffer
-      key_handlers[Keycode.N]               = KeyHandlerJoinH
-      key_handlers[Keycode.N+SHIFT]         = KeyHandlerJoinV
+      key_handlers_2[Keycode.SEMICOLON+SHIFT] = CmdBeginCommandLine
+      key_handlers_2[Keycode.D]               = Cmd( DState )
+      key_handlers_2[Keycode.F]             = CmdFlipH
+      key_handlers_2[Keycode.F+SHIFT]       = CmdFlipV
+      key_handlers_2[Keycode.N]               = CmdParseJoinH
+      key_handlers_2[Keycode.N+SHIFT]         = CmdParseJoinV
       key_handlers[Keycode.P]               = KeyHandlerPaste
       key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
       key_handlers[Keycode.Q]               = KeyHandlerQBuffer
-      key_handlers[Keycode.J+SHIFT]         = KeyHandlerShiftJBuffer
-      key_handlers[Keycode.K+SHIFT]         = KeyHandlerShiftKBuffer
-      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
-      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
-      key_handlers[Keycode.T]               = KeyHandlerStack
-      key_handlers[Keycode.U]               = KeyHandlerUndo
+      key_handlers_2[Keycode.R]             = CmdRotateCW
+      key_handlers_2[Keycode.R+SHIFT]       = CmdRotateCCW
+      key_handlers_2[Keycode.U]             = CmdUndo
       key_handlers[Keycode.Y]               = KeyHandler( YState )
-      key_handlers[Keycode.Z]               = KeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
+      key_handlers_2[Keycode.Z]             = CmdZoomIn
+      key_handlers_2[Keycode.Z+SHIFT]       = CmdZoomOut
+endClass
+
+class ImageListState : StandardState [singleton]
+  METHODS
+    method init
+      prior.init
+      key_handlers_2[Keycode.J]       = CmdImageListNext
+      key_handlers_2[Keycode.K]       = CmdImageListPrevious
+      key_handlers_2[Keycode.J+SHIFT] = CmdImageListShiftDown
+      key_handlers_2[Keycode.K+SHIFT] = CmdImageListShiftUp
+      key_handlers_2[Keycode.T]       = CmdParseStack
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -103,29 +114,15 @@ class ImageListState : State [singleton]
       return "IMAGE LIST"
 endClass
 
-class ZoomState : State [singleton]
+class ZoomState : StandardState [singleton]
   METHODS
     method init
-      key_handlers[Keycode.SEMICOLON+SHIFT] = KeyHandlerColon
-      key_handlers[Keycode.D]               = KeyHandler( DState )
-      key_handlers[Keycode.F]               = KeyHandlerHFlip
-      key_handlers[Keycode.F+SHIFT]         = KeyHandlerVFlip
-      key_handlers[Keycode.H]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(-0.5,0)) )
-      key_handlers[Keycode.J]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,0.5)) )
-      key_handlers[Keycode.K]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,-0.5)) )
-      key_handlers[Keycode.L]               = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0.5,0)) )
-      key_handlers[Keycode.N]               = KeyHandlerJoinH
-      key_handlers[Keycode.N+SHIFT]         = KeyHandlerJoinV
-      key_handlers[Keycode.P]               = KeyHandlerPaste
-      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
-      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
-      key_handlers[Keycode.R]               = KeyHandlerRotate90CW
-      key_handlers[Keycode.R+SHIFT]         = KeyHandlerRotate90CCW
-      key_handlers[Keycode.U]               = KeyHandlerUndo
-      key_handlers[Keycode.Y]               = KeyHandler( YState )
-      key_handlers[Keycode.Z]               = KeyHandlerZ
-      key_handlers[Keycode.Z+SHIFT]         = KeyHandlerShiftZ
-      key_handlers[Keycode.ESCAPE]          = KeyHandler( ImageListState )
+      prior.init
+      key_handlers[Keycode.H]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(-0.5,0)) )
+      key_handlers[Keycode.J]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,0.5)) )
+      key_handlers[Keycode.K]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,-0.5)) )
+      key_handlers[Keycode.L]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0.5,0)) )
+      key_handlers[Keycode.ESCAPE] = KeyHandler( ImageListState )
 
     method on( e:KeyEvent )
       if (e.is_press)

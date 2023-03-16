@@ -61,7 +61,9 @@ class Image
 
     method set_is_modified( setting:Logical )
       if (is_modified != setting)
-        if (this is ImageList.selected.image) ImageList.selected.request_redraw
+        if local selected = ImageList.selected
+          if (this is selected.image) selected.request_redraw
+        endIf
       endIf
       @is_modified = setting
 

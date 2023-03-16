@@ -99,7 +99,7 @@ endTry
 
 class Vimage [singleton]
   PROPERTIES
-    cmd          : Cmd
+    last_cmd     : Cmd
     repeat_count : Int32?
     anchor       = Anchor.CENTER
     bg_color     = Color.BLACK : Color
@@ -131,15 +131,12 @@ class Vimage [singleton]
 
       VimageUI.run
 
-    method execute( cmd )
-      save_undo
-      cmd.update_status
-      if (repeat_count)
-        loop (repeat_count.value) cmd.execute
-        repeat_count = null
-      else
-        cmd.execute
+    method execute( cmd:Cmd )
+      if (cmd.is_edit)
+        save_undo
+        last_cmd = cmd
       endIf
+      cmd()
 
     method parse_args( args:String[] )->Value
       local command = CommandLineParser().

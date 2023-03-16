@@ -2,8 +2,40 @@ module Vimage
 uses Math/Best
 
 class Cmd
+  GLOBAL METHODS
+    method create( new_state:State )->Cmd
+      return CmdChangeState( new_state )
+
   METHODS
+    method init
+
+    method call
+      update_status
+      if (Vimage.repeat_count)
+        local n = Vimage.repeat_count.value
+        Vimage.repeat_count = null
+        loop (n) execute
+      else
+        execute
+      endIf
+
     method execute
+      noAction
+
+    method is_edit->Logical
+      return false
+
+    method is_interactive->Logical
+      return false
+
+    method on( e:KeyEvent )
+      Vimage.execute( this )
+
+    method repeatable( n:Int32 )->Cmd
+      return null
+
+    method set_state( new_state:State )
+      State.current.change_state( new_state )
 
     method set_status( text:String, &dim )
       use status = StatusBar
@@ -16,7 +48,25 @@ class Cmd
       noAction
 endClass
 
-class CmdAspect( size:XY ) : Cmd
+class EditCmd : Cmd
+  METHODS
+    method is_edit->Logical
+      return true
+endClass
+
+class InteractiveCmd : Cmd
+  METHODS
+    method is_interactive->Logical
+      return true
+endClass
+
+class CmdChangeState( new_state:State ) : InteractiveCmd
+  METHODS
+    method on( e:KeyEvent )
+      state = new_state
+endClass
+
+class CmdAspect( size:XY ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -45,7 +95,19 @@ class CmdAspect( size:XY ) : Cmd
       ImageView.show( image )
 endClass
 
-class CmdCopy( a:String, b:String ) : Cmd
+class CmdBeginCommandLine : InteractiveCmd [singleton]
+  METHODS
+    method update_status
+      status = ":"
+
+    method on( e:KeyEvent )
+      Vimage.repeat_count = null
+      VimageUI.command.clear
+      update_status
+      state = EnterCmdLineState()
+endClass
+
+class CmdCopy( a:String, b:String ) : EditCmd
   METHODS
     method update_status
       if (not ImageList.selected)
@@ -79,9 +141,10 @@ class CmdCopy( a:String, b:String ) : Cmd
         local a = a->Int32(&base=16)
         forEach (dest_channel in b)
           local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
+          local write_a = a :<<: b_shift
           forEach (color in rewriter=bitmap.pixels.rewriter)
             local argb = color.argb & !(0xFF:<<:b_shift)
-            argb |= a
+            argb |= write_a
             rewriter.write( Color(argb) )
           endForEach
         endForEach
@@ -90,7 +153,7 @@ class CmdCopy( a:String, b:String ) : Cmd
       ImageView.mark_modified
 endClass
 
-class CmdCrop( width:Int32?, height:Int32? ) : Cmd
+class CmdCrop( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -137,7 +200,12 @@ class CmdCrop( width:Int32?, height:Int32? ) : Cmd
       ImageView.show( image )
 endClass
 
-class CmdDD : Cmd [singleton]
+class CmdDX : EditCmd [singleton]
+  METHODS
+    method on( e:KeyEvent )
+endClass
+
+class CmdDD : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -161,7 +229,86 @@ class CmdDD : Cmd [singleton]
       endIf
 endClass
 
-class CmdJoin( dims:XY ) : Cmd
+class CmdImageListNext : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "j (down to next image)"
+
+    method execute
+      if local current = ImageList.selected
+        if (current.next)
+          ImageList.select( current.next->(as ImageListItem) )
+        endIf
+      endIf
+endClass
+
+class CmdImageListPrevious : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "k (up to previous image)"
+
+    method execute
+      if local current = ImageList.selected
+        forEach (child in ImageList.children)
+          if (child.next is current)
+            ImageList.select( child->(as ImageListItem) )
+            escapeForEach
+          endIf
+        endForEach
+      endIf
+endClass
+
+class CmdImageListShiftDown : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "J (shift image down in list)"
+
+    method execute
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
+          Vimage.save_undo
+          ImageList.remove( current )
+          ImageList.insert( current, index+1 )
+          ImageList.request_layout
+        endIf
+      endIf
+endClass
+
+class CmdImageListShiftUp : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "K (shift image up in list)"
+
+    method execute
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
+          if (index > 0)
+            Vimage.save_undo
+            ImageList.remove( current )
+            ImageList.insert( current, index-1 )
+            ImageList.request_layout
+          endIf
+        endIf
+      endIf
+endClass
+
+class CmdParseJoinH : Cmd [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      local cmd = CmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
+endClass
+
+class CmdParseJoinV : Cmd [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      local cmd = CmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
+endClass
+
+class CmdJoin( dims:XY ) : EditCmd
   METHODS
     method update_status
       local w = dims.x
@@ -189,7 +336,7 @@ class CmdJoin( dims:XY ) : Cmd
       local h = dims.y
       local total = w * h
 
-      if (ImageList.count == 0) return
+      if (ImageList.count == 0 or total <= 1) return
 
       local original_index = ImageList.selected.index
 
@@ -224,23 +371,39 @@ class CmdJoin( dims:XY ) : Cmd
         local tile_w = max_width.value
         local tile_h = max_height.value
 
-        # Reshape all images to be max width and height
-        local cmd = CmdFit( tile_w, tile_h )
-        cmd.execute( (forEach in list) )
-
-        local total_w = tile_w * w
-        local total_h = tile_h * h
+        local total_w, total_h : Int32
+        if (w == 1)
+          # Resize all images to be max width
+          local cmd = CmdResize( tile_w, null )
+          cmd.execute( (forEach in list) )
+          total_w = tile_w
+          total_h += (forEach in list).bitmap.height
+        elseIf (h == 1)
+          # Resize all images to be max height
+          local cmd = CmdResize( null, tile_h )
+          cmd.execute( (forEach in list) )
+          total_w += (forEach in list).bitmap.width
+          total_h = tile_h
+        else
+          # Reshape all images to be max width and/or height
+          local cmd = CmdFit( tile_w, tile_h )
+          cmd.execute( (forEach in list) )
+          total_w = tile_w * w
+          total_h = tile_h * h
+        endIf
 
         local result = Bitmap( total_w, total_h )
         local cursor_y = 0
         forEach (j in 0..<h)
           local cursor_x = 0
+          local dy = tile_h
           forEach (i in 0..<w)
             local bitmap = list[ j*w+i ].bitmap
             bitmap.blit( result, cursor_x, cursor_y )
-            cursor_x += tile_w
+            dy = bitmap.height
+            cursor_x += bitmap.width
           endForEach
-          cursor_y += tile_h
+          cursor_y += dy
         endForEach
 
         local result_image = Image( result )
@@ -248,10 +411,9 @@ class CmdJoin( dims:XY ) : Cmd
         ImageList.select( result_image )
 
       endUse
-
 endClass
 
-class CmdFill( width:Int32?, height:Int32? ) : Cmd
+class CmdFill( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -302,7 +464,7 @@ class CmdFill( width:Int32?, height:Int32? ) : Cmd
       ImageView.show( image )
 endClass
 
-class CmdFit( width:Int32?, height:Int32? ) : Cmd
+class CmdFit( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -353,7 +515,7 @@ class CmdFit( width:Int32?, height:Int32? ) : Cmd
       ImageView.show( image )
 endClass
 
-class CmdFlipH : Cmd [singleton]
+class CmdFlipH : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -370,7 +532,7 @@ class CmdFlipH : Cmd [singleton]
       endIf
 endClass
 
-class CmdFlipV : Cmd [singleton]
+class CmdFlipV : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -387,7 +549,7 @@ class CmdFlipV : Cmd [singleton]
       endIf
 endClass
 
-class CmdNew( size:XY ) : Cmd
+class CmdNew( size:XY ) : EditCmd
   METHODS
     method update_status
       status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
@@ -408,7 +570,7 @@ class CmdNew( size:XY ) : Cmd
       ImageList.request_layout
 endClass
 
-class CmdQuit : Cmd [singleton]
+class CmdQuit : EditCmd [singleton]
   METHODS
     method update_status
       status = "quit"
@@ -432,7 +594,7 @@ class CmdQuit : Cmd [singleton]
       endIf
 endClass
 
-class CmdResize( width:Int32?, height:Int32? ) : Cmd
+class CmdResize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -479,7 +641,7 @@ class CmdResize( width:Int32?, height:Int32? ) : Cmd
       ImageView.show( image )
 endClass
 
-class CmdRotateCW : Cmd [singleton]
+class CmdRotateCW : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -498,7 +660,7 @@ class CmdRotateCW : Cmd [singleton]
       endIf
 endClass
 
-class CmdRotateCCW : Cmd [singleton]
+class CmdRotateCCW : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -517,7 +679,7 @@ class CmdRotateCCW : Cmd [singleton]
       endIf
 endClass
 
-class CmdPaste( repeat_count:Int32 ) : Cmd
+class CmdPaste( repeat_count:Int32 ) : EditCmd
   METHODS
     method update_status
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
@@ -534,7 +696,7 @@ class CmdPaste( repeat_count:Int32 ) : Cmd
       endIf
 endClass
 
-class CmdSplit( dims:XY ) : Cmd
+class CmdSplit( dims:XY ) : EditCmd
   METHODS
     method update_status
       local tiles_wide = dims.x
@@ -620,7 +782,15 @@ class CmdSplit( dims:XY ) : Cmd
 
 endClass
 
-class CmdStack( n:Int32 ) : Cmd
+class CmdParseStack : Cmd [singleton]
+  METHODS
+    method on( e:KeyEvent )
+      local cmd = CmdStack( which{Vimage.repeat_count||2} )
+      Vimage.repeat_count = null
+      Vimage.execute( cmd )
+endClass
+
+class CmdStack( n:Int32 ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -681,18 +851,18 @@ class CmdStack( n:Int32 ) : Cmd
       ImageView.mark_modified
 endClass
 
-class CmdSwap( a:Int32, b:Int32 ) : Cmd
+class CmdSwap( a:Int32, b:Int32 ) : EditCmd
   METHODS
     method update_status
       status = "swap channels $<>$"("bgra"[a],"bgra"[b])
 
     method execute
       if ((a or b) and ImageView.image)
-        local bitmap = ImageView.image.bitmap
+        local bitmap = ImageView.image.cloned_bitmap
 
         local a_shift = a * 8
         local b_shift = b * 8
-        forEach (color in rewriter=bitmap.pixels.rewriter)
+        forEach (color at i in rewriter=bitmap.pixels.rewriter)
           local a = (color.argb :>>>: a_shift) & 0xFF
           local b = (color.argb :>>>: b_shift) & 0xFF
           local argb = color.argb & !(0xFF:<<:a_shift) & !(0xFF:<<:b_shift)
@@ -704,7 +874,16 @@ class CmdSwap( a:Int32, b:Int32 ) : Cmd
       endIf
 endClass
 
-class CmdYY : Cmd [singleton]
+class CmdUndo : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "u (undo)"
+
+    method execute
+      Vimage.undo
+endClass
+
+class CmdYY : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -719,7 +898,7 @@ class CmdYY : Cmd [singleton]
       endIf
 endClass
 
-class CmdYP : Cmd [singleton]
+class CmdYP : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -739,3 +918,42 @@ class CmdYP : Cmd [singleton]
       endIf
 endClass
 
+class CmdZoomIn : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "z (zoom in)"
+
+    method execute
+      ImageView.zoom_in
+      if (ImageView.image)
+        if (ImageView.image.zoom == ImageView.default_zoom)
+          if (State.current is not ImageListState)
+            State.change_state( ImageListState )
+          endIf
+        else
+          if (State.current is not ZoomState)
+            State.change_state( ZoomState )
+          endIf
+        endIf
+      endIf
+endClass
+
+class CmdZoomOut : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "Z (zoom out)"
+
+    method execute
+      ImageView.zoom_out
+      if (ImageView.image)
+        if (ImageView.image.zoom == ImageView.default_zoom)
+          if (State.current is not ImageListState)
+            State.change_state( ImageListState )
+          endIf
+        else
+          if (State.current is not ZoomState)
+            State.change_state( ZoomState )
+          endIf
+        endIf
+      endIf
+endClass
