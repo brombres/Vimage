@@ -25,12 +25,12 @@ class ImageView : UIComponent [singleton]
         if (is_modified)
           is_modified = false
           visible_bounds = Box( image.bitmap.size )
-          local new_size : XY
+          local new_size : RealXY
           if (min_zoom)
-            new_size = ((image.bitmap.size->RealXY * image.zoom) + RealXY(0.5,0.5))->XY
+            new_size = (image.bitmap.size->RealXY * image.zoom)
           else
             local scale = ((display_bounds.size->RealXY*RealXY(1,2)) / image.bitmap.size->RealXY).min
-            new_size = ((image.bitmap.size->RealXY * scale) + RealXY(0.5,0.5))->XY
+            new_size = (image.bitmap.size->RealXY * scale)
             default_zoom = (new_size.x->Real64 / image.bitmap.width)
             min_zoom = default_zoom.or_smaller( 1.0 )
             max_zoom = which{ default_zoom>1.0:default_zoom || 1.0 }
@@ -39,7 +39,7 @@ class ImageView : UIComponent [singleton]
                 image.zoom = min_zoom
                 image.camera = RealXY(0.5,0.5)
               else
-                new_size = ((image.bitmap.size->RealXY * image.zoom) + RealXY(0.5,0.5))->XY
+                new_size = (image.bitmap.size->RealXY * image.zoom)
               endIf
             else
               image.zoom = default_zoom
@@ -53,15 +53,12 @@ class ImageView : UIComponent [singleton]
 
           TitleBar.zoom = image.zoom
           canvas = image.text_canvas( new_size, display_bounds )
-          #local display_image = image.bitmap.resized( new_size )
-          #canvas = ANSIBitmap( display_image )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
         endIf
 
         ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DARK_GRAY) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
-          #local pos = Box( display_bounds.center - (sz*image.camera), sz ).clamped( display_bounds ).top_left
           local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily

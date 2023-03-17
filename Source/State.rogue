@@ -69,8 +69,8 @@ class StandardState : State
       key_handlers_2[Keycode.F+SHIFT]       = CmdFlipV
       key_handlers_2[Keycode.N]               = CmdParseJoinH
       key_handlers_2[Keycode.N+SHIFT]         = CmdParseJoinV
-      key_handlers[Keycode.P]               = KeyHandlerPaste
-      key_handlers[Keycode.PERIOD]          = KeyHandlerPeriod
+      key_handlers_2[Keycode.P]               = CmdPaste
+      key_handlers_2[Keycode.PERIOD]          = CmdRepeatLast
       key_handlers[Keycode.Q]               = KeyHandlerQBuffer
       key_handlers_2[Keycode.R]             = CmdRotateCW
       key_handlers_2[Keycode.R+SHIFT]       = CmdRotateCCW
@@ -158,16 +158,13 @@ endClass
 
 class EnterCmdLineState : State
   METHODS
-    method find_commands( keyword:String )->CmdLineHandler[]
+    method find_commands( keyword:String, &allow_partial )->CmdLineHandler[]
       local cmds = CmdLineHandler[]
       forEach (cmd in VimageUI.cmd_line_handlers)
-        if (cmd.keyword == keyword) cmds.add( cmd )
+        if (cmd.keyword == keyword or (allow_partial and cmd.keyword.begins_with(keyword)))
+          cmds.add( cmd )
+        endIf
       endForEach
-      if (cmds.is_empty)
-        forEach (cmd in VimageUI.cmd_line_handlers)
-          if (cmd.keyword.begins_with(keyword)) cmds.add( cmd )
-        endForEach
-      endIf
       return cmds
 
     method on( e:KeyEvent )
@@ -188,7 +185,8 @@ class EnterCmdLineState : State
             return
           endIf
 
-          local cmds = find_commands( VimageUI.command.before_first(' ') )
+          local cmds = find_commands( VimageUI.command.before_first(' '),
+              &allow_partial=not VimageUI.command.contains(' ') )
           which (cmds.count)
             case 0
               if (e.keycode == Keycode.SPACE)

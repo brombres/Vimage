@@ -159,11 +159,17 @@ class Vimage [singleton]
                |  --help, -h, -?
                |    Show this help text.
 
+    method reset_repeat_count->Int32
+      local result = which{ repeat_count || 1 }
+      repeat_count = null
+      return result
+
     method repeat_count_string->String
       if (repeat_count) return repeat_count.value + ""
       else              return ""
 
     method save_undo
+      if (undo_stack.count > 20) undo_stack.remove_first
       local state  = ImageList->Value
       undo_stack.add( state )
 

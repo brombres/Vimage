@@ -153,7 +153,35 @@ class CmdCopy( a:String, b:String ) : EditCmd
       ImageView.mark_modified
 endClass
 
-class CmdCrop( width:Int32?, height:Int32? ) : EditCmd
+class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print( "crop $ $ $ $"(left,top,right,bottom) )
+        if local selected = ImageList.selected
+          local size = selected.image.bitmap.size
+          if (size.x - (left+right) < 1 or size.y - (top+bottom) < 1)
+            status.print " [exceeds image dimensions]"
+          endIf
+        else
+          status.print " [no images]"
+        endIf
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
+
+    method execute( image:Image )
+      if (image.size.x - (left+right) < 1 or image.size.y - (top+bottom) < 1)
+        return
+      endIf
+
+      image.cloned_bitmap.crop( left, top, right, bottom )
+      ImageView.show( image )
+endClass
+
+class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -175,8 +203,10 @@ class CmdCrop( width:Int32?, height:Int32? ) : EditCmd
     method execute( image:Image )
       if (width)
         local width = this.width.value
+        if (width < 0) width = image.bitmap.width + width
         if (height)
           local height = this.height.value
+          if (height < 0) height = image.bitmap.height + height
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
@@ -190,6 +220,7 @@ class CmdCrop( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
+        if (height < 0) height = image.bitmap.height + height
         local new_size = XY( image.bitmap.width, height )
         if (image.bitmap.size == new_size) return
 
@@ -679,20 +710,38 @@ class CmdRotateCCW : EditCmd [singleton]
       endIf
 endClass
 
-class CmdPaste( repeat_count:Int32 ) : EditCmd
+class CmdPaste( repeat_count:Int32 ) : EditCmd [singleton]
   METHODS
+    method init
+
+    method on( e:KeyEvent )
+      Vimage.execute( CmdPaste(Vimage.reset_repeat_count) )
+
     method update_status
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
 
     method execute
-      local bitmap = Vimage.clipboard.bitmap.cloned
-      if (ImageList.selected)
-        local before_index = ImageList.selected.index
-        ImageList.insert( Image(bitmap), before_index )
-        ImageList.select( before_index )
-      else
-        ImageList.add( Image(bitmap) )
-        ImageList.select( 0 )
+      local bitmap = Vimage.clipboard.bitmap
+      loop repeat_count
+        if (ImageList.selected)
+          local before_index = ImageList.selected.index
+          ImageList.insert( Image(bitmap), before_index )
+          ImageList.select( before_index )
+        else
+          ImageList.add( Image(bitmap) )
+          ImageList.select( 0 )
+        endIf
+      endLoop
+endClass
+
+class CmdRepeatLast : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "$. (repeat last command)"(which{Vimage.repeat_count==1:""||Vimage.repeat_count->String})
+
+    method execute
+      if (Vimage.last_cmd)
+        Vimage.execute( Vimage.last_cmd )
       endIf
 endClass
 
@@ -767,7 +816,7 @@ class CmdSplit( dims:XY ) : EditCmd
           local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
           local img : Image
           if (image.file)
-            img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) )
+            img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]
           elseIf (image.name)
             img = Image( tile, "$-$"(image.name,seq.format(fmt)) )
           else

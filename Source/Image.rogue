@@ -9,6 +9,7 @@ class Image
     zoom        : Real64
     camera      = RealXY(0.5,0.5)
     is_modified : Logical
+    error       : String
 
     cached_text_canvas    : TextCanvas
     cached_bitmap_size    : XY
@@ -17,15 +18,19 @@ class Image
 
   METHODS
     method init( bitmap, name=null )
+      is_modified = true
 
     method init( bitmap, file )
       if (file) name = file.value.filepath
 
     method init( file )
-      if local bitmap = Bitmap( file.value )
-        init( bitmap, file.value.filepath )
+      name = file.value.filepath
+      if (file.value.exists)
+        bitmap = Bitmap( file.value )
+        if (bitmap.error) error = "Unsupported file type or corrupted file: " + file
       else
-        init( Bitmap(16,16), file.value.filepath )
+        error = "File not found: " + file
+        bitmap = Bitmap(1,1)
       endIf
 
     method init( info:Value )
@@ -46,16 +51,18 @@ class Image
 
     method compact_name->String
       local result = String()
-      result.print( which{is_modified:'*'||' '} )
+      result.print( which{error:'!' || is_modified:'*' || ' '} )
       if (name)
         result.print File(name).filename.before_last('.')
-        result.print ' '
+        if (not error) result.print ' '
       endIf
-      result.print '['
-      result.print bitmap.width
-      result.print 'x'
-      result.print bitmap.height
-      result.print ']'
+      if (not error)
+        result.print '['
+        result.print bitmap.width
+        result.print 'x'
+        result.print bitmap.height
+        result.print ']'
+      endIf
       return result
 
 
@@ -96,9 +103,9 @@ class Image
         endIf
       endIf
       local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
-      piece.resize( piece_size*zoom )
+      piece.resize( (piece_size*zoom)->XY.clamped_low(XY(1,1)) )
 
-      cached_text_canvas = ANSIBitmap( piece )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
+      cached_text_canvas = ANSIBitmap( piece, &dither )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
       return cached_text_canvas
 
     method to->String

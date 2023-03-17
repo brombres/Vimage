@@ -326,15 +326,20 @@ endClass
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
-    syntax  = "[WxH|Wx|xH]"
+    syntax  = "[WxH|Wx|xH|LEFT TOP RIGHT BOTTOM]"
 
   METHODS
-    method execute( args:String )
-      local (w,h) = parse_size_either_or( args )
-      if (w or h)
-        execute( CmdCrop(w,h) )
+    method execute( arg_string:String )
+      local args = arg_string.split(' ')
+      if (args.count == 4)
+        execute( CmdCrop(args[0],args[1],args[2],args[3]) )
       else
-        status = "crop [missing or invalid size specification]"
+        local (w,h) = parse_size_either_or( arg_string )
+        if (w or h)
+          execute( CmdCropToSize(w,h) )
+        else
+          status = "crop [missing or invalid size specification]"
+        endIf
       endIf
 
 endClass

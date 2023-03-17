@@ -46,23 +46,3 @@ class KeyHandlerQBuffer : KeyHandler [singleton]
       VimageUI.is_running = false
 endClass
 
-class KeyHandlerPaste : KeyHandler [singleton]
-  METHODS
-    method on( e:KeyEvent )
-      if (Vimage.clipboard)
-        local cmd = CmdPaste( which{Vimage.repeat_count||1} )
-        Vimage.repeat_count = null
-        Vimage.execute( cmd )
-      else
-        status = "$p (paste) [empty clipboard]"(Vimage.repeat_count_string)
-      endIf
-endClass
-
-class KeyHandlerPeriod : KeyHandler [singleton]
-  METHODS
-    method on( e:KeyEvent )
-      if (Vimage.last_cmd)
-        Vimage.execute( Vimage.last_cmd )
-      endIf
-endClass
-

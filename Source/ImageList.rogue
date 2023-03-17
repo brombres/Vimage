@@ -37,12 +37,6 @@ class ImageList : UIList [singleton]
     method on_resize
       fixed_width = FIXED_WIDTH
 
-      #{
-    method request_redraw [override]
-      prior.request_redraw
-      scroll_view.request_redraw
-      }#
-
     method scroll_view->ImageListScrollView
       local view = parent
       while (view)
@@ -74,24 +68,30 @@ class ImageList : UIList [singleton]
       endIf
       selected = item
       if (item)
-        item.request_redraw
-        VimageUI.show( item.image )
-        localize scroll_view
-        if (scroll_view)
-          local item_bounds = item.display_bounds
-          local view_bounds = scroll_view.display_bounds
-          local delta = item_bounds.y2 - view_bounds.y2
-          if (delta > 0)
-            scroll_view.content_offset -= XY(0,delta)
-          else
-            delta = view_bounds.y1 - item_bounds.y1
+        if (item.image.error)
+          ImageView.show( null )
+          TitleBar.show( item.image )
+          StatusBar.text = "[ERROR] $"(item.image.error)
+        else
+          item.request_redraw
+          VimageUI.show( item.image )
+          localize scroll_view
+          if (scroll_view)
+            local item_bounds = item.display_bounds
+            local view_bounds = scroll_view.display_bounds
+            local delta = item_bounds.y2 - view_bounds.y2
             if (delta > 0)
-              scroll_view.content_offset += XY(0,delta)
+              scroll_view.content_offset -= XY(0,delta)
+            else
+              delta = view_bounds.y1 - item_bounds.y1
+              if (delta > 0)
+                scroll_view.content_offset += XY(0,delta)
+              endIf
             endIf
+            #if local intersection = (item.display_bounds & this.display_bounds)
+            #else
+            #endIf
           endIf
-          #if local intersection = (item.display_bounds & this.display_bounds)
-          #else
-          #endIf
         endIf
       else
         VimageUI.show( null )
