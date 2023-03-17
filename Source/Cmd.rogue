@@ -734,6 +734,19 @@ class CmdPaste( repeat_count:Int32 ) : EditCmd [singleton]
       endLoop
 endClass
 
+class CmdRedo : Cmd [singleton]
+  METHODS
+    method update_status
+      if (Vimage.redo_stack.count)
+        status = "^R (redo)"
+      else
+        status = "^R (redo) [no commands to redo]"
+      endIf
+
+    method execute
+      Vimage.redo
+endClass
+
 class CmdRepeatLast : Cmd [singleton]
   METHODS
     method update_status
@@ -926,7 +939,11 @@ endClass
 class CmdUndo : Cmd [singleton]
   METHODS
     method update_status
-      status = "u (undo)"
+      if (Vimage.undo_stack.count)
+        status = "u (undo)"
+      else
+        status = "u (undo) [no commands to undo]"
+      endIf
 
     method execute
       Vimage.undo

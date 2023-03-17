@@ -105,6 +105,7 @@ class Vimage [singleton]
     bg_color     = Color.BLACK : Color
     clipboard    : Image
     undo_stack   = @[]
+    redo_stack   = @[]
 
   METHODS
     method init( args:String[] )
@@ -172,9 +173,16 @@ class Vimage [singleton]
       if (undo_stack.count > 20) undo_stack.remove_first
       local state  = ImageList->Value
       undo_stack.add( state )
+      redo_stack.clear
 
     method undo
       if (undo_stack.is_empty) return
+      redo_stack.add( ImageList->Value )  # save current state as a redo
       ImageList.unpack( undo_stack.remove_last )
+
+    method redo
+      if (redo_stack.is_empty) return
+      undo_stack.add( ImageList->Value )  # save current state as an undo
+      ImageList.unpack( redo_stack.remove_last )
 
 endClass

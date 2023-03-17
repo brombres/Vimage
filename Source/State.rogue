@@ -74,6 +74,7 @@ class StandardState : State
       key_handlers[Keycode.Q]               = KeyHandlerQBuffer
       key_handlers_2[Keycode.R]             = CmdRotateCW
       key_handlers_2[Keycode.R+SHIFT]       = CmdRotateCCW
+      key_handlers_2[Keycode.R+SHIFT+CONTROL] = CmdRedo
       key_handlers_2[Keycode.U]             = CmdUndo
       key_handlers[Keycode.Y]               = KeyHandler( YState )
       key_handlers_2[Keycode.Z]             = CmdZoomIn
