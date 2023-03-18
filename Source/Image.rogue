@@ -110,6 +110,7 @@ class Image
 
     method to->String
       if (name)
+        if (error) return name
         return "$$ [$x$]"(which{is_modified:"*"||""},name,bitmap.width,bitmap.height)
       elseIf (is_modified)
         return "*[$x$]"(bitmap.width,bitmap.height)

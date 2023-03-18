@@ -3,8 +3,9 @@ uses Geometry
 
 class CmdLineHandler
   PROPERTIES
-    keyword : String
-    syntax  : String
+    keyword   : String
+    alternate : String
+    syntax    : String
 
   METHODS
     method execute( args:String )
@@ -427,20 +428,45 @@ endClass
 
 class CmdLineQuit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "quit"
+    keyword   = "q"
+    syntax    = "(quit)"
 
   METHODS
     method execute( args:String )
-      execute( CmdQuit )
+      execute( CmdQuit() )
+
+endClass
+
+class CmdLineForceQuit : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "q!"
+    syntax  = "(force-quit)"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdQuit(&force) )
 
 endClass
 
 class CmdLineQuitAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "qall"
+    keyword = "qa"
+    syntax  = "(quit all)"
 
   METHODS
     method execute( args:String )
+      execute( CmdQuitAll() )
+
+endClass
+
+class CmdLineForceQuitAll : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "qa!"
+    syntax  = "(force-quit all)"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdQuitAll(&force) )
 
 endClass
 

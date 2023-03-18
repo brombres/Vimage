@@ -6,6 +6,9 @@ class Cmd
     method create( new_state:State )->Cmd
       return CmdChangeState( new_state )
 
+    method create( callback:Function(e:KeyEvent) )->Cmd
+      return CmdCallback( callback )
+
   METHODS
     method init
 
@@ -58,6 +61,12 @@ class InteractiveCmd : Cmd
   METHODS
     method is_interactive->Logical
       return true
+endClass
+
+class CmdCallback( callback:Function(e:KeyEvent) ) : Cmd
+  METHODS
+    method on( e:KeyEvent )
+      callback( e )
 endClass
 
 class CmdChangeState( new_state:State ) : InteractiveCmd
@@ -601,13 +610,19 @@ class CmdNew( size:XY ) : EditCmd
       ImageList.request_layout
 endClass
 
-class CmdQuit : EditCmd [singleton]
+class CmdQuit( force=false:Logical ) : EditCmd
   METHODS
     method update_status
-      status = "quit"
+      if (force) status = "quit! (force-quit)"
+      else       status = "quit"
 
     method execute
       if (ImageList.selected)
+        if (not force and ImageList.selected.image.is_modified)
+          status = "q (quit) [image is modified; ':w' or else ':q!' to force-quit]"
+          return
+        endIf
+
         if (ImageList.count > 1)
           if (ImageList.selected is ImageList.last_child)
             ImageList.remove( ImageList.selected )
@@ -623,6 +638,26 @@ class CmdQuit : EditCmd [singleton]
       else
         VimageUI.is_running = false
       endIf
+endClass
+
+class CmdQuitAll( force=false:Logical ) : EditCmd
+  METHODS
+    method update_status
+      if (force) status = "qa! (force-quit all)"
+      else       status = "qa (quit all)"
+
+    method execute
+      if (not force)
+        contingent
+          forEach (item in ImageList)
+            necessary (not item->(as ImageListItem).image.is_modified)
+          endForEach
+        unsatisfied
+          status = "qa (quit all) [modified images exist; ':w' each or else ':qa!' to force-quit]"
+          return
+        endContingent
+      endIf
+      VimageUI.is_running = false
 endClass
 
 class CmdResize( width:Int32?, height:Int32? ) : EditCmd
@@ -758,6 +793,24 @@ class CmdRepeatLast : Cmd [singleton]
       if (Vimage.last_cmd)
         Vimage.execute( Vimage.last_cmd )
       endIf
+endClass
+
+class CmdScroll( dx:Real, dy:Real ) : EditCmd
+  METHODS
+    method update_status
+      if (dx > 0) status = "l (scroll right)"
+      elseIf (dx < 0) status = "h (scroll left)"
+      elseIf (dy > 0) status = "j (scroll down)"
+      else            status = "k (scroll up)"
+
+    method execute
+      ImageView.scroll( RealXY(dx,dy) )
+      if (State.current not instanceOf ZoomState)
+        if (ImageView.image and ImageView.image.zoom != ImageView.default_zoom)
+          state = ZoomState
+        endIf
+      endIf
+
 endClass
 
 class CmdSplit( dims:XY ) : EditCmd
@@ -951,7 +1004,7 @@ class CmdUndo : Cmd [singleton]
       Vimage.undo
 endClass
 
-class CmdYY : EditCmd [singleton]
+class CmdYank : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
@@ -966,13 +1019,13 @@ class CmdYY : EditCmd [singleton]
       endIf
 endClass
 
-class CmdYP : EditCmd [singleton]
+class CmdYankAndPaste : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
-        set_status( "yp (yank and paste / duplicate)" )
+        set_status( "yp (yank and paste; duplicate)" )
       else
-        set_status( "yp [no image to duplicate]" )
+        set_status( "yp (yank and paste) [no image to duplicate]" )
       endIf
 
     method execute

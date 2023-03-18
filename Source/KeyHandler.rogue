@@ -39,10 +39,3 @@ class KeyHandler
       endIf
 endClass
 
-class KeyHandlerQBuffer : KeyHandler [singleton]
-  METHODS
-    method on( e:KeyEvent )
-      status = "q (quit)"
-      VimageUI.is_running = false
-endClass
-

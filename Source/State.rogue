@@ -64,21 +64,20 @@ class StandardState : State
   METHODS
     method init
       key_handlers_2[Keycode.SEMICOLON+SHIFT] = CmdBeginCommandLine
-      key_handlers_2[Keycode.D]               = Cmd( DState )
-      key_handlers_2[Keycode.F]             = CmdFlipH
-      key_handlers_2[Keycode.F+SHIFT]       = CmdFlipV
+      key_handlers_2[Keycode.D]               = Cmd( DeleteState )
+      key_handlers_2[Keycode.F]               = CmdFlipH
+      key_handlers_2[Keycode.F+SHIFT]         = CmdFlipV
       key_handlers_2[Keycode.N]               = CmdParseJoinH
       key_handlers_2[Keycode.N+SHIFT]         = CmdParseJoinV
       key_handlers_2[Keycode.P]               = CmdPaste
       key_handlers_2[Keycode.PERIOD]          = CmdRepeatLast
-      key_handlers[Keycode.Q]               = KeyHandlerQBuffer
-      key_handlers_2[Keycode.R]             = CmdRotateCW
-      key_handlers_2[Keycode.R+SHIFT]       = CmdRotateCCW
+      key_handlers_2[Keycode.R]               = CmdRotateCW
+      key_handlers_2[Keycode.R+SHIFT]         = CmdRotateCCW
       key_handlers_2[Keycode.R+SHIFT+CONTROL] = CmdRedo
-      key_handlers_2[Keycode.U]             = CmdUndo
-      key_handlers[Keycode.Y]               = KeyHandler( YState )
-      key_handlers_2[Keycode.Z]             = CmdZoomIn
-      key_handlers_2[Keycode.Z+SHIFT]       = CmdZoomOut
+      key_handlers_2[Keycode.U]               = CmdUndo
+      key_handlers_2[Keycode.Y]               = Cmd( YankState )
+      key_handlers_2[Keycode.Z]               = CmdZoomIn
+      key_handlers_2[Keycode.Z+SHIFT]         = CmdZoomOut
 endClass
 
 class ImageListState : StandardState [singleton]
@@ -89,6 +88,8 @@ class ImageListState : StandardState [singleton]
       key_handlers_2[Keycode.K]       = CmdImageListPrevious
       key_handlers_2[Keycode.J+SHIFT] = CmdImageListShiftDown
       key_handlers_2[Keycode.K+SHIFT] = CmdImageListShiftUp
+      key_handlers_2[Keycode.H]       = CmdScroll( -0.5, 0 )
+      key_handlers_2[Keycode.L]       = CmdScroll(  0.5, 0 )
       key_handlers_2[Keycode.T]       = CmdParseStack
 
     method on( e:KeyEvent )
@@ -118,11 +119,11 @@ class ZoomState : StandardState [singleton]
   METHODS
     method init
       prior.init
-      key_handlers[Keycode.H]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(-0.5,0)) )
-      key_handlers[Keycode.J]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,0.5)) )
-      key_handlers[Keycode.K]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0,-0.5)) )
-      key_handlers[Keycode.L]      = KeyHandler( (e) => Vimage::ImageView.scroll(RealXY(0.5,0)) )
-      key_handlers[Keycode.ESCAPE] = KeyHandler( ImageListState )
+      key_handlers_2[Keycode.H]      = CmdScroll(-0.5, 0.0 )
+      key_handlers_2[Keycode.J]      = CmdScroll( 0.0, 0.5 )
+      key_handlers_2[Keycode.K]      = CmdScroll( 0.0,-0.5 )
+      key_handlers_2[Keycode.L]      = CmdScroll( 0.5, 0.0 )
+      key_handlers_2[Keycode.ESCAPE] = Cmd( ImageListState )
 
     method on( e:KeyEvent )
       if (e.is_press)
@@ -158,12 +159,16 @@ endClass
 
 class EnterCmdLineState : State
   METHODS
-    method find_commands( keyword:String, &allow_partial )->CmdLineHandler[]
+    method find_commands( keyword:String, &allow_partial, &use_alternate )->CmdLineHandler[]
       local cmds = CmdLineHandler[]
       forEach (cmd in VimageUI.cmd_line_handlers)
-        if (cmd.keyword == keyword or (allow_partial and cmd.keyword.begins_with(keyword)))
+        contingent
+          sufficient (cmd.keyword == keyword)
+          sufficient (allow_partial and cmd.keyword.begins_with(keyword))
+          necessary  (use_alternate and cmd.alternate == keyword)
+        satisfied
           cmds.add( cmd )
-        endIf
+        endContingent
       endForEach
       return cmds
 
@@ -185,8 +190,14 @@ class EnterCmdLineState : State
             return
           endIf
 
-          local cmds = find_commands( VimageUI.command.before_first(' '),
-              &allow_partial=not VimageUI.command.contains(' ') )
+          local cmds = find_commands( VimageUI.command.before_first(' ') )
+          if (not cmds.count)
+            cmds = find_commands( VimageUI.command.before_first(' '), &allow_partial )
+            if (cmds.count != 1)
+              cmds = find_commands( VimageUI.command.before_first(' '), &use_alternate )
+            endIf
+          endIf
+
           which (cmds.count)
             case 0
               if (e.keycode == Keycode.SPACE)
@@ -227,7 +238,7 @@ class EnterCmdLineState : State
 
         local keyword = cmd_line.before_first(' ')
         local args = cmd_line.after_first(' ')
-        local cmds = find_commands( keyword )
+        local cmds = find_commands( keyword, &allow_partial=not cmd_line.contains(' '), &use_alternate )
 
         which (cmds.count)
           case 0
@@ -246,9 +257,11 @@ class EnterCmdLineState : State
           case 1
             local cmd = cmds.first
             builder.print keyword
-            builder.style.dim
-            builder.print cmd.keyword[ forEach in keyword.count..<cmd.keyword.count ]
-            builder.style.dim_off
+            if (cmd.keyword.begins_with(keyword))
+              builder.style.dim
+              builder.print cmd.keyword[ forEach in keyword.count..<cmd.keyword.count ]
+              builder.style.dim_off
+            endIf
 
             if (args.count)
               builder.print ' '
@@ -278,7 +291,7 @@ class EnterCmdLineState : State
       endUse
 endClass
 
-class DState : State [singleton]
+class DeleteState : State [singleton]
   METHODS
     method on_enter
       use status = StatusBar
@@ -302,7 +315,7 @@ class DState : State [singleton]
       endIf
 endClass
 
-class YState : State [singleton]
+class YankState : State [singleton]
   METHODS
     method on_enter
       use status = StatusBar
@@ -317,10 +330,10 @@ class YState : State [singleton]
         if (e.keycode == Keycode.ESCAPE)
           cancel
         elseIf (e.unicode == 'y')
-          execute( CmdYY )
+          execute( CmdYank )
           state = ImageListState
         elseIf (e.unicode == 'p')
-          execute( CmdYP )
+          execute( CmdYankAndPaste )
           state = ImageListState
         else
           set_status( "[invalid command 'y$']"(e.unicode) )
