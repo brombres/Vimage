@@ -540,20 +540,16 @@ class CmdLineWrite : CmdLineHandler [singleton]
       endIf
 
       if (args == "")
-        if (ImageList.selected.image.file)
-          args = ImageList.selected.image.file.value.filepath
-        else
-          status = "w [missing filepath]"
-          return
-        endIf
-      else
-        which (File(args).extension.to_lowercase)
-          case "png", "jpg", "jpeg"
-            noAction
-          others
-            args += ".png"
-        endWhich
+        Vimage.execute( CmdWrite )
+        return
       endIf
+
+      which (File(args).extension.to_lowercase)
+        case "png", "jpg", "jpeg"
+          noAction
+        others
+          args += ".png"
+      endWhich
 
       local file = File( args )
       local image = ImageList.selected.image

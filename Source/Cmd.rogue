@@ -1004,6 +1004,33 @@ class CmdUndo : Cmd [singleton]
       Vimage.undo
 endClass
 
+class CmdWrite : EditCmd [singleton]
+  METHODS
+    method execute
+      local filepath : String
+      if (ImageList.selected.image.file)
+        filepath = ImageList.selected.image.file.value.filepath
+      else
+        status = "w [missing filepath]"
+        return
+      endIf
+
+      local file = File( filepath )
+      local image = ImageList.selected.image
+      image.file = file
+      image.name = file.filepath
+      local bitmap = image.bitmap
+      which (File(filepath).extension.to_lowercase)
+        case "png"
+          file.save( bitmap.to_png_bytes )
+        case "jpg", ".jpeg"
+          file.save( bitmap.to_jpeg_bytes )
+      endWhich
+      status = ''"$" [$x$, $ bytes] written''(filepath,bitmap.width,bitmap.height,file.size.format(","))
+
+      image.is_modified = false
+endClass
+
 class CmdYank : EditCmd [singleton]
   METHODS
     method update_status
