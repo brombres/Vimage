@@ -9,6 +9,9 @@ class Cmd
     method create( callback:Function(e:KeyEvent) )->Cmd
       return CmdCallback( callback )
 
+  PROPERTIES
+    repeat_count : Int32
+
   METHODS
     method init
 
@@ -17,13 +20,18 @@ class Cmd
       if (Vimage.repeat_count)
         local n = Vimage.repeat_count.value
         Vimage.repeat_count = null
-        loop (n) execute
+        execute( n )
       else
-        execute
+        execute( 1 )
       endIf
 
     method execute
       noAction
+
+    method execute( repeat_count )
+      loop (repeat_count)
+        execute
+      endLoop
 
     method is_edit->Logical
       return false
@@ -194,6 +202,44 @@ class CmdBitwiseNOT : EditCmd [singleton]
                 |{
                 |  RogueInt32 argb = *(++data);
                 |  *data = (argb & 0xFF000000) | (~argb & 0xFFffFF);
+                |}
+      endIf
+endClass
+
+class CmdBitwiseRotateLeft : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "< (bitwise rotate left)"
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.size.product
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb & 0xFF000000) | ((argb<<1) & 0xFFffFE) | ((argb>>23) & 1);
+                |}
+      endIf
+endClass
+
+class CmdBitwiseRotateRight : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "> (bitwise rotate right)"
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.size.product
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb & 0xFF000000) | ((argb>>1) & 0x7FffFF) | ((argb<<23) & 0x800000);
                 |}
       endIf
 endClass
@@ -827,12 +873,10 @@ class CmdRotateCCW : EditCmd [singleton]
       endIf
 endClass
 
-class CmdPaste( repeat_count:Int32 ) : EditCmd [singleton]
+
+class CmdPaste : EditCmd [singleton]
   METHODS
     method init
-
-    method on( e:KeyEvent )
-      Vimage.execute( CmdPaste(Vimage.reset_repeat_count) )
 
     method update_status
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
@@ -873,6 +917,12 @@ class CmdRepeatLast : Cmd [singleton]
 
     method execute
       if (Vimage.last_cmd)
+        if (repeat_count == 1)
+          local n = Vimage.last_cmd.repeat_count
+          if (n != 1) Vimage.repeat_count = n
+        else
+          Vimage.repeat_count = this.repeat_count
+        endIf
         Vimage.execute( Vimage.last_cmd )
       endIf
 endClass

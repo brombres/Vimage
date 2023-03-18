@@ -66,8 +66,8 @@ class Image
       return result
 
 
-    method set_is_modified( setting:Logical )
-      if (is_modified != setting)
+    method set_is_modified( @is_modified )
+      if (is_modified)
         if local selected = ImageList.selected
           if (this is selected.image)
             selected.request_redraw
@@ -75,7 +75,6 @@ class Image
           endIf
         endIf
       endIf
-      @is_modified = setting
 
     method size->XY
       return bitmap.size
