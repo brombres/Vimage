@@ -179,28 +179,24 @@ class CmdBitwiseXOR : EditCmd [singleton]
       endIf
 endClass
 
-#{
-class CmdBitwiseAND : EditCmd [singleton]
+class CmdBitwiseNOT : EditCmd [singleton]
   METHODS
     method update_status
-      status = "& (bitwise-AND with underlying image)"
+      status = "! (bitwise-NOT; invert)"
 
     method execute
       if local selected = ImageList.selected
-        if (selected is ImageList.last_child)
-          status = "& (bitwise-AND) [no underlying image]"
-          return
-        else
-          local top    = selected.image.bitmap
-          local bottom_image  = selected.next->(as ImageListItem).image
-          local bottom_bitmap = bottom_image.cloned_bitmap
-          top.blit( bottom_bitmap, XY(0,0), BlitModeAND )
-          ImageList.remove( selected )
-          ImageList.select( bottom_image )
-        endIf
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.size.product
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb & 0xFF000000) | (~argb & 0xFFffFF);
+                |}
       endIf
 endClass
-}#
 
 class CmdCopy( a:String, b:String ) : EditCmd
   METHODS
@@ -1117,7 +1113,7 @@ class CmdWrite : EditCmd [singleton]
       image.is_modified = false
 endClass
 
-class CmdYank : EditCmd [singleton]
+class CmdYank : Cmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)

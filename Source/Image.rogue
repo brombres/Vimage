@@ -38,7 +38,7 @@ class Image
       bitmap = info//bitmap.to<<Bitmap>>
       name = which{ info//name:info//name->String || null }
       zoom = info//zoom
-      camera = XY( info//camera//x, info//camera//y )
+      camera = RealXY( info//camera//x, info//camera//y )
       is_modified = info//is_modified
 
       cached_text_canvas = null
@@ -69,7 +69,10 @@ class Image
     method set_is_modified( setting:Logical )
       if (is_modified != setting)
         if local selected = ImageList.selected
-          if (this is selected.image) selected.request_redraw
+          if (this is selected.image)
+            selected.request_redraw
+            ImageView.mark_modified
+          endIf
         endIf
       endIf
       @is_modified = setting
