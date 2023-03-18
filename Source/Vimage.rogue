@@ -76,6 +76,7 @@ uses Bitmap/IO
 uses Epilog
 uses UI
 
+$include BlitMode
 $include Cmd
 $include CmdLineHandler
 $include Image

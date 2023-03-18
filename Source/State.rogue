@@ -15,8 +15,7 @@ class State
       current.set_state( new_state )
 
   PROPERTIES
-    key_handlers = [Int32:KeyHandler]
-    key_handlers_2 = [Int32:Cmd]
+    key_handlers = [Int32:Cmd]
 
   METHODS
     method cancel
@@ -29,10 +28,6 @@ class State
     method on( e:KeyEvent )
       if (e.is_press)
         if local handler = key_handlers[ (e.modifier_key_state:<<:16) | e.keycode ]
-          handler.on( e )
-          return
-        endIf
-        if local handler = key_handlers_2[ (e.modifier_key_state:<<:16) | e.keycode ]
           handler.on( e )
           return
         endIf
@@ -63,38 +58,28 @@ endClass
 class StandardState : State
   METHODS
     method init
-      key_handlers_2[Keycode.SEMICOLON+SHIFT] = CmdBeginCommandLine
-      key_handlers_2[Keycode.D]               = Cmd( DeleteState )
-      key_handlers_2[Keycode.F]               = CmdFlipH
-      key_handlers_2[Keycode.F+SHIFT]         = CmdFlipV
-      key_handlers_2[Keycode.N]               = CmdParseJoinH
-      key_handlers_2[Keycode.N+SHIFT]         = CmdParseJoinV
-      key_handlers_2[Keycode.P]               = CmdPaste
-      key_handlers_2[Keycode.PERIOD]          = CmdRepeatLast
-      key_handlers_2[Keycode.R]               = CmdRotateCW
-      key_handlers_2[Keycode.R+SHIFT]         = CmdRotateCCW
-      key_handlers_2[Keycode.R+SHIFT+CONTROL] = CmdRedo
-      key_handlers_2[Keycode.U]               = CmdUndo
-      key_handlers_2[Keycode.Y]               = Cmd( YankState )
-      key_handlers_2[Keycode.Z]               = CmdZoomIn
-      key_handlers_2[Keycode.Z+SHIFT]         = CmdZoomOut
-endClass
-
-class ImageListState : StandardState [singleton]
-  METHODS
-    method init
-      prior.init
-      key_handlers_2[Keycode.J]       = CmdImageListNext
-      key_handlers_2[Keycode.K]       = CmdImageListPrevious
-      key_handlers_2[Keycode.J+SHIFT] = CmdImageListShiftDown
-      key_handlers_2[Keycode.K+SHIFT] = CmdImageListShiftUp
-      key_handlers_2[Keycode.H]       = CmdScroll( -0.5, 0 )
-      key_handlers_2[Keycode.L]       = CmdScroll(  0.5, 0 )
-      key_handlers_2[Keycode.T]       = CmdParseStack
+      key_handlers[Keycode.SEMICOLON+SHIFT] = CmdBeginCommandLine
+      key_handlers[Keycode.NUMBER_7+SHIFT]  = CmdBitwiseAND
+      key_handlers[Keycode.BACKSLASH+SHIFT] = CmdBitwiseOR
+      key_handlers[Keycode.BACKQUOTE+SHIFT] = CmdBitwiseXOR
+      key_handlers[Keycode.D]               = Cmd( DeleteState )
+      key_handlers[Keycode.F]               = CmdFlipH
+      key_handlers[Keycode.F+SHIFT]         = CmdFlipV
+      key_handlers[Keycode.N]               = CmdParseJoinH
+      key_handlers[Keycode.N+SHIFT]         = CmdParseJoinV
+      key_handlers[Keycode.P]               = CmdPaste
+      key_handlers[Keycode.PERIOD]          = CmdRepeatLast
+      key_handlers[Keycode.R]               = CmdRotateCW
+      key_handlers[Keycode.R+SHIFT]         = CmdRotateCCW
+      key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo
+      key_handlers[Keycode.U]               = CmdUndo
+      key_handlers[Keycode.Y]               = Cmd( YankState )
+      key_handlers[Keycode.Z]               = CmdZoomIn
+      key_handlers[Keycode.Z+SHIFT]         = CmdZoomOut
 
     method on( e:KeyEvent )
       if (e.is_press)
-        if (e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
+        if (not e.is_shift_pressed and e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
           local digit = (e.keycode - Keycode.NUMBER_0)
           if (Vimage.repeat_count)
             Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
@@ -105,8 +90,30 @@ class ImageListState : StandardState [singleton]
           StatusBar.request_redraw
           return
         endIf
+
+        if (e.is_press(Keycode.ESCAPE) and Vimage.repeat_count)
+          Vimage.repeat_count = null
+          StatusBar.builder.[clear,flush]
+          StatusBar.request_redraw
+          return
+        endIf
       endIf
+
       prior.on( e )
+
+endClass
+
+class ImageListState : StandardState [singleton]
+  METHODS
+    method init
+      prior.init
+      key_handlers[Keycode.J]       = CmdImageListNext
+      key_handlers[Keycode.K]       = CmdImageListPrevious
+      key_handlers[Keycode.J+SHIFT] = CmdImageListShiftDown
+      key_handlers[Keycode.K+SHIFT] = CmdImageListShiftUp
+      key_handlers[Keycode.H]       = CmdScroll( -0.5, 0 )
+      key_handlers[Keycode.L]       = CmdScroll(  0.5, 0 )
+      key_handlers[Keycode.T]       = CmdParseStack
 
     method on_enter
       Vimage.repeat_count = null
@@ -119,28 +126,11 @@ class ZoomState : StandardState [singleton]
   METHODS
     method init
       prior.init
-      key_handlers_2[Keycode.H]      = CmdScroll(-0.5, 0.0 )
-      key_handlers_2[Keycode.J]      = CmdScroll( 0.0, 0.5 )
-      key_handlers_2[Keycode.K]      = CmdScroll( 0.0,-0.5 )
-      key_handlers_2[Keycode.L]      = CmdScroll( 0.5, 0.0 )
-      key_handlers_2[Keycode.ESCAPE] = Cmd( ImageListState )
-
-    method on( e:KeyEvent )
-      if (e.is_press)
-        if (e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
-          local digit = (e.keycode - Keycode.NUMBER_0)
-          if (Vimage.repeat_count)
-            Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
-          else
-            Vimage.repeat_count = digit
-            StatusBar.builder.clear
-          endIf
-          StatusBar.builder.print digit
-          StatusBar.request_redraw
-          return
-        endIf
-      endIf
-      prior.on( e )
+      key_handlers[Keycode.H]      = CmdScroll(-0.5, 0.0 )
+      key_handlers[Keycode.J]      = CmdScroll( 0.0, 0.5 )
+      key_handlers[Keycode.K]      = CmdScroll( 0.0,-0.5 )
+      key_handlers[Keycode.L]      = CmdScroll( 0.5, 0.0 )
+      key_handlers[Keycode.ESCAPE] = Cmd( ImageListState )
 
     method on_enter
       Vimage.repeat_count = null

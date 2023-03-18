@@ -116,6 +116,92 @@ class CmdBeginCommandLine : InteractiveCmd [singleton]
       state = EnterCmdLineState()
 endClass
 
+class CmdBitwiseAND : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "& (bitwise-AND with underlying image)"
+
+    method execute
+      if local selected = ImageList.selected
+        if (selected is ImageList.last_child)
+          status = "& (bitwise-AND) [no underlying image]"
+          return
+        else
+          local top    = selected.image.bitmap
+          local bottom_image  = selected.next->(as ImageListItem).image
+          local bottom_bitmap = bottom_image.cloned_bitmap
+          top.blit( bottom_bitmap, XY(0,0), BlitModeAND )
+          ImageList.remove( selected )
+          ImageList.select( bottom_image )
+        endIf
+      endIf
+endClass
+
+class CmdBitwiseOR : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "| (bitwise-OR with underlying image)"
+
+    method execute
+      if local selected = ImageList.selected
+        if (selected is ImageList.last_child)
+          status = "| (bitwise-OR) [no underlying image]"
+          return
+        else
+          local top    = selected.image.bitmap
+          local bottom_image  = selected.next->(as ImageListItem).image
+          local bottom_bitmap = bottom_image.cloned_bitmap
+          top.blit( bottom_bitmap, XY(0,0), BlitModeOR )
+          ImageList.remove( selected )
+          ImageList.select( bottom_image )
+        endIf
+      endIf
+endClass
+
+class CmdBitwiseXOR : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "~ (bitwise-XOR with underlying image)"
+
+    method execute
+      if local selected = ImageList.selected
+        if (selected is ImageList.last_child)
+          status = "~ (bitwise-XOR) [no underlying image]"
+          return
+        else
+          local top    = selected.image.bitmap
+          local bottom_image  = selected.next->(as ImageListItem).image
+          local bottom_bitmap = bottom_image.cloned_bitmap
+          top.blit( bottom_bitmap, XY(0,0), BlitModeXOR )
+          ImageList.remove( selected )
+          ImageList.select( bottom_image )
+        endIf
+      endIf
+endClass
+
+#{
+class CmdBitwiseAND : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "& (bitwise-AND with underlying image)"
+
+    method execute
+      if local selected = ImageList.selected
+        if (selected is ImageList.last_child)
+          status = "& (bitwise-AND) [no underlying image]"
+          return
+        else
+          local top    = selected.image.bitmap
+          local bottom_image  = selected.next->(as ImageListItem).image
+          local bottom_bitmap = bottom_image.cloned_bitmap
+          top.blit( bottom_bitmap, XY(0,0), BlitModeAND )
+          ImageList.remove( selected )
+          ImageList.select( bottom_image )
+        endIf
+      endIf
+endClass
+}#
+
 class CmdCopy( a:String, b:String ) : EditCmd
   METHODS
     method update_status
@@ -795,7 +881,7 @@ class CmdRepeatLast : Cmd [singleton]
       endIf
 endClass
 
-class CmdScroll( dx:Real, dy:Real ) : EditCmd
+class CmdScroll( dx:Real, dy:Real ) : Cmd
   METHODS
     method update_status
       if (dx > 0) status = "l (scroll right)"
