@@ -750,7 +750,9 @@ endClass
 class CmdRepeatLast : Cmd [singleton]
   METHODS
     method update_status
-      status = "$. (repeat last command)"(which{Vimage.repeat_count==1:""||Vimage.repeat_count->String})
+      if (not Vimage.last_cmd)
+        status = ". [no editing commands to repeat]"
+      endIf
 
     method execute
       if (Vimage.last_cmd)

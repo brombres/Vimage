@@ -99,9 +99,8 @@ class ImageListState : StandardState [singleton]
             Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
           else
             Vimage.repeat_count = digit
-            StatusBar.builder.clear
           endIf
-          StatusBar.builder.print digit
+          StatusBar.builder.[clear, print(Vimage.repeat_count.value), flush]
           StatusBar.request_redraw
           return
         endIf
