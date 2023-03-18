@@ -450,7 +450,7 @@ endClass
 
 class CmdLineQuitAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "qa"
+    keyword = "qq"
     syntax  = "(quit all)"
 
   METHODS
@@ -461,7 +461,7 @@ endClass
 
 class CmdLineForceQuitAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "qa!"
+    keyword = "qq!"
     syntax  = "(force-quit all)"
 
   METHODS
@@ -565,6 +565,8 @@ class CmdLineWrite : CmdLineHandler [singleton]
       status = ''"$" [$x$, $ bytes] written''(args,bitmap.width,bitmap.height,file.size.format(","))
 
       image.is_modified = false
+      ImageList.selected.request_redraw
+      TitleBar.request_redraw
 
     method syntax->String
       if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg]"

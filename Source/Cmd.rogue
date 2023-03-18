@@ -314,7 +314,7 @@ class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
         return
       endIf
 
-      image.cloned_bitmap.crop( left, top, right, bottom )
+      image.cloned_bitmap.crop( left, top, right, bottom, Vimage.bg_color )
       ImageView.show( image )
 endClass
 
@@ -771,8 +771,8 @@ endClass
 class CmdQuitAll( force=false:Logical ) : EditCmd
   METHODS
     method update_status
-      if (force) status = "qa! (force-quit all)"
-      else       status = "qa (quit all)"
+      if (force) status = "qq! (force-quit all)"
+      else       status = "qq (quit all)"
 
     method execute
       if (not force)
@@ -781,7 +781,7 @@ class CmdQuitAll( force=false:Logical ) : EditCmd
             necessary (not item->(as ImageListItem).image.is_modified)
           endForEach
         unsatisfied
-          status = "qa (quit all) [modified images exist; ':w' each or else ':qa!' to force-quit]"
+          status = "qq (quit all) [modified images exist; ':w' each or else ':qq!' to force-quit]"
           return
         endContingent
       endIf
@@ -883,16 +883,14 @@ class CmdPaste : EditCmd [singleton]
 
     method execute
       local bitmap = Vimage.clipboard.bitmap
-      loop repeat_count
-        if (ImageList.selected)
-          local before_index = ImageList.selected.index
-          ImageList.insert( Image(bitmap), before_index )
-          ImageList.select( before_index )
-        else
-          ImageList.add( Image(bitmap) )
-          ImageList.select( 0 )
-        endIf
-      endLoop
+      if (ImageList.selected)
+        local before_index = ImageList.selected.index
+        ImageList.insert( Image(bitmap), before_index )
+        ImageList.select( before_index )
+      else
+        ImageList.add( Image(bitmap) )
+        ImageList.select( 0 )
+      endIf
 endClass
 
 class CmdRedo : Cmd [singleton]
