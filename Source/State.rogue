@@ -84,6 +84,10 @@ class StandardState : State
     method on( e:KeyEvent )
       if (e.is_press)
         if (not e.is_shift_pressed and e.keycode >= Keycode.NUMBER_0 and e.keycode <= Keycode.NUMBER_9)
+          if (e.is_press(Keycode.NUMBER_0) and not Vimage.repeat_count)
+            Vimage.execute( CmdResetZoom )
+            return
+          endIf
           local digit = (e.keycode - Keycode.NUMBER_0)
           if (Vimage.repeat_count)
             Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
@@ -225,6 +229,9 @@ class EnterCmdLineState : State
           endWhich
         endIf
       endIf
+
+    method state_name->String
+      return "COMMAND LINE"
 
     method update_status( cmd_line:String )
       use builder = StatusBar

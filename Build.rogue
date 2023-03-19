@@ -27,7 +27,7 @@ augment Build
     PROJECT          = "Vimage"
     LAUNCHER_NAME    = PROJECT.to_lowercase : String
 
-    BUILD_MODE       = "debug"
+    BUILD_MODE       = "release"
     LAUNCHER_FOLDER  = "/usr/local/bin"
     ROGUEC_FLAGS     = ""
     #CC_ARGS_UNIX     = "Source/ObjC.m -I /System/Libraries/Frameworks -framework Foundation"
@@ -46,11 +46,7 @@ endRoutine
 
 routine rogo_run
   # Runs this project.
-  local files = Files(".")
-  files.add( "*.png" )
-  files.add( "*.jpg" )
-  files.add( "*.jpeg" )
-  execute exe_file.esc.appending( files->String[].join(' ') )
+  execute "$ ." (exe_file.esc)
 endRoutine
 
 routine rogo_debug

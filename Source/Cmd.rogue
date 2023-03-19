@@ -791,6 +791,18 @@ class CmdQuitAll( force=false:Logical ) : EditCmd
       VimageUI.is_running = false
 endClass
 
+class CmdResetZoom : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "0 (reset zoom)"
+
+    method execute
+      ImageView.reset_zoom
+      if (State.current instanceOf ZoomState)
+        state = ImageListState
+      endIf
+endClass
+
 class CmdResize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
