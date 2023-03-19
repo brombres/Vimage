@@ -206,6 +206,7 @@ class EnterCmdLineState : State
 
               if (keyword == cmds.first.keyword)
                 VimageUI.command.print ' '
+                update_status( VimageUI.command )
               else
                 VimageUI.command.clear
                 VimageUI.command.print cmds.first.keyword
@@ -229,6 +230,8 @@ class EnterCmdLineState : State
       use builder = StatusBar
         builder.print ':'
 
+        local cursor_pos = builder.cursor + XY( cmd_line.count+1, 0 )
+
         local keyword = cmd_line.before_first(' ')
         local args = cmd_line.after_first(' ')
         local cmds = find_commands( keyword, &allow_partial=not cmd_line.contains(' '), &use_alternate )
@@ -250,9 +253,11 @@ class EnterCmdLineState : State
           case 1
             local cmd = cmds.first
             builder.print keyword
-            if (cmd.keyword.begins_with(keyword))
+            if (cmd.keyword.begins_with(keyword) and not args.count)
               builder.style.dim
-              builder.print cmd.keyword[ forEach in keyword.count..<cmd.keyword.count ]
+              forEach (i in keyword.count..<cmd.keyword.count)
+                builder.print cmd.keyword[i]
+              endForEach
               builder.style.dim_off
             endIf
 
@@ -280,6 +285,10 @@ class EnterCmdLineState : State
             builder.print ']'
             builder.style.dim_off
         endWhich
+
+        local ch = builder[cursor_pos]
+        ch.style.flags |= CharacterStyle.INVERSE
+        builder[cursor_pos] = ch
 
       endUse
 endClass

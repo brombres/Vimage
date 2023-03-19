@@ -115,7 +115,10 @@ endClass
 class CmdBeginCommandLine : InteractiveCmd [singleton]
   METHODS
     method update_status
-      status = ":"
+      use builder = StatusBar
+        builder.print ':'
+        builder.style.inverse; builder.print ' '; builder.style.inverse_off
+      endUse
 
     method on( e:KeyEvent )
       Vimage.repeat_count = null
