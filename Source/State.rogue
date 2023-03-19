@@ -75,6 +75,7 @@ class StandardState : State
       key_handlers[Keycode.R]               = CmdRotateCW
       key_handlers[Keycode.R+SHIFT]         = CmdRotateCCW
       key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo
+      key_handlers[Keycode.T]               = CmdStack
       key_handlers[Keycode.U]               = CmdUndo
       key_handlers[Keycode.Y]               = Cmd( YankState )
       key_handlers[Keycode.Z]               = CmdZoomIn
@@ -116,7 +117,6 @@ class ImageListState : StandardState [singleton]
       key_handlers[Keycode.K+SHIFT] = CmdImageListShiftUp
       key_handlers[Keycode.H]       = CmdScroll( -0.5, 0 )
       key_handlers[Keycode.L]       = CmdScroll(  0.5, 0 )
-      key_handlers[Keycode.T]       = CmdParseStack
 
     method on_enter
       Vimage.repeat_count = null

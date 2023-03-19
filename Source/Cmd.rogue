@@ -18,9 +18,9 @@ class Cmd
     method call
       update_status
       if (Vimage.repeat_count)
-        local n = Vimage.repeat_count.value
+        repeat_count = Vimage.repeat_count.value
         Vimage.repeat_count = null
-        execute( n )
+        execute( repeat_count )
       else
         execute( 1 )
       endIf
@@ -1029,36 +1029,28 @@ class CmdSplit( dims:XY ) : EditCmd
 
 endClass
 
-class CmdParseStack : Cmd [singleton]
-  METHODS
-    method on( e:KeyEvent )
-      local cmd = CmdStack( which{Vimage.repeat_count||2} )
-      Vimage.repeat_count = null
-      Vimage.execute( cmd )
-endClass
-
-class CmdStack( n:Int32 ) : EditCmd
+class CmdStack : EditCmd [singleton]
   METHODS
     method update_status
       use status = StatusBar
-        if (n != 2) status.print n
         status.print "t (stack images)"
         if (ImageList.selected)
           local available = ImageList.count - ImageList.selected.index
+          local n = which{ Vimage.repeat_count || 2 }
           if (n > available) status.print " [not enough images]"
         else
           status.print " [no images]"
         endIf
       endUse
 
-    method execute
+    method execute( n:Int32 )
+      if (n == 1) n = 2
+
       local available : Int32
       if (ImageList.selected)
         available = ImageList.count - ImageList.selected.index
       endIf
       if (n <= 1 or available < n) return
-
-      local bitmap = ImageList.selected.image.bitmap
 
       local original_index = ImageList.selected.index
 
@@ -1078,11 +1070,12 @@ class CmdStack( n:Int32 ) : EditCmd
           endIf
         endLoop
 
-        local largest_width  = Best<<Int32>>( (a,b) => a > b )
-        local largest_height = Best<<Int32>>( (a,b) => a > b )
-        largest_width.consider( (forEach in list).bitmap.width )
-        largest_height.consider( (forEach in list).bitmap.height )
-        (forEach in list).bitmap.crop( largest_width.value, largest_height.value, Vimage.anchor, Vimage.bg_color )
+        local target_size = list.last.bitmap.size
+        forEach (image in list)
+          if (image.size != target_size)
+            image.cloned_bitmap.crop( target_size.x, target_size.y, Vimage.anchor, Vimage.bg_color )
+          endIf
+        endForEach
 
         local result = list.remove_last.cloned_bitmap
         forEach (image in list step -1)
