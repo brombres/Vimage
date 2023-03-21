@@ -104,10 +104,19 @@ class Image
           endIf
         endIf
       endIf
-      local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
-      piece.resize( (piece_size*zoom)->XY.clamped_low(XY(1,1)) )
 
-      cached_text_canvas = ANSIBitmap( piece, &dither )->TextCanvas( &bg=CharacterStyle.BG_DARK_GRAY )
+      local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
+      local target_size = (piece_size*zoom)->XY.clamped_low(XY(1,1))
+
+      # NOT IMPLEMENTED - jaggier result still looks better
+      #while (target_size.x * 2 < piece.size.x)
+      #  # Resize in half-size increments to avoid a jaggy result
+      #  piece.resize( piece.size/2 )
+      #endWhile
+
+      piece.resize( target_size )
+
+      cached_text_canvas = piece->TextCanvas( &dither, &bg8=CharacterStyle.BG_DARK_GRAY, &bg24=Color(0xFF444444) )
       return cached_text_canvas
 
     method to->String

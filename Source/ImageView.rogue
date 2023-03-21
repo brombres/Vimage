@@ -21,6 +21,8 @@ class ImageView : UIComponent [singleton]
     method on_draw
       localize display_bounds
 
+      local bg = CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg( Color(0xFF444444) )
+
       if (image)
         if (is_modified)
           is_modified = false
@@ -55,7 +57,7 @@ class ImageView : UIComponent [singleton]
           canvas = image.text_canvas( new_size, display_bounds )
         endIf
 
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DARK_GRAY) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',bg) )
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
@@ -64,7 +66,7 @@ class ImageView : UIComponent [singleton]
         endTemporarily
 
       else
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.BG_DARK_GRAY) )
+        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',bg) )
 
       endIf
 
