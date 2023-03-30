@@ -27,7 +27,10 @@ class Image
       name = file.value.filepath
       if (file.value.exists)
         bitmap = Bitmap( file.value )
-        if (bitmap.error) error = "Unsupported file type or corrupted file: " + file
+        if (not bitmap)
+          error = "Unsupported file type or corrupted file: " + file
+          bitmap = Bitmap(1,1)
+        endIf
       else
         error = "File not found: " + file
         bitmap = Bitmap(1,1)
@@ -107,12 +110,6 @@ class Image
 
       local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
       local target_size = (piece_size*zoom)->XY.clamped_low(XY(1,1))
-
-      # NOT IMPLEMENTED - jaggier result still looks better
-      #while (target_size.x * 2 < piece.size.x)
-      #  # Resize in half-size increments to avoid a jaggy result
-      #  piece.resize( piece.size/2 )
-      #endWhile
 
       piece.resize( target_size )
 

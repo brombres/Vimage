@@ -387,7 +387,7 @@ class CmdDD : EditCmd [singleton]
 
     method execute
       if (ImageList.selected)
-        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
+        Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
         local next = ImageList.selected.next
         ImageList.remove( ImageList.selected )
         if (next)
@@ -897,14 +897,18 @@ class CmdPaste : EditCmd [singleton]
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
 
     method execute
-      local bitmap = Vimage.clipboard.bitmap
-      if (ImageList.selected)
-        local before_index = ImageList.selected.index
-        ImageList.insert( Image(bitmap), before_index )
-        ImageList.select( before_index )
+      local bitmap = Clipboard.bitmap
+      if (bitmap)
+        if (ImageList.selected)
+          local before_index = ImageList.selected.index
+          ImageList.insert( Image(bitmap), before_index )
+          ImageList.select( before_index )
+        else
+          ImageList.add( Image(bitmap) )
+          ImageList.select( 0 )
+        endIf
       else
-        ImageList.add( Image(bitmap) )
-        ImageList.select( 0 )
+        status = "$p (paste) [no image on clipboard]"(which{repeat_count==1:""||repeat_count+""})
       endIf
 endClass
 
@@ -1180,7 +1184,7 @@ class CmdYank : Cmd [singleton]
 
     method execute
       if (ImageList.selected)
-        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
+        Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
       endIf
 endClass
 
@@ -1195,9 +1199,9 @@ class CmdYankAndPaste : EditCmd [singleton]
 
     method execute
       if (ImageList.selected)
-        Vimage.clipboard = ImageList.selected->(as ImageListItem).image
+        local bitmap = ImageList.selected->(as ImageListItem).image.bitmap.cloned
+        Clipboard.bitmap = bitmap
 
-        local bitmap = Vimage.clipboard.bitmap.cloned
         local before_index = ImageList.selected.index
         ImageList.insert( Image(bitmap), before_index )
         ImageList.select( before_index )

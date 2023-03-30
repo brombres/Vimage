@@ -14,6 +14,8 @@ uses Utility/VersionNumber
 #$ LIBRARIES(macOS)   = zlib(flags:-lz)
 #$ LIBRARIES(Linux)   = libjpeg(install:libjpeg-dev)
 #$ LIBRARIES(Linux)   = libpng(install:libpng-dev)
+#$ LIBRARIES(Linux)   = xclip
+#$ LIBRARIES(Linux)   = uuid(uuid-dev)
 #$ LIBRARIES(Windows) = brombres/windowsmedialibs
 #$ CC_LINK(Windows)   = /link /LTCG
 
@@ -31,10 +33,11 @@ augment Build
     #BUILD_MODE       = "release"
     LAUNCHER_FOLDER  = "/usr/local/bin"
     ROGUEC_FLAGS     = ""
-    #CC_ARGS_UNIX     = "Source/ObjC.m -I /System/Libraries/Frameworks -framework Foundation"
+    CC_ARGS_MACOS    = "-I /System/Libraries/Frameworks -framework Foundation -framework AppKit"
+    CC_LINK_MACOS    = ""
     CC_ARGS_UNIX     = ""
     CC_LINK_UNIX     = ""
-    CC_ARGS_WINDOWS  = ""
+    CC_ARGS_WINDOWS  = "user32.lib gdi32.lib Rpcrt4.lib"
     CC_LINK_WINDOWS  = "/link /LTCG"
 endAugment
 
@@ -311,8 +314,9 @@ routine compile_rogue
   local c_filepath = "Build/$-$" (Build.PROJECT,System.os)
   local flags = Build.ROGUEC_FLAGS
   if (Build.BUILD_MODE == "debug") flags = flags.with_suffix(' ') + "--debug"
-  local cmd = "roguec $ $ --main --output=$ --target=Console,C,$"...
-  (File(src_filepath).esc,flags,File(c_filepath).esc,System.os)
+  local objc = which{ System.is_macos:",ObjC" || "" }
+  local cmd = "roguec $ $ --main --output=$ --target=Console,C,$$"...
+  (File(src_filepath).esc,flags,File(c_filepath).esc,System.os,objc)
   println "> " + cmd
   local error = System.run( cmd )
   if (error) throw Error( "Build failed." )
@@ -329,6 +333,14 @@ routine compile_c
     local cc = "cl $ /nologo $.c /Fo$ /Fe$" (flags,c_filepath,obj_filepath,exe_filepath)
     cc .= appending( "$LIBRARY_FLAGS" )
     cc .= appending( Build.CC_LINK_WINDOWS )
+    execute cc
+  elseIf (System.is_macos)
+    local flags = Build.CC_ARGS_MACOS
+    if (flags != "") flags += " "
+    flags += which{ Build.BUILD_MODE=="release":"-O3" || "-O0" }
+    local cc = "cc $ -Wall -fno-strict-aliasing $.m -o $ -lm" (flags,File(c_filepath).esc,exe_file.esc)
+    cc .= appending( "$LIBRARY_FLAGS" )
+    cc .= appending( Build.CC_LINK_MACOS )
     execute cc
   else
     local flags = Build.CC_ARGS_UNIX
