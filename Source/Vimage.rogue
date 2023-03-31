@@ -106,12 +106,14 @@ class Vimage [singleton]
     MAX_UNDOS = 100
 
   PROPERTIES
-    last_cmd     : Cmd
-    repeat_count : Int32?
-    anchor       = Anchor.CENTER
-    bg_color     = Color.BLACK : Color
-    undo_stack   = @[]
-    redo_stack   = @[]
+    last_cmd        : Cmd
+    repeat_count    : Int32?
+    anchor          = Anchor.CENTER
+    bg_color        = Color.BLACK : Color
+    undo_stack      = @[]
+    redo_stack      = @[]
+    macro           = Cmd[]
+    recording_macro : Logical
 
   METHODS
     method init( args:String[] )
@@ -152,11 +154,12 @@ class Vimage [singleton]
 
       VimageUI.run
 
-    method execute( cmd:Cmd )
+    method execute( cmd:Cmd, &skip_undo_save_state )
       if (cmd.is_edit)
-        save_undo
+        if (not skip_undo_save_state) save_undo
         last_cmd = cmd
       endIf
+      if (recording_macro and cmd.allowed_in_macro) macro.add( cmd )
       cmd()
 
     method parse_args( args:String[] )->Value

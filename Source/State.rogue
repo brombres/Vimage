@@ -65,6 +65,7 @@ class StandardState : State
       key_handlers[Keycode.BACKQUOTE+SHIFT] = CmdBitwiseXOR
       key_handlers[Keycode.COMMA+SHIFT]     = CmdBitwiseRotateLeft
       key_handlers[Keycode.PERIOD+SHIFT]    = CmdBitwiseRotateRight
+      key_handlers[Keycode.A]               = CmdApply
       key_handlers[Keycode.D]               = Cmd( DeleteState )
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
@@ -72,6 +73,7 @@ class StandardState : State
       key_handlers[Keycode.N+SHIFT]         = CmdParseJoinV
       key_handlers[Keycode.P]               = CmdPaste
       key_handlers[Keycode.PERIOD]          = CmdRepeatLast
+      key_handlers[Keycode.Q]               = CmdMacro
       key_handlers[Keycode.R]               = CmdRotateCW
       key_handlers[Keycode.R+SHIFT]         = CmdRotateCCW
       key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo

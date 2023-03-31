@@ -15,6 +15,9 @@ class Cmd
   METHODS
     method init
 
+    method allowed_in_macro->Logical
+      return true
+
     method call
       update_status
       if (Vimage.repeat_count)
@@ -44,6 +47,13 @@ class Cmd
 
     method repeatable( n:Int32 )->Cmd
       return null
+
+      #{
+    method resolved->Cmd
+      # 'this' command becomes the repeatable 'last_cmd' and possibly goes on the 'macro' list.
+      # This method's resulting 'resolved' command is what is actually executed
+      return this
+      }#
 
     method set_state( new_state:State )
       State.current.change_state( new_state )
@@ -81,6 +91,27 @@ class CmdChangeState( new_state:State ) : InteractiveCmd
   METHODS
     method on( e:KeyEvent )
       state = new_state
+endClass
+
+class CmdApply : EditCmd [singleton]
+  METHODS
+    method allowed_in_macro->Logical
+      return false
+
+    method update_status
+      if (Vimage.recording_macro)
+        Vimage.recording_macro = false
+        if (Vimage.macro.count) status = "a (apply macro) [recording stopped]"
+        else                    status = "a (apply macro) [recording stopped] [no macro recorded]"
+      elseIf (Vimage.macro.is_empty)
+        status = "a (apply macro) [no macro recorded]"
+      else
+        status = "a (apply macro)"
+      endIf
+
+    method execute
+      forEach (cmd in Vimage.macro) Vimage.execute( cmd, &skip_undo_save_state )
+      Vimage.last_cmd = this
 endClass
 
 class CmdAspect( size:XY ) : EditCmd
@@ -720,6 +751,24 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
+class CmdMacro : Cmd [singleton]
+  METHODS
+    method allowed_in_macro->Logical
+      return false
+
+    method update_status
+
+    method execute( ignore_repeat_count:Int32 )
+      if (Vimage.recording_macro)
+        Vimage.recording_macro = false
+        status = "q (end macro) [can now (a)pply or apply to (A)ll]"
+      else
+        status = "q (begin recording macro) ['q' again to end]"
+        Vimage.recording_macro = true
+        Vimage.macro.clear
+      endIf
+endClass
+
 class CmdNew( size:XY ) : EditCmd
   METHODS
     method update_status
@@ -929,6 +978,9 @@ endClass
 
 class CmdRepeatLast : Cmd [singleton]
   METHODS
+    method allowed_in_macro->Logical
+      return false
+
     method update_status
       if (not Vimage.last_cmd)
         status = ". [no editing commands to repeat]"
