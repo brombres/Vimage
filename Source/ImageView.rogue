@@ -49,8 +49,8 @@ class ImageView : UIComponent [singleton]
           endIf
 
           local sz = (display_bounds.size * XY(1,2) / image.zoom).clamped_high( image.size ) / image.size
-          camera_bounds_tl = sz / 2
-          camera_bounds_br = RealXY(1,1) - sz/2
+          camera_bounds_tl = (sz->RealXY / 2) - RealXY(1,2)
+          camera_bounds_br = (RealXY(1,1) - sz/2)
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
           TitleBar.zoom = image.zoom
