@@ -18,7 +18,7 @@ class Cmd
     method call
       update_status
       if (Vimage.repeat_count)
-        repeat_count = Vimage.repeat_count.value
+        repeat_count = Vimage.repeat_count.value.clamped_low(1)
         Vimage.repeat_count = null
         execute( repeat_count )
       else
@@ -28,7 +28,7 @@ class Cmd
     method execute
       noAction
 
-    method execute( repeat_count )
+    method execute( repeat_count:Int32 )
       loop (repeat_count)
         execute
       endLoop
@@ -896,17 +896,19 @@ class CmdPaste : EditCmd [singleton]
     method update_status
       status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
 
-    method execute
+    method execute( repeat_count:Int32 )
       local bitmap = Clipboard.bitmap
       if (bitmap)
-        if (ImageList.selected)
-          local before_index = ImageList.selected.index
-          ImageList.insert( Image(bitmap), before_index )
-          ImageList.select( before_index )
-        else
-          ImageList.add( Image(bitmap) )
-          ImageList.select( 0 )
-        endIf
+        loop repeat_count
+          if (ImageList.selected)
+            local before_index = ImageList.selected.index
+            ImageList.insert( Image(bitmap), before_index )
+            ImageList.select( before_index )
+          else
+            ImageList.add( Image(bitmap) )
+            ImageList.select( 0 )
+          endIf
+        endLoop
       else
         status = "$p (paste) [no image on clipboard]"(which{repeat_count==1:""||repeat_count+""})
       endIf
@@ -1182,7 +1184,8 @@ class CmdYank : Cmd [singleton]
         set_status( "yy [no image to copy]" )
       endIf
 
-    method execute
+    method execute( repeat_count:Int32 )
+      # 'repeat_count' ignored.
       if (ImageList.selected)
         Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
       endIf
@@ -1197,14 +1200,16 @@ class CmdYankAndPaste : EditCmd [singleton]
         set_status( "yp (yank and paste) [no image to duplicate]" )
       endIf
 
-    method execute
+    method execute( repeat_count:Int32 )
       if (ImageList.selected)
         local bitmap = ImageList.selected->(as ImageListItem).image.bitmap.cloned
         Clipboard.bitmap = bitmap
 
-        local before_index = ImageList.selected.index
-        ImageList.insert( Image(bitmap), before_index )
-        ImageList.select( before_index )
+        loop (repeat_count)
+          local before_index = ImageList.selected.index
+          ImageList.insert( Image(bitmap), before_index )
+          ImageList.select( before_index )
+        endLoop
       endIf
 endClass
 
