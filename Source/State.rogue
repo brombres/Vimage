@@ -67,6 +67,7 @@ class StandardState : State
       key_handlers[Keycode.PERIOD+SHIFT]    = CmdBitwiseRotateRight
       key_handlers[Keycode.A]               = CmdApply
       key_handlers[Keycode.A+SHIFT]         = CmdApplyAll
+      key_handlers[Keycode.C]               = Cmd( CropState )
       key_handlers[Keycode.D]               = Cmd( DeleteState )
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
@@ -80,7 +81,7 @@ class StandardState : State
       key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo
       key_handlers[Keycode.T]               = CmdStack
       key_handlers[Keycode.U]               = CmdUndo
-      key_handlers[Keycode.U+SHIFT]         = CmdRedo
+      key_handlers[Keycode.U+SHIFT]         = CmdRedoU
       key_handlers[Keycode.Y]               = Cmd( YankState )
       key_handlers[Keycode.Z]               = CmdZoomIn
       key_handlers[Keycode.Z+SHIFT]         = CmdZoomOut
@@ -129,6 +130,16 @@ class ImageListState : StandardState [singleton]
       Vimage.repeat_count = null
       if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
 
+      ImageList.is_dim = false
+      ImageList.request_redraw
+
+      status = ""
+
+    method on_leave
+      ImageList.is_dim = true
+      ImageList.request_redraw
+      StatusBar.request_redraw
+
     method state_name->String
       return "IMAGE LIST"
 endClass
@@ -146,17 +157,30 @@ class ZoomState : StandardState [singleton]
     method on_enter
       Vimage.repeat_count = null
       if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
-      ImageList.is_dim = true
-      ImageList.request_redraw
-      StatusBar.request_redraw
-
-    method on_leave
-      ImageList.is_dim = false
-      ImageList.request_redraw
-      StatusBar.request_redraw
 
     method state_name->String
       return "ZOOM"
+endClass
+
+class CropState : StandardState [singleton]
+  METHODS
+    method init
+      prior.init
+      key_handlers[Keycode.J]       = CmdCrop( 0, 0, 0, 1)
+      key_handlers[Keycode.K]       = CmdCrop( 0, 1, 0, 0)
+      key_handlers[Keycode.H]       = CmdCrop( 1, 0, 0, 0)
+      key_handlers[Keycode.L]       = CmdCrop( 0, 0, 1, 0)
+      key_handlers[Keycode.J+SHIFT] = CmdCrop( 0, 0, 0,-1)
+      key_handlers[Keycode.K+SHIFT] = CmdCrop( 0,-1, 0, 0)
+      key_handlers[Keycode.H+SHIFT] = CmdCrop(-1, 0, 0, 0)
+      key_handlers[Keycode.L+SHIFT] = CmdCrop( 0, 0,-1, 0)
+      key_handlers[Keycode.ESCAPE]  = Cmd( ImageListState )
+
+    method on_enter
+      status = "c (crop mode)"
+
+    method state_name->String
+      return "CROP"
 endClass
 
 class EnterCmdLineState : State

@@ -350,23 +350,43 @@ endClass
 class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
   METHODS
     method update_status
-      use status = StatusBar
-        status.print( "crop $ $ $ $"(left,top,right,bottom) )
-        if local selected = ImageList.selected
-          local size = selected.image.bitmap.size
-          if (size.x - (left+right) < 1 or size.y - (top+bottom) < 1)
-            status.print " [exceeds image dimensions]"
-          endIf
-        else
-          status.print " [no images]"
+      local status = String()
+      local n = which{ Vimage.repeat_count || 1 }
+
+      localize left, top, right, bottom
+      left *= n
+      top *= n
+      right *= n
+      bottom *= n
+
+      status.print( "crop" )
+      if (left)   status.print " left $"(left)
+      if (top)    status.print " top $"(top)
+      if (right)  status.print " right $"(right)
+      if (bottom) status.print " bottom $"(bottom)
+
+      if local selected = ImageList.selected
+        local size = selected.image.bitmap.size
+        if (size.x - (left+right) < 1 or size.y - (top+bottom) < 1)
+          status.print " [exceeds image dimensions]"
         endIf
-      endUse
+      else
+        status.print " [no images]"
+      endIf
 
-    method execute
+      StatusBar.text = status
+
+    method execute( repeat_count:Int32 )
       if (not ImageList.selected) return
-      execute( ImageList.selected.image )
+      execute( ImageList.selected.image, repeat_count )
 
-    method execute( image:Image )
+    method execute( image:Image, n:Int32 )
+      localize left, top, right, bottom
+      left *= n
+      top *= n
+      right *= n
+      bottom *= n
+
       if (image.size.x - (left+right) < 1 or image.size.y - (top+bottom) < 1)
         return
       endIf
@@ -999,6 +1019,19 @@ class CmdRedo : Cmd [singleton]
       Vimage.redo
 endClass
 
+class CmdRedoU : Cmd [singleton]
+  METHODS
+    method update_status
+      if (Vimage.redo_stack.count)
+        status = "U (redo)"
+      else
+        status = "U (redo) [no commands to redo]"
+      endIf
+
+    method execute
+      Vimage.redo
+endClass
+
 class CmdRepeatLast : Cmd [singleton]
   PROPERTIES
     repeat_count : Int32
@@ -1006,6 +1039,11 @@ class CmdRepeatLast : Cmd [singleton]
   METHODS
     method allowed_in_macro->Logical
       return false
+
+    method call
+      local n = which{ Vimage.repeat_count || Vimage.last_repeat_count }
+      prior.call
+      Vimage.last_repeat_count = n
 
     method update_status
       if (not Vimage.last_cmd)
