@@ -154,6 +154,8 @@ class CmdLineHandler
       endIf
 
     method parse_size_either_or( arg:String )->(width:Int32?,height:Int32?)
+      if (arg.contains('.')) return (width:null,height:null) # contains a scale, not a size
+
       local pair = arg.split('x')
       if (pair.count == 2)
         contingent
@@ -166,6 +168,24 @@ class CmdLineHandler
           else
             if (pair.last == "") return (width:pair.first->Int32,height:null)
             else                 return (width:pair.first->Int32,height:pair.last->Int32)
+          endIf
+        endContingent
+      endIf
+
+      set_status( "$ [missing or invalid size specification '$']"(keyword,arg) )
+      return (width:null,height:null)
+
+    method parse_scale_either_or( arg:String )->(width:Real?,height:Real?)
+      local pair = arg.split('x')
+      if (pair.count == 2)
+        contingent
+          necessary (pair.first != "" or pair.last != "")
+
+          if (pair.first == "")
+            return (width:null,height:pair.last->Real)
+          else
+            if (pair.last == "") return (width:pair.first->Real,height:null)
+            else                 return (width:pair.first->Real,height:pair.last->Real)
           endIf
         endContingent
       endIf
@@ -228,7 +248,7 @@ class CmdLineAspect : CmdLineHandler [singleton]
       endIf
 
     method syntax->String
-      if (not ImageList.selected) return "WxH"
+      if (not ImageList.selected) return "W:H"
       local bitmap = ImageList.selected.image.bitmap
       local w = bitmap.width
       local h = bitmap.height
@@ -342,7 +362,12 @@ class CmdLineCrop : CmdLineHandler [singleton]
         if (w or h)
           execute( CmdCropToSize(w,h) )
         else
-          status = "crop [missing or invalid size specification]"
+          local (sx,sy) = parse_scale_either_or( arg_string )
+          if (sx or sy)
+            execute( CmdCropToScale(sx,sy) )
+          else
+            status = "crop [missing or invalid size specification]"
+          endIf
         endIf
       endIf
 

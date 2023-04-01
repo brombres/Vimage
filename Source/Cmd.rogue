@@ -445,6 +445,32 @@ class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
       ImageView.show( image )
 endClass
 
+class CmdCropToScale( sx:Real?, sy:Real? ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "crop to scale "
+        if (sx and sy)
+          status.print "$x$"(sx,sy)
+        elseIf (sx)
+          status.print "sx $"(sx)
+        elseIf (sy)
+          status.print "sy $"(sy)
+        endIf
+        if (not ImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
+
+    method execute( image:Image )
+      local w, h : Int32?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int32
+      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      CmdCropToSize( w, h ).execute
+endClass
+
 class CmdDX : EditCmd [singleton]
   METHODS
     method on( e:KeyEvent )
