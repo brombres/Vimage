@@ -9,9 +9,6 @@ class Cmd
     method create( callback:Function(e:KeyEvent) )->Cmd
       return CmdCallback( callback )
 
-  PROPERTIES
-    repeat_count : Int32
-
   METHODS
     method init
 
@@ -21,11 +18,12 @@ class Cmd
     method call
       update_status
       if (Vimage.repeat_count)
-        repeat_count = Vimage.repeat_count.value.clamped_low(1)
-        Vimage.repeat_count = null
+        local repeat_count = Vimage.read_and_reset_repeat_count
         execute( repeat_count )
+        Vimage.last_repeat_count = repeat_count
       else
         execute( 1 )
+        Vimage.last_repeat_count = 1
       endIf
 
     method execute
@@ -943,7 +941,7 @@ class CmdPaste : EditCmd [singleton]
     method init
 
     method update_status
-      status = "$p (paste)"(which{repeat_count==1:""||repeat_count+""})
+      status = "$p (paste)"(Vimage.repeat_count_string)
 
     method execute( repeat_count:Int32 )
       local bitmap = Clipboard.bitmap
@@ -959,7 +957,7 @@ class CmdPaste : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "$p (paste) [no image on clipboard]"(which{repeat_count==1:""||repeat_count+""})
+        status = "$p (paste) [no image on clipboard]"(Vimage.repeat_count_string)
       endIf
 endClass
 
@@ -977,6 +975,9 @@ class CmdRedo : Cmd [singleton]
 endClass
 
 class CmdRepeatLast : Cmd [singleton]
+  PROPERTIES
+    repeat_count : Int32
+
   METHODS
     method allowed_in_macro->Logical
       return false
@@ -988,15 +989,18 @@ class CmdRepeatLast : Cmd [singleton]
 
     method execute
       if (Vimage.last_cmd)
-        if (repeat_count == 1)
-          local n = Vimage.last_cmd.repeat_count
-          if (n != 1) Vimage.repeat_count = n
-        else
-          Vimage.repeat_count = this.repeat_count
-        endIf
+        local n = which{ Vimage.repeat_count || Vimage.last_repeat_count }
+        Vimage.repeat_count = n
         Vimage.execute( Vimage.last_cmd )
       endIf
 endClass
+
+class CmdSetRepeatCount( n:Int32? ) : Cmd
+  METHODS
+    method execute
+      Vimage.repeat_count = n
+endClass
+
 
 class CmdScroll( dx:Real, dy:Real ) : Cmd
   METHODS
@@ -1236,8 +1240,7 @@ class CmdYank : Cmd [singleton]
         set_status( "yy [no image to copy]" )
       endIf
 
-    method execute( repeat_count:Int32 )
-      # 'repeat_count' ignored.
+    method execute( ignore_repeat_count:Int32 )
       if (ImageList.selected)
         Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
       endIf

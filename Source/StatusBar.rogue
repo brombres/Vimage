@@ -13,6 +13,12 @@ class StatusBar : UIComponent [singleton]
 
     method on_draw
       localize display_bounds
+      if (Vimage.recording_macro)
+        local tag = "[recording]"
+        builder.cursor = XY( Console.width-(State.current.state_name.count+tag.count+1), 0 )
+        builder.style.reset
+        builder.print tag
+      endIf
       builder.cursor = XY( Console.width-State.current.state_name.count, 0 )
       builder.style.reset
       builder.print State.current.state_name
@@ -22,7 +28,6 @@ class StatusBar : UIComponent [singleton]
 
     method on_use->TextCanvas
       builder.clear
-      if (Vimage.recording_macro) builder.print "[recording] "
       if (Vimage.repeat_count) builder.print Vimage.repeat_count
       return builder
 

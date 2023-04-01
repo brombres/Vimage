@@ -79,6 +79,7 @@ class StandardState : State
       key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo
       key_handlers[Keycode.T]               = CmdStack
       key_handlers[Keycode.U]               = CmdUndo
+      key_handlers[Keycode.U+SHIFT]         = CmdRedo
       key_handlers[Keycode.Y]               = Cmd( YankState )
       key_handlers[Keycode.Z]               = CmdZoomIn
       key_handlers[Keycode.Z+SHIFT]         = CmdZoomOut
@@ -91,11 +92,9 @@ class StandardState : State
             return
           endIf
           local digit = (e.keycode - Keycode.NUMBER_0)
-          if (Vimage.repeat_count)
-            Vimage.repeat_count = Vimage.repeat_count.value * 10 + digit
-          else
-            Vimage.repeat_count = digit
-          endIf
+          local n = which{ Vimage.repeat_count || 0 } * 10 + digit
+          Vimage.repeat_count = n
+          if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(n) )
           StatusBar.builder.[clear, print(Vimage.repeat_count.value), flush]
           StatusBar.request_redraw
           return
@@ -103,6 +102,7 @@ class StandardState : State
 
         if (e.is_press(Keycode.ESCAPE) and Vimage.repeat_count)
           Vimage.repeat_count = null
+          if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
           StatusBar.builder.[clear,flush]
           StatusBar.request_redraw
           return
@@ -126,6 +126,7 @@ class ImageListState : StandardState [singleton]
 
     method on_enter
       Vimage.repeat_count = null
+      if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
 
     method state_name->String
       return "IMAGE LIST"
@@ -143,6 +144,7 @@ class ZoomState : StandardState [singleton]
 
     method on_enter
       Vimage.repeat_count = null
+      if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
       ImageList.is_dim = true
       ImageList.request_redraw
       StatusBar.request_redraw
