@@ -1210,13 +1210,6 @@ class CmdStack : EditCmd [singleton]
           endIf
         endLoop
 
-        local target_size = list.last.bitmap.size
-        forEach (image in list)
-          if (image.size != target_size)
-            image.cloned_bitmap.crop( target_size.x, target_size.y, Vimage.anchor, Vimage.bg_color )
-          endIf
-        endForEach
-
         local result = list.remove_last.cloned_bitmap
         forEach (image in list step -1)
           image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
