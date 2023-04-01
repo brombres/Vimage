@@ -17,6 +17,8 @@ class StatusBar : UIComponent [singleton]
         local tag = "[recording]"
         builder.cursor = XY( Console.width-(State.current.state_name.count+tag.count+1), 0 )
         builder.style.reset
+        builder.style.bg_red
+        builder.style.fg_white
         builder.print tag
       endIf
       builder.cursor = XY( Console.width-State.current.state_name.count, 0 )

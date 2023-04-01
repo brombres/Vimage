@@ -112,6 +112,31 @@ class CmdApply : EditCmd [singleton]
       Vimage.last_cmd = this
 endClass
 
+class CmdApplyAll : EditCmd [singleton]
+  METHODS
+    method allowed_in_macro->Logical
+      return false
+
+    method update_status
+      if (Vimage.recording_macro)
+        Vimage.recording_macro = false
+        if (Vimage.macro.count) status = "A (apply macro to all) [recording stopped]"
+        else                    status = "A (apply macro to all) [recording stopped] [no macro recorded]"
+      elseIf (Vimage.macro.is_empty)
+        status = "a (apply macro to all) [no macro recorded]"
+      else
+        status = "a (apply macro to all)"
+      endIf
+
+    method execute
+      while (ImageList.selected and ImageList.selected is not ImageList.last_child)
+        local index = ImageList.selected.index
+        forEach (cmd in Vimage.macro) Vimage.execute( cmd, &skip_undo_save_state )
+        if (index + 1 < ImageList.count) ImageList.select( index + 1 )
+      endWhile
+      Vimage.last_cmd = this
+endClass
+
 class CmdAspect( size:XY ) : EditCmd
   METHODS
     method update_status

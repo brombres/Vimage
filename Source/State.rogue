@@ -66,6 +66,7 @@ class StandardState : State
       key_handlers[Keycode.COMMA+SHIFT]     = CmdBitwiseRotateLeft
       key_handlers[Keycode.PERIOD+SHIFT]    = CmdBitwiseRotateRight
       key_handlers[Keycode.A]               = CmdApply
+      key_handlers[Keycode.A+SHIFT]         = CmdApplyAll
       key_handlers[Keycode.D]               = Cmd( DeleteState )
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
