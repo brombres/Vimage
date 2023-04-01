@@ -327,13 +327,16 @@ endClass
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
-    syntax  = "[WxH|Wx|xH|LEFT TOP RIGHT BOTTOM]"
+    syntax  = "[WxH|Wx|xH|N|LEFT TOP RIGHT BOTTOM]"
 
   METHODS
     method execute( arg_string:String )
       local args = arg_string.split(' ')
       if (args.count == 4)
         execute( CmdCrop(args[0],args[1],args[2],args[3]) )
+      elseIf (args.count == 1 and not args[0].contains('x'))
+        local n = args[0]->Int32
+        execute( CmdCrop(n,n,n,n) )
       else
         local (w,h) = parse_size_either_or( arg_string )
         if (w or h)
