@@ -54,6 +54,7 @@
 # Z            - ZOOM OUT (scale / 2)
 # <            - Rotate RGB bits to the left
 # >            - Rotate RGB bits to the right
+# "            - Toggle between internal and OS clipboards
 # :bg <color>
 # :join W H
 # :swap [argb][argb01]
@@ -103,15 +104,17 @@ class Vimage [singleton]
     MAX_UNDOS = 100
 
   PROPERTIES
-    repeat_count      : Int32?
-    last_repeat_count : Int32
-    last_cmd          : Cmd
-    anchor            = Anchor.CENTER
-    bg_color          = Color.BLACK : Color
-    undo_stack        = @[]
-    redo_stack        = @[]
-    macro             = Cmd[]
-    recording_macro   : Logical
+    clipboard          : Bitmap
+    using_os_clipboard : Logical
+    repeat_count       : Int32?
+    last_repeat_count  : Int32
+    last_cmd           : Cmd
+    anchor             = Anchor.CENTER
+    bg_color           = Color.BLACK : Color
+    undo_stack         = @[]
+    redo_stack         = @[]
+    macro              = Cmd[]
+    recording_macro    : Logical
 
   METHODS
     method init( args:String[] )

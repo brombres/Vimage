@@ -487,7 +487,11 @@ class CmdDD : EditCmd [singleton]
 
     method execute
       if (ImageList.selected)
-        Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
+        if (Vimage.using_os_clipboard)
+          Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
+        else
+          Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
+        endIf
         local next = ImageList.selected.next
         ImageList.remove( ImageList.selected )
         if (next)
@@ -1015,7 +1019,12 @@ class CmdPasteAfter : EditCmd [singleton]
       status = "$p (paste after)"(Vimage.repeat_count_string)
 
     method execute( repeat_count:Int32 )
-      local bitmap = Clipboard.bitmap
+      local bitmap : Bitmap
+      if (Vimage.using_os_clipboard)
+        bitmap = Clipboard.bitmap
+      else
+        bitmap = Vimage.clipboard
+      endIf
       if (bitmap)
         loop repeat_count
           if (ImageList.selected)
@@ -1040,7 +1049,12 @@ class CmdPasteBefore : EditCmd [singleton]
       status = "$P (paste after)"(Vimage.repeat_count_string)
 
     method execute( repeat_count:Int32 )
-      local bitmap = Clipboard.bitmap
+      local bitmap : Bitmap
+      if (Vimage.using_os_clipboard)
+        bitmap = Clipboard.bitmap
+      else
+        bitmap = Vimage.clipboard
+      endIf
       if (bitmap)
         loop repeat_count
           if (ImageList.selected)
@@ -1298,6 +1312,19 @@ class CmdSwap( a:Int32, b:Int32 ) : EditCmd
       endIf
 endClass
 
+class CmdToggleClipboard : Cmd [singleton]
+  METHODS
+    method update_status
+      if (Vimage.using_os_clipboard)
+        status = ''" (toggle clipboard) [now using internal clipboard]''
+      else
+        status = ''" (toggle clipboard) [now using OS clipboard]''
+      endIf
+
+    method execute
+      Vimage.using_os_clipboard = not Vimage.using_os_clipboard
+endClass
+
 class CmdUndo : Cmd [singleton]
   METHODS
     method update_status
@@ -1349,7 +1376,11 @@ class CmdYank : Cmd [singleton]
 
     method execute( ignore_repeat_count:Int32 )
       if (ImageList.selected)
-        Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
+        if (Vimage.using_os_clipboard)
+          Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
+        else
+          Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
+        endIf
       endIf
 endClass
 
@@ -1365,7 +1396,11 @@ class CmdYankAndPaste : EditCmd [singleton]
     method execute( repeat_count:Int32 )
       if (ImageList.selected)
         local bitmap = ImageList.selected->(as ImageListItem).image.bitmap.cloned
-        Clipboard.bitmap = bitmap
+        if (Vimage.using_os_clipboard)
+          Clipboard.bitmap = bitmap
+        else
+          Vimage.clipboard = bitmap
+        endIf
 
         loop (repeat_count)
           local before_index = ImageList.selected.index

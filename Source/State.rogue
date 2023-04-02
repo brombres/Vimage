@@ -65,6 +65,7 @@ class StandardState : State
       key_handlers[Keycode.BACKQUOTE+SHIFT] = CmdBitwiseXOR
       key_handlers[Keycode.COMMA+SHIFT]     = CmdBitwiseRotateLeft
       key_handlers[Keycode.PERIOD+SHIFT]    = CmdBitwiseRotateRight
+      key_handlers[Keycode.QUOTE+SHIFT]     = CmdToggleClipboard
       key_handlers[Keycode.A]               = CmdApply
       key_handlers[Keycode.A+SHIFT]         = CmdApplyAll
       key_handlers[Keycode.C]               = Cmd( CropState )
