@@ -2,11 +2,11 @@
 # Vimage.rogue
 # February 19, 2023
 #
-# a
-# A
+# a            - Apply Macro
+# A            - Apply Macro to All (current image and all below)
 # b
 # B            -
-# c [WxH|WASD] - Crop/expand, [ENTER|ESC]
+# c            - Crop Mode - I/J/K/L crops left/bottom/top/right
 # C
 # d
 # D
@@ -16,24 +16,22 @@
 # F            - Vertical Flip
 # g
 # G
-# h            - Left / Cursor Images<-Layers
-# H            - Left (BR Corner) / Layer moves out to become image
+# h            - ZOOM MODE: scroll Left. CROP MODE: crop left.
+# H
 # i
 # I
-# j            - Down / Next Image / Next Layer
-# J            - Down (BR Corner) / Move image/layer down 1 level
-# k            - Up / Previous Image
-# K            - Up (BR Corner) / Move image/layer up 1 level
-# l            - Right / Cursor Images->Layers
-# L            - Right (BR Corner) / Image becomes layer of underlying image (same as t)
+# j            - Down / Next Image. ZOOM MODE: scroll down. CROP MODE: crop bottom.
+# J            - Move image down 1 level
+# k            - Up / Previous Image. ZOOM MODE: scroll up. CROP MODE: crop top.
+# K            - Move image up 1 level
+# l            - ZOOM MODE: scroll right. CROP MODE: crop right.
+# L
 # m
 # M
 # n
 # N
-# o pattern    - Open file or files; inserts above current buffer
-# O            - Open using built-in file dialog
-# p            - Paste - new image/layer from clipboard stacked above current image/layer
-# P            - Paste below
+# p            - Paste image below
+# P            - Paste image above
 # q            - Quit (close) current buffer
 # Q            - Quit (close) all buffers
 # r            - Rotate 90º CW
@@ -57,7 +55,6 @@
 # <            - Rotate RGB bits to the left
 # >            - Rotate RGB bits to the right
 # :bg <color>
-# :fg <color>
 # :join W H
 # :swap [argb][argb01]
 #

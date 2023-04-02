@@ -1007,12 +1007,37 @@ class CmdRotateCCW : EditCmd [singleton]
 endClass
 
 
-class CmdPaste : EditCmd [singleton]
+class CmdPasteAfter : EditCmd [singleton]
   METHODS
     method init
 
     method update_status
-      status = "$p (paste)"(Vimage.repeat_count_string)
+      status = "$p (paste after)"(Vimage.repeat_count_string)
+
+    method execute( repeat_count:Int32 )
+      local bitmap = Clipboard.bitmap
+      if (bitmap)
+        loop repeat_count
+          if (ImageList.selected)
+            local before_index = ImageList.selected.index + 1
+            ImageList.insert( Image(bitmap), before_index )
+            ImageList.select( before_index )
+          else
+            ImageList.add( Image(bitmap) )
+            ImageList.select( ImageList.count-1 )
+          endIf
+        endLoop
+      else
+        status = "$p (paste after) [no image on clipboard]"(Vimage.repeat_count_string)
+      endIf
+endClass
+
+class CmdPasteBefore : EditCmd [singleton]
+  METHODS
+    method init
+
+    method update_status
+      status = "$P (paste after)"(Vimage.repeat_count_string)
 
     method execute( repeat_count:Int32 )
       local bitmap = Clipboard.bitmap
@@ -1028,7 +1053,7 @@ class CmdPaste : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "$p (paste) [no image on clipboard]"(Vimage.repeat_count_string)
+        status = "$p (paste before) [no image on clipboard]"(Vimage.repeat_count_string)
       endIf
 endClass
 
