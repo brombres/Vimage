@@ -382,9 +382,14 @@ class CmdLineFill : CmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( CmdFill(w,h) )
+        execute( CmdFillToSize(w,h) )
       else
-        status = "fill [missing or invalid size specification]"
+        local (sx,sy) = parse_scale_either_or( args )
+        if (sx or sy)
+          execute( CmdFillToScale(sx,sy) )
+        else
+          status = "fill [missing or invalid size specification]"
+        endIf
       endIf
 endClass
 
@@ -397,9 +402,14 @@ class CmdLineFit : CmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( CmdFit(w,h) )
+        execute( CmdFitToSize(w,h) )
       else
-        status = "fit [missing or invalid size specification]"
+        local (sx,sy) = parse_scale_either_or( args )
+        if (sx or sy)
+          execute( CmdFitToScale(sx,sy) )
+        else
+          status = "fit [missing or invalid size specification]"
+        endIf
       endIf
 endClass
 
@@ -519,9 +529,14 @@ class CmdLineResize : CmdLineHandler [singleton]
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( CmdResize(w,h) )
+        execute( CmdResizeToSize(w,h) )
       else
-        status = "resize [missing or invalid size specification]"
+        local (sx,sy) = parse_scale_either_or( args )
+        if (sx or sy)
+          execute( CmdResizeToScale(sx,sy) )
+        else
+          status = "resize [missing or invalid size specification]"
+        endIf
       endIf
 endClass
 

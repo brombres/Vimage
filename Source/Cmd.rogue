@@ -649,19 +649,19 @@ class CmdJoin( dims:XY ) : EditCmd
         local total_w, total_h : Int32
         if (w == 1)
           # Resize all images to be max width
-          local cmd = CmdResize( tile_w, null )
+          local cmd = CmdResizeToSize( tile_w, null )
           cmd.execute( (forEach in list) )
           total_w = tile_w
           total_h += (forEach in list).bitmap.height
         elseIf (h == 1)
           # Resize all images to be max height
-          local cmd = CmdResize( null, tile_h )
+          local cmd = CmdResizeToSize( null, tile_h )
           cmd.execute( (forEach in list) )
           total_w += (forEach in list).bitmap.width
           total_h = tile_h
         else
           # Reshape all images to be max width and/or height
-          local cmd = CmdFit( tile_w, tile_h )
+          local cmd = CmdFitToSize( tile_w, tile_h )
           cmd.execute( (forEach in list) )
           total_w = tile_w * w
           total_h = tile_h * h
@@ -688,7 +688,7 @@ class CmdJoin( dims:XY ) : EditCmd
       endUse
 endClass
 
-class CmdFill( width:Int32?, height:Int32? ) : EditCmd
+class CmdFillToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -739,7 +739,33 @@ class CmdFill( width:Int32?, height:Int32? ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdFit( width:Int32?, height:Int32? ) : EditCmd
+class CmdFillToScale( sx:Real?, sy:Real? ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "fill to scale "
+        if (sx and sy)
+          status.print "$x$"(sx,sy)
+        elseIf (sx)
+          status.print "sx $"(sx)
+        elseIf (sy)
+          status.print "sy $"(sy)
+        endIf
+        if (not ImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
+
+    method execute( image:Image )
+      local w, h : Int32?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int32
+      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      CmdFillToSize( w, h ).execute
+endClass
+
+class CmdFitToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -788,6 +814,32 @@ class CmdFit( width:Int32?, height:Int32? ) : EditCmd
       endIf
 
       ImageView.show( image )
+endClass
+
+class CmdFitToScale( sx:Real?, sy:Real? ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "fit to scale "
+        if (sx and sy)
+          status.print "$x$"(sx,sy)
+        elseIf (sx)
+          status.print "sx $"(sx)
+        elseIf (sy)
+          status.print "sy $"(sy)
+        endIf
+        if (not ImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
+
+    method execute( image:Image )
+      local w, h : Int32?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int32
+      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      CmdFitToSize( w, h ).execute
 endClass
 
 class CmdFlipH : EditCmd [singleton]
@@ -925,7 +977,7 @@ class CmdResetZoom : Cmd [singleton]
       endIf
 endClass
 
-class CmdResize( width:Int32?, height:Int32? ) : EditCmd
+class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -970,6 +1022,32 @@ class CmdResize( width:Int32?, height:Int32? ) : EditCmd
       endIf
 
       ImageView.show( image )
+endClass
+
+class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "resize to scale "
+        if (sx and sy)
+          status.print "$x$"(sx,sy)
+        elseIf (sx)
+          status.print "sx $"(sx)
+        elseIf (sy)
+          status.print "sy $"(sy)
+        endIf
+        if (not ImageList.selected) status.print " [no images]"
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image )
+
+    method execute( image:Image )
+      local w, h : Int32?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int32
+      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      CmdResizeToSize( w, h ).execute
 endClass
 
 class CmdRotateCW : EditCmd [singleton]
