@@ -365,7 +365,7 @@ class YankState : State [singleton]
       use status = StatusBar
         status.print 'y'
         status.style.dim
-        status.print "[p|y]"
+        status.print "[y|p|a|r|g|b]"
         status.style.dim_off
       endUse
 
@@ -378,6 +378,18 @@ class YankState : State [singleton]
           state = ImageListState
         elseIf (e.unicode == 'p')
           execute( CmdYankAndPaste )
+          state = ImageListState
+        elseIf (e.unicode == 'a')
+          execute( CmdYankChannel("alpha",0xFF000000) )
+          state = ImageListState
+        elseIf (e.unicode == 'r')
+          execute( CmdYankChannel("red",0xFFFF0000) )
+          state = ImageListState
+        elseIf (e.unicode == 'g')
+          execute( CmdYankChannel("green",0xFF00FF00) )
+          state = ImageListState
+        elseIf (e.unicode == 'b')
+          execute( CmdYankChannel("blue",0xFF0000FF) )
           state = ImageListState
         else
           set_status( "[invalid command 'y$']"(e.unicode) )

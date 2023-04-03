@@ -1488,6 +1488,30 @@ class CmdYankAndPaste : EditCmd [singleton]
       endIf
 endClass
 
+class CmdYankChannel( name:String, mask:Int32 ) : Cmd [singleton]
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "yank $ channel (copy to clipboard)"(name)
+        if (not ImageList.selected) status.print " [no image to copy]"
+      endUse
+
+    method execute( ignore_repeat_count:Int32 )
+      if (ImageList.selected)
+        local bitmap = ImageList.selected->(as ImageListItem).image.bitmap
+        bitmap .= cloned
+        forEach (pixel in rewriter=bitmap.pixels.rewriter)
+          rewriter.write( Color(pixel.argb & mask) )
+        endForEach
+
+        if (Vimage.using_os_clipboard)
+          Clipboard.bitmap = bitmap
+        else
+          Vimage.clipboard = bitmap
+        endIf
+      endIf
+endClass
+
 class CmdZoomIn : Cmd [singleton]
   METHODS
     method update_status
