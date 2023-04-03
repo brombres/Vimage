@@ -9,6 +9,7 @@ class VimageUI : ConsoleUI [singleton]
     command             = String()
     cmd_line_handlers   = [String:CmdLineHandler]
     last_input_timer    = Timer()
+    actions             : Action
 
   METHODS
     method init
@@ -64,6 +65,10 @@ class VimageUI : ConsoleUI [singleton]
 
     method on_update [override]
       prior.on_update
+
+      if (actions)
+        actions .= update
+      endIf
 
       # Load another image, if necessary, during user input downtime
       if (last_input_timer.elapsed_ms >= 1000)

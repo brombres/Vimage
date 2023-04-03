@@ -129,12 +129,7 @@ class CmdApplyAll : EditCmd [singleton]
       endIf
 
     method execute
-      while (ImageList.selected and ImageList.selected is not ImageList.last_child)
-        local index = ImageList.selected.index
-        forEach (cmd in Vimage.macro) Vimage.execute( cmd, &skip_undo_save_state )
-        if (index + 1 < ImageList.count) ImageList.select( index + 1 )
-      endWhile
-      Vimage.last_cmd = this
+      VimageUI.actions += ActionApplyAll( this )
 endClass
 
 class CmdAspect( size:XY ) : EditCmd

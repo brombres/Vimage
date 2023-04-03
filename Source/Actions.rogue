@@ -1,0 +1,26 @@
+module Vimage
+
+class ActionApplyAll : Action
+  PROPERTIES
+    cmd         : CmdApplyAll
+    is_finished : Logical
+
+  METHODS
+    method init( cmd )
+      prior.init
+
+    method is_finished->Logical [override]
+      return @is_finished
+
+    method on_update [override]
+      contingent
+        necessary (ImageList.selected)
+        local index = ImageList.selected.index
+        forEach (cmd in Vimage.macro) Vimage.execute( cmd, &skip_undo_save_state )
+        necessary (index+1 < ImageList.count)
+        ImageList.select( index + 1 )
+      unsatisfied
+        is_finished = true
+        Vimage.last_cmd = cmd
+      endContingent
+endClass

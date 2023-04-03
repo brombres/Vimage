@@ -73,10 +73,12 @@ module Vimage
 uses Console/CommandLineParser
 uses Bitmap
 uses Bitmap/IO
+uses Control/Action
 uses Epilog
 uses UI
 uses Utility/Clipboard
 
+$include Actions
 $include BlitMode
 $include Cmd
 $include CmdLineHandler
