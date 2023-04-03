@@ -137,11 +137,6 @@ class ImageListState : StandardState [singleton]
 
       status = ""
 
-    method on_leave
-      ImageList.is_dim = true
-      ImageList.request_redraw
-      StatusBar.request_redraw
-
     method state_name->String
       return "IMAGE LIST"
 endClass
@@ -159,6 +154,11 @@ class ZoomState : StandardState [singleton]
     method on_enter
       Vimage.repeat_count = null
       if (Vimage.recording_macro) Vimage.macro.add( CmdSetRepeatCount(null) )
+
+      ImageList.is_dim = true
+      ImageList.request_redraw
+      StatusBar.request_redraw
+
 
     method state_name->String
       return "ZOOM"
@@ -180,6 +180,10 @@ class CropState : StandardState [singleton]
 
     method on_enter
       status = "c (crop mode)"
+
+      ImageList.is_dim = true
+      ImageList.request_redraw
+      StatusBar.request_redraw
 
     method state_name->String
       return "CROP"
