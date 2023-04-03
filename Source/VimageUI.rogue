@@ -8,6 +8,7 @@ class VimageUI : ConsoleUI [singleton]
     repeat_count        : Int32?
     command             = String()
     cmd_line_handlers   = [String:CmdLineHandler]
+    last_input_timer    = Timer()
 
   METHODS
     method init
@@ -40,7 +41,16 @@ class VimageUI : ConsoleUI [singleton]
       add( layout )
 
     method on( e:KeyEvent )
+      last_input_timer.restart
       State.current.on( e )
+
+    method on( e:PointerEvent )
+      last_input_timer.restart
+      prior.on( e )
+
+    method on( e:ScrollEvent )
+      last_input_timer.restart
+      prior.on( e )
 
     method on_resize
       ImageView.show( ImageView.image )
@@ -51,5 +61,19 @@ class VimageUI : ConsoleUI [singleton]
     method show( image:Image )
       TitleBar.show( image )
       ImageView.show( image )
+
+    method on_update [override]
+      prior.on_update
+
+      # Load another image, if necessary, during user input downtime
+      if (last_input_timer.elapsed_ms >= 1000)
+        forEach (item in ImageList)
+          local image = item->(as ImageListItem).image
+          if (not image.@bitmap)
+            image.bitmap
+            escapeForEach
+          endIf
+        endForEach
+      endIf
 
 endClass

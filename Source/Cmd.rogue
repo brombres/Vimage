@@ -945,7 +945,7 @@ class CmdQuit( force=false:Logical ) : EditCmd
       endIf
 endClass
 
-class CmdQuitAll( force=false:Logical ) : EditCmd
+class CmdQuitAll( force=false:Logical ) : Cmd
   METHODS
     method update_status
       if (force) status = "qq! (force-quit all)"

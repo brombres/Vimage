@@ -25,9 +25,17 @@ class Image
 
     method init( file )
       name = file.value.filepath
-      if (file.value.exists)
+      if (not file.value.exists)
+        error = "File not found: " + file
+        bitmap = Bitmap(1,1)
+      endIf
+
+    method bitmap->Bitmap
+      if (@bitmap) return @bitmap
+
+      if (file and file.value.exists)
         bitmap = Bitmap( file.value )
-        if (not bitmap)
+        if (not @bitmap)
           error = "Unsupported file type or corrupted file: " + file
           bitmap = Bitmap(1,1)
         endIf
@@ -35,6 +43,18 @@ class Image
         error = "File not found: " + file
         bitmap = Bitmap(1,1)
       endIf
+
+      forEach (item in ImageList)
+        if (item->(as ImageListItem).image is this)
+          item->(as ImageListItem).request_redraw
+          if (ImageList.selected and this is ImageList.selected.image)
+            ImageView.mark_modified
+          endIf
+          escapeForEach
+        endIf
+      endForEach
+
+      return @bitmap
 
     method init( info:Value )
       if (info//filepath) file = File(info//filepath->String)
@@ -59,7 +79,7 @@ class Image
         result.print File(name).filename.before_last('.')
         if (not error) result.print ' '
       endIf
-      if (not error)
+      if (not error and @bitmap)
         result.print '['
         result.print bitmap.width
         result.print 'x'
@@ -71,12 +91,15 @@ class Image
 
     method set_is_modified( @is_modified )
       if (is_modified)
-        if local selected = ImageList.selected
-          if (this is selected.image)
-            selected.request_redraw
-            ImageView.mark_modified
+        forEach (item in ImageList)
+          if (item->(as ImageListItem).image is this)
+            item->(as ImageListItem).request_redraw
+            if (ImageList.selected and this is ImageList.selected.image)
+              ImageView.mark_modified
+            endIf
+            escapeForEach
           endIf
-        endIf
+        endForEach
       endIf
 
     method size->XY
@@ -117,20 +140,31 @@ class Image
       return cached_text_canvas
 
     method to->String
-      if (name)
-        if (error) return name
-        return "$$ [$x$]"(which{is_modified:"*"||""},name,bitmap.width,bitmap.height)
-      elseIf (is_modified)
-        return "*[$x$]"(bitmap.width,bitmap.height)
+      if (@bitmap)
+        if (name)
+          if (error) return name
+          return "$$ [$x$]"(which{is_modified:"*"||""},name,bitmap.width,bitmap.height)
+        elseIf (is_modified)
+          return "*[$x$]"(bitmap.width,bitmap.height)
+        else
+          return "[$x$]"(bitmap.width,bitmap.height)
+        endIf
       else
-        return "[$x$]"(bitmap.width,bitmap.height)
+        if (name)
+          if (error) return name
+          return "$$"(which{is_modified:"*"||""},name)
+        elseIf (is_modified)
+          return "*"
+        else
+          return "?"
+        endIf
       endIf
 
     method to->Value
       return ...
       @{
         filepath:which{file:file.value.filepath||null},
-        bitmap:Value(bitmap),
+        bitmap:Value(@bitmap),
         :name,
         :zoom,
         camera:{x:camera.x,y:camera.y},
