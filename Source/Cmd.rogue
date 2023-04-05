@@ -499,6 +499,28 @@ class CmdDD : EditCmd [singleton]
       endIf
 endClass
 
+class CmdGoToFirstImage : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "g (go to first image)"
+
+    method execute
+      if (ImageList.count)
+        ImageList.select( 0 )
+      endIf
+endClass
+
+class CmdGoToLastImage : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "G (go to last image)"
+
+    method execute
+      if (ImageList.count)
+        ImageList.select( ImageList.count-1 )
+      endIf
+endClass
+
 class CmdImageListNext : Cmd [singleton]
   METHODS
     method update_status
