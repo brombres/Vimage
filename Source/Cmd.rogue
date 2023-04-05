@@ -247,7 +247,7 @@ class CmdBitwiseNOT : EditCmd [singleton]
     method execute
       if local selected = ImageList.selected
         local bitmap = selected.image.cloned_bitmap
-        local n = bitmap.size.product
+        local n = bitmap.pixels.count
         native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
                 |
                 |while (--$n >= 0)

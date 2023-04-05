@@ -416,6 +416,24 @@ class CmdLineFit : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineHardAlpha : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "ha"
+
+  METHODS
+    method execute( args:String )
+      Vimage.hard_alpha = not Vimage.hard_alpha
+
+      if (Vimage.hard_alpha) status = "(hard alpha on)"
+      else                   status = "(hard alpha off)"
+
+      if (ImageList.selected)
+        ImageList.selected.image.cached_text_canvas = null
+        ImageView.mark_modified
+      endIf
+
+endClass
+
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"

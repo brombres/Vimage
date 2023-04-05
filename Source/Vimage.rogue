@@ -113,8 +113,10 @@ class Vimage [singleton]
     last_cmd           : Cmd
     anchor             = Anchor.CENTER
     bg_color           = Color.BLACK : Color
+    hard_alpha         : Logical
     undo_stack         = @[]
     redo_stack         = @[]
+
     macro              = Cmd[]
     recording_macro    : Logical
 

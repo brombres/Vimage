@@ -136,6 +136,21 @@ class Image
 
       piece.resize( target_size )
 
+      if (Vimage.hard_alpha)
+        local n = piece.pixels.count
+        native @|RogueInt32* data  = $piece->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  RogueInt32 a;
+                |  if ((a=(argb & 0xFF000000)) && a != 0xFF000000)
+                |  {
+                |    *data = argb | 0xFF000000;
+                |  }
+                |}
+      endIf
+
       cached_text_canvas = piece->TextCanvas( &dither, &bg8=CharacterStyle.BG_DARK_GRAY, &bg24=Color(0xFF444444) )
       return cached_text_canvas
 
