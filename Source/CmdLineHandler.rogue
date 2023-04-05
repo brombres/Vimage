@@ -432,6 +432,10 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
         ImageView.mark_modified
       endIf
 
+    method syntax->String
+      if (Vimage.hard_alpha) return "(turn hard alpha off)"
+      else                   return "(turn hard alpha on)"
+
 endClass
 
 class CmdLineJoin : CmdLineHandler [singleton]
