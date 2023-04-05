@@ -44,6 +44,13 @@ class VimageUI : ConsoleUI [singleton]
 
     method on( e:KeyEvent )
       last_input_timer.restart
+
+      if (e.is_press(Keycode.ESCAPE) and actions)
+        actions = null
+        StatusBar.text = "[command cancelled]"
+        return
+      endIf
+
       State.current.on( e )
 
     method on( e:PointerEvent )
@@ -69,6 +76,7 @@ class VimageUI : ConsoleUI [singleton]
 
       if (actions)
         actions .= update
+        ensure_rapid_updates( 2 )
       endIf
 
       # Load another image, if necessary, during user input downtime
@@ -77,6 +85,7 @@ class VimageUI : ConsoleUI [singleton]
           local image = item->(as ImageListItem).image
           if (not image.@bitmap)
             image.bitmap
+            ensure_rapid_updates( 2 )
             escapeForEach
           endIf
         endForEach

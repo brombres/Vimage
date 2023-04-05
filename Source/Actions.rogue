@@ -16,7 +16,7 @@ class ActionApplyAll : Action
       contingent
         necessary (ImageList.selected)
         local index = ImageList.selected.index
-        forEach (cmd in Vimage.macro) Vimage.execute( cmd, &skip_undo_save_state )
+        forEach (macro_cmd in Vimage.macro) Vimage.execute( macro_cmd, &skip_undo_save_state )
         necessary (index+1 < ImageList.count)
         ImageList.select( index + 1 )
       unsatisfied
