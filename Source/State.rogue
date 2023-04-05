@@ -193,6 +193,12 @@ class EnterCmdLineState : State
   METHODS
     method find_commands( keyword:String, &allow_partial, &use_alternate )->CmdLineHandler[]
       local cmds = CmdLineHandler[]
+
+      if (keyword.count and keyword[0].is_number)
+        cmds.add( CmdLineSelectIndex(keyword->Int32) )
+        return cmds
+      endIf
+
       forEach (cmd in VimageUI.cmd_line_handlers)
         contingent
           sufficient (cmd.keyword == keyword)
@@ -202,6 +208,7 @@ class EnterCmdLineState : State
           cmds.add( cmd )
         endContingent
       endForEach
+
       return cmds
 
     method on( e:KeyEvent )

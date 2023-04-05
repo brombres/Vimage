@@ -1196,6 +1196,22 @@ class CmdRepeatLast : Cmd [singleton]
       endIf
 endClass
 
+class CmdSelectIndex( index:Int32 ) : Cmd [singleton]
+  METHODS
+    method update_status
+      if (index >= 0 and index < ImageList.count)
+        status = "select image $"(index)
+      else
+        status = "select image $ [index out of bounds]"(index)
+      endIf
+
+    method execute
+      if (ImageList.count == 0) return
+
+      local index = index.clamped( 0, ImageList.count-1 )
+      ImageList.select( index )
+endClass
+
 class CmdSetRepeatCount( n:Int32? ) : Cmd
   METHODS
     method execute

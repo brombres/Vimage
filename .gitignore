@@ -3,6 +3,10 @@
 Local.settings
 BuildLocal.rogue
 /Build
+/*.png
+/*.jpg
+/*.jpeg
+/Test
 
 # Mac
 .DS_Store

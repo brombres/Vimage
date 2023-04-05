@@ -20,6 +20,9 @@ class CmdLineHandler
       parts[3] .= to_lowercase
       return parts.join("")
 
+    method keyword->String
+      return @keyword
+
     method parse_anchor( args:String )->Anchor?
       if (args == "") return Vimage.anchor
 
@@ -506,6 +509,18 @@ class CmdLineForceQuitAll : CmdLineHandler [singleton]
     method execute( args:String )
       execute( CmdQuitAll(&force) )
 
+endClass
+
+class CmdLineSelectIndex( index:Int32 ) : CmdLineHandler
+  METHODS
+    method execute( args:String )
+      execute( CmdSelectIndex(index) )
+
+    method keyword->String
+      return index->String
+
+    method syntax->String
+      return "(select image $)"(index)
 endClass
 
 class CmdLineSplit : CmdLineHandler [singleton]
