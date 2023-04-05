@@ -79,18 +79,16 @@ class ImageList : UIList [singleton]
           if (scroll_view)
             local item_bounds = item.display_bounds
             local view_bounds = scroll_view.display_bounds
-            local delta = item_bounds.y2 - view_bounds.y2
-            if (delta > 0)
-              scroll_view.content_offset -= XY(0,delta)
-            else
-              delta = view_bounds.y1 - item_bounds.y1
-              if (delta > 0)
-                scroll_view.content_offset += XY(0,delta)
-              endIf
+            local index = item.index
+            local i1 = -scroll_view.content_offset.y
+            local i2 = i1 + scroll_view.size.y
+            if (index < i1)
+              scroll_view.content_offset = XY(0,-index)
+              scroll_view.request_redraw
+            elseIf (index >= i2)
+              scroll_view.content_offset = XY(0,-(index-(scroll_view.size.y-1)))
+              scroll_view.request_redraw
             endIf
-            #if local intersection = (item.display_bounds & this.display_bounds)
-            #else
-            #endIf
           endIf
         endIf
       else
