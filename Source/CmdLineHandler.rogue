@@ -456,6 +456,72 @@ class CmdLineJoin : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineLiteralBitwiseAND : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "&"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        execute( CmdLiteralBitwiseAND(color.argb) )
+      endIf
+endClass
+
+class CmdLineLiteralBitwiseOR : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "|"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        execute( CmdLiteralBitwiseOR(color.argb) )
+      endIf
+endClass
+
+class CmdLineLiteralBitwiseXOR : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "~"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        execute( CmdLiteralBitwiseXOR(color.argb) )
+      endIf
+endClass
+
+class CmdLineLiteralBitwiseROL : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "<"
+    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)"
+
+  METHODS
+    method execute( args:String )
+      local include_alpha = args.contains('a')
+      if (include_alpha) args = args.replacing("a","").trimmed
+      local n = args->Int32
+      if (n->String == args)
+        execute( CmdLiteralBitwiseROL(n,&=include_alpha) )
+      endIf
+endClass
+
+class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = ">"
+    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)"
+
+  METHODS
+    method execute( args:String )
+      local include_alpha = args.contains('a')
+      if (include_alpha) args = args.replacing("a","").trimmed
+      local n = args->Int32
+      if (n->String == args)
+        execute( CmdLiteralBitwiseROR(n,&=include_alpha) )
+      endIf
+endClass
+
 class CmdLineNew : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"

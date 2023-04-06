@@ -896,6 +896,138 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
+class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
+  METHODS
+    method update_status
+      status = "& $ (bitwise AND)"(argb->String(&hex))
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize argb
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb & $argb);
+                |}
+      endIf
+endClass
+
+class CmdLiteralBitwiseOR( argb:Int32 )  : EditCmd
+  METHODS
+    method update_status
+      status = "| $ (bitwise OR)"(argb->String(&hex))
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize argb
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb | $argb);
+                |}
+      endIf
+endClass
+
+class CmdLiteralBitwiseROL( bit_count:Int32, include_alpha:Logical )  : EditCmd
+  METHODS
+    method update_status
+      status = "< $ (bitwise ROL)"(bit_count)
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize bit_count
+        if (include_alpha)
+          bit_count &= 31
+          local shr = 32 - bit_count
+          local lsb_mask = which{ bit_count:(-1:>>:shr) || 0 }
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  *data = (argb << $bit_count) | ((argb >> $shr) & $lsb_mask);
+                  |}
+        else
+          bit_count %= 24
+          local shr = 24 - bit_count
+          local lsb_mask = which{ bit_count:(0xFFFFFF:>>:shr) || 0 }
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  *data = (argb & 0xFF000000) | ((argb << $bit_count) & 0xFFFFFF) | ((argb >> $shr) & $lsb_mask);
+                  |}
+        endIf
+      endIf
+endClass
+
+class CmdLiteralBitwiseROR( bit_count:Int32, include_alpha:Logical )  : EditCmd
+  METHODS
+    method update_status
+      status = "> $ (bitwise ROR)"(bit_count)
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize bit_count
+        if (include_alpha)
+          bit_count &= 31
+          local shl = 32 - bit_count
+          local lsb_mask = 0xFFFFFFFF:>>:bit_count
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  *data = ((argb >> $bit_count) & $lsb_mask) | (argb << $shl);
+                  |}
+        else
+          bit_count %= 24
+          local shl = 24 - bit_count
+          local lsb_mask = 0xffffff:>>>:bit_count
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  *data = (argb & 0xFF000000) | ((argb >> $bit_count) & $lsb_mask) | ((argb << $shl) & 0xFFFFFF);
+                  |}
+        endIf
+      endIf
+endClass
+
+class CmdLiteralBitwiseXOR( argb:Int32 )  : EditCmd
+  METHODS
+    method update_status
+      status = "~ $ (bitwise XOR)"(argb->String(&hex))
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize argb
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  *data = (argb ^ $argb);
+                |}
+      endIf
+endClass
+
 class CmdMacro : Cmd [singleton]
   METHODS
     method allowed_in_macro->Logical
