@@ -24,3 +24,31 @@ class ActionApplyAll : Action
         Vimage.last_cmd = cmd
       endContingent
 endClass
+
+class ActionWriteAll : Action
+  PROPERTIES
+    cmd         : CmdWriteAll
+    is_finished : Logical
+    index       = 0
+
+  METHODS
+    method init( cmd )
+      prior.init
+
+    method is_finished->Logical [override]
+      return @is_finished
+
+    method on_update [override]
+      forEach (i in index..<ImageList.count)
+        local item = ImageList[i]->(as ImageListItem)
+        if (item.image.is_modified)
+          ImageList.select( i )
+          CmdWrite.execute
+          ++i
+          return
+        endIf
+      endForEach
+
+      is_finished = true
+      Vimage.last_cmd = cmd
+endClass

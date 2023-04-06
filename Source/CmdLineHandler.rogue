@@ -424,8 +424,8 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
     method execute( args:String )
       Vimage.hard_alpha = not Vimage.hard_alpha
 
-      if (Vimage.hard_alpha) status = "(hard alpha on)"
-      else                   status = "(hard alpha off)"
+      if (Vimage.hard_alpha) status = "[hard alpha on]"
+      else                   status = "[hard alpha off]"
 
       if (ImageList.selected)
         ImageList.selected.image.cached_text_canvas = null
@@ -634,27 +634,26 @@ class CmdLineWrite : CmdLineHandler [singleton]
       local file = File( args )
       local image = ImageList.selected.image
       image.file = file
-      image.name = file.filepath
-      local bitmap = image.bitmap
-      which (File(args).extension.to_lowercase)
-        case "png"
-          file.save( bitmap.to_png_bytes )
-        case "jpg", ".jpeg"
-          file.save( bitmap.to_jpeg_bytes )
-      endWhich
-      status = ''"$" [$x$, $ bytes] written''(args,bitmap.width,bitmap.height,file.size.format(","))
 
-      image.is_modified = false
-      ImageList.selected.request_redraw
-      TitleBar.request_redraw
+      Vimage.execute( CmdWrite )
 
     method syntax->String
-      if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg]"
+      if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg] (save image)"
 
       if (ImageView.image and ImageView.image.file)
-        return "[$]"(ImageView.image.file.value.filepath)
+        return "[$] (save image)"(ImageView.image.file.value.filepath)
       else
-        return "filepath.[png|jpg]"
+        return "filepath.[png|jpg] (save image)"
       endIf
+endClass
+
+class CmdLineWriteAll : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "wall"
+    syntax  = "(write all; save all modified images)"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdWriteAll )
 endClass
 

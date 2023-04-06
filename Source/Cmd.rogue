@@ -1462,18 +1462,29 @@ class CmdWrite : EditCmd [singleton]
 
       local file = File( filepath )
       local image = ImageList.selected.image
-      image.file = file
       image.name = file.filepath
       local bitmap = image.bitmap
-      which (File(filepath).extension.to_lowercase)
+      local ext = (File(filepath).extension.to_lowercase)
+      which (ext)
         case "png"
           file.save( bitmap.to_png_bytes )
         case "jpg", ".jpeg"
           file.save( bitmap.to_jpeg_bytes )
+        others
+          status = "[saving image type '$' is unsupported]"(ext)
+          return
       endWhich
       status = ''"$" [$x$, $ bytes] written''(filepath,bitmap.width,bitmap.height,file.size.format(","))
 
       image.is_modified = false
+      ImageList.selected.request_redraw
+      TitleBar.request_redraw
+endClass
+
+class CmdWriteAll : Cmd [singleton]
+  METHODS
+    method execute( ignore_repeat_count:Int32 )
+      VimageUI.actions += ActionWriteAll( this )
 endClass
 
 class CmdYank : Cmd [singleton]

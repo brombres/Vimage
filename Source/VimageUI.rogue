@@ -33,6 +33,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineSplit )
       register( CmdLineSwap )
       register( CmdLineWrite )
+      register( CmdLineWriteAll )
 
       State.current.change_state( ImageListState )
 
