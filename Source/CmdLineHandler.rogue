@@ -416,6 +416,36 @@ class CmdLineFit : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineGradient : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "gradient"
+    syntax  = "COLOR-1 COLOR-2 [COLOR-3 COLOR-4]"
+
+  METHODS
+    method execute( arg_line:String )
+      local args = arg_line.split(' ')
+      which (args.count)
+        case 2
+          if local a = parse_color( args[0] )
+            if local b = parse_color( args[1] )
+              execute( CmdGradient(a,b,a,b) )
+            endIf
+          endIf
+        case 4
+          if local a = parse_color( args[0] )
+            if local b = parse_color( args[1] )
+              if local c = parse_color( args[2] )
+                if local d = parse_color( args[3] )
+                  execute( CmdGradient(a,b,c,d) )
+                endIf
+              endIf
+            endIf
+          endIf
+        others
+      endWhich
+
+endClass
+
 class CmdLineHardAlpha : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "ha"

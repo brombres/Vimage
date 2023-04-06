@@ -86,6 +86,7 @@ $include Image
 $include ImageList
 $include ImageView
 $include KeyHandler
+$include Lerp
 $include State
 $include StatusBar
 $include TitleBar

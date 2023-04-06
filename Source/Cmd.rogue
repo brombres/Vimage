@@ -896,6 +896,36 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
+class CmdGradient( a:Color, b:Color, c:Color, d:Color ) : EditCmd
+  METHODS
+    method update_status
+      status = "gradient $ $ $ $"(a,b,c,d)
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local left = ColorLerp( a, c, h-1 )
+      local right = ColorLerp( b, d, h-1 )
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local mid = ColorLerp( Color(left.read_another.value), Color(right.read_another.value), w-1 )
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = mid.read_another.value
+        native
+          @|  *(++data) = $argb;
+           |}
+      endLoop
+
+endClass
+
 class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
   METHODS
     method update_status
