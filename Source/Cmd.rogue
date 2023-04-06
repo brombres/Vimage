@@ -490,15 +490,7 @@ class CmdDelete : EditCmd [singleton]
         else
           Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
         endIf
-        local next = ImageList.selected.next
-        ImageList.remove( ImageList.selected )
-        if (next)
-          ImageList.select( next->(as ImageListItem) )
-        elseIf (ImageList.count)
-          ImageList.select( ImageList.last_child->(as ImageListItem) )
-        else
-          ImageList.select( null )
-        endIf
+        ImageList.remove_selected
       endIf
 endClass
 
@@ -1165,6 +1157,25 @@ class CmdQuitAll( force=false:Logical ) : Cmd
         endContingent
       endIf
       VimageUI.is_running = false
+endClass
+
+class CmdRemove : EditCmd [singleton]
+  METHODS
+    method update_status
+      if (ImageList.selected and ImageList.selected.image.file)
+        status = "rm '$' image file from folder"(ImageList.selected.image.file)
+      elseIf (ImageList.selected)
+        status = "rm [no file associated with current image]"
+      else
+        status = "rm [no current image]"
+      endIf
+
+    method execute
+      if (ImageList.selected and ImageList.selected.image.file)
+        local file = ImageList.selected.image.file.value
+        file.delete
+        ImageList.remove_selected
+      endIf
 endClass
 
 class CmdResetZoom : Cmd [singleton]

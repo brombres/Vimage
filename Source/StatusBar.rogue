@@ -30,7 +30,7 @@ class StatusBar : UIComponent [singleton]
 
     method on_use->TextCanvas
       builder.clear
-      if (Vimage.repeat_count) builder.print Vimage.repeat_count
+      if (Vimage.repeat_count and Vimage.repeat_count.value > 1) builder.print Vimage.repeat_count
       return builder
 
     method on_end_use( builder:TextCanvas )

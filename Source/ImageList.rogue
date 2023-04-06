@@ -45,6 +45,18 @@ class ImageList : UIList [singleton]
     method on_resize
       fixed_width = FIXED_WIDTH
 
+    method remove_selected
+      if (not selected) return
+      local next = selected.next
+      remove( selected )
+      if (next)
+        select( next->(as ImageListItem) )
+      elseIf (count)
+        select( last_child->(as ImageListItem) )
+      else
+        select( null )
+      endIf
+
     method scroll_view->ImageListScrollView
       local view = parent
       while (view)

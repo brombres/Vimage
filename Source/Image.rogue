@@ -57,12 +57,17 @@ class Image
       return @bitmap
 
     method init( info:Value )
-      if (info//filepath) file = File(info//filepath->String)
       bitmap = info//bitmap.to<<Bitmap>>
       name = which{ info//name:info//name->String || null }
       zoom = info//zoom
       camera = RealXY( info//camera//x, info//camera//y )
+      error = which{ info//error:info//error->String || null }
       is_modified = info//is_modified
+
+      if (info//filepath)
+        file = File(info//filepath->String)
+        if (not file.value.exists) is_modified = true
+      endIf
 
       cached_text_canvas = null
 
@@ -183,6 +188,7 @@ class Image
         :name,
         :zoom,
         camera:{x:camera.x,y:camera.y},
+        :error,
         :is_modified
       }
 endClass

@@ -666,6 +666,17 @@ class CmdLineSplit : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineRemove : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "rm"
+    syntax  = "(permanently deletes this image file from its folder)"
+
+  METHODS
+    method execute( arg_line:String )
+      execute( CmdRemove )
+
+endClass
+
 class CmdLineResize : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "resize"
