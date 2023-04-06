@@ -86,7 +86,7 @@ class StandardState : State
       key_handlers[Keycode.T]               = CmdStack
       key_handlers[Keycode.U]               = CmdUndo
       key_handlers[Keycode.U+SHIFT]         = CmdRedoU
-      key_handlers[Keycode.Y]               = Cmd( YankState )
+      key_handlers[Keycode.Y]               = CmdYank
       key_handlers[Keycode.Z]               = CmdZoomIn
       key_handlers[Keycode.Z+SHIFT]         = CmdZoomOut
 
@@ -368,41 +368,3 @@ class DeleteState : State [singleton]
       endIf
 endClass
 
-class YankState : State [singleton]
-  METHODS
-    method on_enter
-      use status = StatusBar
-        status.print 'y'
-        status.style.dim
-        status.print "[y|p|a|r|g|b]"
-        status.style.dim_off
-      endUse
-
-    method on( e:KeyEvent )
-      if (e.is_press)
-        if (e.keycode == Keycode.ESCAPE)
-          cancel
-        elseIf (e.unicode == 'y')
-          execute( CmdYank )
-          state = ImageListState
-        elseIf (e.unicode == 'p')
-          execute( CmdYankAndPaste )
-          state = ImageListState
-        elseIf (e.unicode == 'a')
-          execute( CmdYankChannel("alpha",0xFF000000) )
-          state = ImageListState
-        elseIf (e.unicode == 'r')
-          execute( CmdYankChannel("red",0xFFFF0000) )
-          state = ImageListState
-        elseIf (e.unicode == 'g')
-          execute( CmdYankChannel("green",0xFF00FF00) )
-          state = ImageListState
-        elseIf (e.unicode == 'b')
-          execute( CmdYankChannel("blue",0xFF0000FF) )
-          state = ImageListState
-        else
-          set_status( "[invalid command 'y$']"(e.unicode) )
-          state = ImageListState
-        endIf
-      endIf
-endClass
