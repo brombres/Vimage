@@ -474,13 +474,13 @@ class CmdDX : EditCmd [singleton]
     method on( e:KeyEvent )
 endClass
 
-class CmdDD : EditCmd [singleton]
+class CmdDelete : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
-        set_status( "dd (delete image and copy to clipboard)" )
+        set_status( "d (delete image and copy to clipboard)" )
       else
-        set_status( "dd [no image to delete]" )
+        set_status( "d [no image to delete]" )
       endIf
 
     method execute

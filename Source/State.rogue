@@ -69,7 +69,7 @@ class StandardState : State
       key_handlers[Keycode.A]               = CmdApply
       key_handlers[Keycode.A+SHIFT]         = CmdApplyAll
       key_handlers[Keycode.C]               = Cmd( CropState )
-      key_handlers[Keycode.D]               = Cmd( DeleteState )
+      key_handlers[Keycode.D]               = CmdDelete
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
       key_handlers[Keycode.G]               = CmdGoToFirstImage
@@ -342,29 +342,5 @@ class EnterCmdLineState : State
         builder[cursor_pos] = ch
 
       endUse
-endClass
-
-class DeleteState : State [singleton]
-  METHODS
-    method on_enter
-      use status = StatusBar
-        status.print 'd'
-        status.style.dim
-        status.print "[d]"
-        status.style.dim_off
-      endUse
-
-    method on( e:KeyEvent )
-      if (e.is_press)
-        if (e.keycode == Keycode.ESCAPE)
-          cancel
-        elseIf (e.unicode == 'd')
-          execute( CmdDD )
-          state = ImageListState
-        else
-          set_status( "[invalid command 'd$']"(e.unicode) )
-          state = ImageListState
-        endIf
-      endIf
 endClass
 
