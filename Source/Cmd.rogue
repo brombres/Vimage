@@ -1097,6 +1097,26 @@ class CmdNew( size:XY ) : EditCmd
       ImageList.request_layout
 endClass
 
+class CmdOpen( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "open images for editing"
+
+    method execute
+      local index = which{ ImageList.selected:ImageList.selected.index+1 || 0 }
+
+      forEach (arg in args)
+        forEach (filepath in File(arg).listing)
+          local file = File( filepath )
+          if (not ImageList.contains(file))
+            ImageList.insert( Image(file), index )
+          endIf
+          ++index
+        endForEach
+      endForEach
+
+endClass
+
 class CmdQuit( force=false:Logical ) : EditCmd
   METHODS
     method update_status

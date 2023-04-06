@@ -21,6 +21,14 @@ class ImageList : UIList [singleton]
     method after_draw
       if (is_dim) ConsoleUICanvas.style.dim_off
 
+    method contains( file:File )->Logical
+      file .= abs
+      forEach (child in children)
+        local image = child->(as ImageListItem).image
+        if (image.file and image.file.value.abs == file) return true
+      endForEach
+      return false
+
     method dispatch( e:PointerEvent )
       # Send input events to children in reverse order because the top layer comes last
       if (next) next.dispatch( e )

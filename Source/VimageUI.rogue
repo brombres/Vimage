@@ -31,6 +31,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineLiteralBitwiseROR )
       register( CmdLineLiteralBitwiseXOR )
       register( CmdLineNew )
+      register( CmdLineOpen )
       register( CmdLineQuit )
       register( CmdLineQuitAll )
       register( CmdLineForceQuit )
@@ -40,6 +41,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineSwap )
       register( CmdLineWrite )
       register( CmdLineWriteAll )
+      register( CmdLineWriteQuit )
 
       State.current.change_state( ImageListState )
 

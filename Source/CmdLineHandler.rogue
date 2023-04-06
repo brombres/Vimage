@@ -585,6 +585,19 @@ class CmdLineNew : CmdLineHandler [singleton]
       return "$x$"(default_size.x,default_size.y)
 endClass
 
+class CmdLineOpen : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "open"
+    syntax  = "[filepath|wildcard/**/*.filepath]"
+
+  METHODS
+    method execute( arg_line:String )
+      if (arg_line == "") return
+      local args = Scanner( arg_line ).scan_args
+      execute( CmdOpen(args) )
+
+endClass
+
 class CmdLineQuit : CmdLineHandler [singleton]
   PROPERTIES
     keyword   = "q"
@@ -721,7 +734,7 @@ class CmdLineWrite : CmdLineHandler [singleton]
       endIf
 
       which (File(args).extension.to_lowercase)
-        case "png", "jpg", "jpeg"
+        case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
           noAction
         others
           args += ".png"
@@ -751,5 +764,46 @@ class CmdLineWriteAll : CmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       execute( CmdWriteAll )
+endClass
+
+class CmdLineWriteQuit : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "wq"
+
+  METHODS
+    method execute( args:String )
+      if (not ImageList.selected)
+        status = "wq [no current image]"
+        return
+      endIf
+
+      if (args == "")
+        Vimage.execute( CmdWrite )
+        Vimage.execute( CmdQuit() )
+        return
+      endIf
+
+      which (File(args).extension.to_lowercase)
+        case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
+          noAction
+        others
+          args += ".png"
+      endWhich
+
+      local file = File( args )
+      local image = ImageList.selected.image
+      image.file = file
+
+      Vimage.execute( CmdWrite )
+      Vimage.execute( CmdQuit() )
+
+    method syntax->String
+      if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg] (save image and quit)"
+
+      if (ImageView.image and ImageView.image.file)
+        return "[$] (save image and quit)"(ImageView.image.file.value.filepath)
+      else
+        return "filepath.[png|jpg] (save image and quit)"
+      endIf
 endClass
 
