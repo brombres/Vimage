@@ -29,8 +29,8 @@ augment Build
     PROJECT          = "Vimage"
     LAUNCHER_NAME    = PROJECT.to_lowercase : String
 
-    BUILD_MODE       = "debug"
-    #BUILD_MODE       = "release"
+    #BUILD_MODE       = "debug"
+    BUILD_MODE       = "release"
     LAUNCHER_FOLDER  = "/usr/local/bin"
     ROGUEC_FLAGS     = ""
     CC_ARGS_MACOS    = "-I /System/Libraries/Frameworks -framework Foundation -framework AppKit"

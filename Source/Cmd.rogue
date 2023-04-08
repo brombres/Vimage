@@ -1100,10 +1100,21 @@ class CmdOpen( args:String[] ) : EditCmd
       forEach (arg in args)
         forEach (filepath in File(arg).listing)
           local file = File( filepath )
-          if (not ImageList.contains(file))
+          contingent
+            necessary (not file.is_folder)
+            local ext = file.extension
+            which (ext)
+              case "bmp", "jpg", "jpeg", "png", "tif", "tiff"
+                noAction
+              others
+                escapeContingent
+            endWhich
+            necessary (not ImageList.contains(file))
+
             ImageList.insert( Image(file), index )
-          endIf
-          ++index
+            if (not ImageList.selected) ImageList.select( index )
+            ++index
+          endContingent
         endForEach
       endForEach
 
