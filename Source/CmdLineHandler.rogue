@@ -14,12 +14,6 @@ class CmdLineHandler
     method execute( cmd:Cmd )
       Vimage.execute( cmd )
 
-    method color_string( color:Color )->String
-      local parts = color.argb->String( &hex ).split( 2 )
-      parts[1] .= to_lowercase
-      parts[3] .= to_lowercase
-      return parts.join("")
-
     method keyword->String
       return @keyword
 
@@ -45,7 +39,9 @@ class CmdLineHandler
 
       return Anchor(RealXY(x,y))
 
-    method parse_color( arg:String )->Color?
+    method parse_color( arg:String )->ColorValue?
+      local result : Color?
+
       contingent
         forEach (ch in arg)
           necessary (ch.is_number(16))
@@ -58,10 +54,10 @@ class CmdLineHandler
           case 1  # V        -> 0xFFVVVVVV
             local v = arg->Int32( &base=16 )
             v |= v:<<:4
-            return Color( v, v, v )
+            result = Color( v, v, v )
           case 2  # Vv       -> 0xFFVvVvVv
             local v = arg->Int32( &base=16 )
-            return Color( v, v, v )
+            result = Color( v, v, v )
           case 3  # RGB      -> 0xFFRRGGBB
             local r = arg[0].to_number( &base=16 )
             local g = arg[1].to_number( &base=16 )
@@ -69,7 +65,7 @@ class CmdLineHandler
             r |= r:<<:4
             g |= g:<<:4
             b |= b:<<:4
-            return Color( r, g, b )
+            result = Color( r, g, b )
           case 4  # ARGB     -> 0xAARRGGBB
             local a = arg[0].to_number( &base=16 )
             local r = arg[1].to_number( &base=16 )
@@ -79,47 +75,50 @@ class CmdLineHandler
             r |= r:<<:4
             g |= g:<<:4
             b |= b:<<:4
-            return Color( r, g, b, a )
+            result = Color( r, g, b, a )
           case 6  # RRGGBB   -> 0xFFRRGGBB
             local r = arg.substring(0,2)->Int32( &base=16 )
             local g = arg.substring(2,2)->Int32( &base=16 )
             local b = arg.substring(4,2)->Int32( &base=16 )
-            return Color( r, g, b )
+            result = Color( r, g, b )
           case 8  # AARRGGBB -> 0xAARRGGBB
             local a = arg.substring(0,2)->Int32( &base=16 )
             local r = arg.substring(2,2)->Int32( &base=16 )
             local g = arg.substring(4,2)->Int32( &base=16 )
             local b = arg.substring(6,2)->Int32( &base=16 )
-            return Color( r, g, b, a )
+            result = Color( r, g, b, a )
         endWhich
 
       unsatisfied
         arg .= replacing(' ','_').replacing('-','_')
         which (arg)
-          case "black":       return Color( 0xff000000 )
-          case "blue":        return Color( 0xff0000FF )
-          case "brown":       return Color( 0xff882222 )
-          case "cyan":        return Color( 0xff00FFFF )
-          case "dark_gray":   return Color( 0xff444444 )
-          case "dark_green":  return Color( 0xff008800 )
-          case "gray":        return Color( 0xff888888 )
-          case "green":       return Color( 0xff00FF00 )
-          case "light_gray":  return Color( 0xffCCCCCC )
-          case "light_green": return Color( 0xff88FF88 )
-          case "magenta":     return Color( 0xffFF00FF )
-          case "orange":      return Color( 0xffFF8800 )
-          case "pink":        return Color( 0xffFFCCCC )
-          case "purple":      return Color( 0xff880088 )
-          case "red":         return Color( 0xffFF0000 )
-          case "rogue_blue":  return Color( 0xff3333FF )
-          case "royal_blue":  return Color( 0xff4169E1 )
-          case "sky_blue":    return Color( 0xff87CEEB )
-          case "transparent": return Color( 0 )
-          case "clear":       return Color( 0 )
-          case "yellow":      return Color( 0xffFFFF00 )
-          case "white":       return Color( 0xffFFFFFF )
+          case "black":       result = Color( 0xff000000 )
+          case "blue":        result = Color( 0xff0000FF )
+          case "brown":       result = Color( 0xff882222 )
+          case "cyan":        result = Color( 0xff00FFFF )
+          case "dark_gray":   result = Color( 0xff444444 )
+          case "dark_green":  result = Color( 0xff008800 )
+          case "gray":        result = Color( 0xff888888 )
+          case "green":       result = Color( 0xff00FF00 )
+          case "light_gray":  result = Color( 0xffCCCCCC )
+          case "light_green": result = Color( 0xff88FF88 )
+          case "magenta":     result = Color( 0xffFF00FF )
+          case "orange":      result = Color( 0xffFF8800 )
+          case "pink":        result = Color( 0xffFFCCCC )
+          case "purple":      result = Color( 0xff880088 )
+          case "red":         result = Color( 0xffFF0000 )
+          case "rogue_blue":  result = Color( 0xff3333FF )
+          case "royal_blue":  result = Color( 0xff4169E1 )
+          case "sky_blue":    result = Color( 0xff87CEEB )
+          case "transparent": result = Color( 0 )
+          case "clear":       result = Color( 0 )
+          case "yellow":      result = Color( 0xffFFFF00 )
+          case "white":       result = Color( 0xffFFFFFF )
+          case "random":      return ColorValue( Color.BLACK, &is_random )
         endWhich
       endContingent
+
+      if (result) return ColorValue( result.value )
 
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
@@ -295,13 +294,12 @@ endClass
 class CmdLineBG : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...|random]"
 
   METHODS
     method execute( args:String )
       if local color = parse_color( args )
-        status = "bg color $"(color_string(color))
-        Vimage.bg_color = color
+        execute( CmdSetBGColor(color) )
       endIf
 endClass
 
@@ -428,7 +426,7 @@ class CmdLineGradient : CmdLineHandler [singleton]
         case 2
           if local a = parse_color( args[0] )
             if local b = parse_color( args[1] )
-              execute( CmdGradient(a,b,a,b) )
+              execute( CmdGradient2(a,b) )
             endIf
           endIf
         case 4
@@ -436,7 +434,7 @@ class CmdLineGradient : CmdLineHandler [singleton]
             if local b = parse_color( args[1] )
               if local c = parse_color( args[2] )
                 if local d = parse_color( args[3] )
-                  execute( CmdGradient(a,b,c,d) )
+                  execute( CmdGradient4(a,b,c,d) )
                 endIf
               endIf
             endIf
@@ -494,7 +492,7 @@ class CmdLineLiteralBitwiseAND : CmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if local color = parse_color( args )
-        execute( CmdLiteralBitwiseAND(color.argb) )
+        execute( CmdLiteralBitwiseAND(color->Color.argb) )
       endIf
 endClass
 
@@ -506,7 +504,7 @@ class CmdLineLiteralBitwiseOR : CmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if local color = parse_color( args )
-        execute( CmdLiteralBitwiseOR(color.argb) )
+        execute( CmdLiteralBitwiseOR(color->Color.argb) )
       endIf
 endClass
 
@@ -518,7 +516,7 @@ class CmdLineLiteralBitwiseXOR : CmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if local color = parse_color( args )
-        execute( CmdLiteralBitwiseXOR(color.argb) )
+        execute( CmdLiteralBitwiseXOR(color->Color.argb) )
       endIf
 endClass
 

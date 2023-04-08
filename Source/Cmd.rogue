@@ -41,9 +41,6 @@ class Cmd
     method on( e:KeyEvent )
       Vimage.execute( this )
 
-    method repeatable( n:Int32 )->Cmd
-      return null
-
     method set_state( new_state:State )
       State.current.change_state( new_state )
 
@@ -888,7 +885,37 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
-class CmdGradient( a:Color, b:Color, c:Color, d:Color ) : EditCmd
+class CmdGradient2( a:ColorValue, b:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      status = "gradient $ $"(a,b)
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local left = a->Color
+      local right = b->Color
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local mid = ColorLerp( left, right, w-1 )
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = mid.read_another.value
+        native
+          @|  *(++data) = $argb;
+           |}
+      endLoop
+
+endClass
+
+class CmdGradient4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
   METHODS
     method update_status
       status = "gradient $ $ $ $"(a,b,c,d)
@@ -1439,6 +1466,16 @@ class CmdSelectIndex( index:Int32 ) : Cmd [singleton]
 
       local index = index.clamped( 0, ImageList.count-1 )
       ImageList.select( index )
+endClass
+
+class CmdSetBGColor( color:ColorValue ) : Cmd [singleton]
+  METHODS
+    method update_status
+      if (color.is_random) status = "bg random"
+      else                 status = "bg " + color
+
+    method execute
+      Vimage.bg_color = color
 endClass
 
 class CmdSetRepeatCount( n:Int32? ) : Cmd

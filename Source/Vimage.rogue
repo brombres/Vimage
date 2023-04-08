@@ -1,66 +1,7 @@
 #================================================================================
 # Vimage.rogue
-# February 19, 2023
 #
-# a            - Apply Macro
-# A            - Apply Macro to All (current image and all below)
-# b
-# B            -
-# c            - Crop Mode - I/J/K/L crops left/bottom/top/right
-# C
-# d
-# D
-# e
-# E
-# f            - Horizontal Flip
-# F            - Vertical Flip
-# g
-# G
-# h            - ZOOM MODE: scroll Left. CROP MODE: crop left.
-# H
-# i
-# I
-# j            - Down / Next Image. ZOOM MODE: scroll down. CROP MODE: crop bottom.
-# J            - Move image down 1 level
-# k            - Up / Previous Image. ZOOM MODE: scroll up. CROP MODE: crop top.
-# K            - Move image up 1 level
-# l            - ZOOM MODE: scroll right. CROP MODE: crop right.
-# L
-# m
-# M
-# n
-# N
-# p            - Paste image below
-# P            - Paste image above
-# q            - Quit (close) current buffer
-# Q            - Quit (close) all buffers
-# r            - Rotate 90º CW
-# R            - Rotate 90º CCW
-# s            - Join horizontal (2x1)
-# S            - Join vertical (1x2)
-# t            - S(T)ACK - cur buffer becomes layer of image underneath
-# T
-# u            - UNDO
-# U
-# v
-# V
-# w
-# W
-# x
-# X
-# y [rgbay]    - Yank (copy) R, G, B, A, or Y=all channels to clipboard.
-# Y
-# z            - ZOOM IN  (scale * 2)
-# Z            - ZOOM OUT (scale / 2)
-# <            - Rotate RGB bits to the left
-# >            - Rotate RGB bits to the right
-# "            - Toggle between internal and OS clipboards
-# :bg <color>
-# :join W H
-# :swap [argb][argb01]
-#
-# <color>
-#   [V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|black|white|...]
+# Started: February 19, 2023
 #================================================================================
 
 $define VERSION "0.1"
@@ -82,6 +23,7 @@ $include Actions
 $include BlitMode
 $include Cmd
 $include CmdLineHandler
+$include ColorValue
 $include Image
 $include ImageList
 $include ImageView
@@ -113,7 +55,7 @@ class Vimage [singleton]
     last_repeat_count  : Int32
     last_cmd           : Cmd
     anchor             = Anchor.CENTER
-    bg_color           = Color.BLACK : Color
+    bg_color           = ColorValue( Color.BLACK )
     hard_alpha         : Logical
     undo_stack         = @[]
     redo_stack         = @[]

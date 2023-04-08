@@ -1,0 +1,20 @@
+class ColorValue( value:Color, is_random=false:Logical ) [compound]
+  METHODS
+    method to->Color
+      if (is_random) return Random.color
+      return @value
+
+    method to->String
+      if (is_random) return "random"
+
+      local parts = @value.argb->String( &hex ).split( 2 )
+      parts[1] .= to_lowercase
+      parts[3] .= to_lowercase
+      return parts.join("")
+
+
+    method value->Color
+      if (is_random) return Random.color
+      return @value
+
+endClass
