@@ -39,15 +39,30 @@ class ActionWriteAll : Action
       return @is_finished
 
     method on_update [override]
+      local has_unnamed = false
+
       forEach (i in index..<ImageList.count)
         local item = ImageList[i]->(as ImageListItem)
         if (item.image.is_modified)
-          ImageList.select( i )
-          CmdWrite.execute
-          ++i
-          return
+          has_unnamed = true
+          if (item.image.file)
+            ImageList.select( i )
+            CmdWrite.execute
+            return
+          endIf
         endIf
       endForEach
+
+      if (has_unnamed)
+        forEach (i in index..<ImageList.count)
+          local item = ImageList[i]->(as ImageListItem)
+          if (item.image.is_modified)
+            ImageList.select( i )
+            CmdWrite.execute
+            escapeForEach
+          endIf
+        endForEach
+      endIf
 
       is_finished = true
       Vimage.last_cmd = cmd

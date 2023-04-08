@@ -77,4 +77,33 @@ Command   | Arguments       | Description
 :anchor   | [center|top|left|bottom|right]+<br>[c|t|l|b|r]+ | Sets the anchor used when when an image is cropped or expanded.
 :aspect   | [16:9|3:4|...]  | Crops or expands the image as necessary to achieve the specified aspect ratio.
 :bg       | [V|RGB|ARGB|RRGGBB|AARRGGBB]<br>[transparent|white|black|red|green|...] | Sets the background color used for `:new` images and for expanded areas of an existing image.
-:copy     | [a|r|g|b|XX] [a|r|g|b]+ | Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:copy r gb`.
+:copy     | [a|r|g|b|XX] [a|r|g|b]+ | Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:copy r gb`. See also: `:swap`.
+:crop     | WxH             | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height.
+:crop     | Wx              | Crop/expand to width W, preserving the current height.
+:crop     | xH              | Crop/expand to height H, preserving the current width.
+:crop     | N               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
+:crop     | LEFT TOP RIGHT BOTTOM | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
+:fill     | [WxH|Wx|xH]     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
+:fit      | [WxH|Wx|xH]     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
+:gradient | LEFT RIGHT<br>TL TR BL BR | Fills the current image with a color gradient using either 2 side colors or 4 corner colors.
+:ha       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
+:join     | WxH             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
+:&        | [V|RGB|ARGB|RRGGBB|AARRGGBB] Bitwise-AND's each pixel in the current image with the specified constant value.
+:|        | [V|RGB|ARGB|RRGGBB|AARRGGBB] Bitwise-OR's each pixel in the current image with the specified constant value.
+:~        | [V|RGB|ARGB|RRGGBB|AARRGGBB] Bitwise-XOR's each pixel in the current image with the specified constant value.
+:<        | N               | Left-rotates the RGB bits by N pixels. Does not affect the alpha bits.
+:<        | N a             | Left-rotates the ARGB bits by N pixels.
+:>        | N               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits.
+:>        | N a             | Right-rotates the ARGB bits by N pixels.
+:new      | WxH             | Creates a new image of the specified size.
+:open     | <filepaths>     | Opens one or more specified images and adds them to the Image List.
+:q        |                 | Quits (closes) the current image. Will be unsuccessful if the image has modifications.
+:q!       |                 | Quits (closes) the current image, even if it has modifications.
+:qq       |                 | Quits all images and ends Vimage. Will be unsuccessful if any image has modifications.
+:qq!      |                 | Quits all images, even if some of them have modifications.
+:rm       |                 | Removes (deletes) the file for the current image from storage. Useful for cleaning up an image folder by deleting unwanted images.
+:resize   | [WxH|Wx|xH]     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
+:split    | [WxH]           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
+:swap     | [a|r|g|b] [a|r|g|b] | Swaps one color channel with another in the current image. For example, `:swap r b` swaps the red and blue channels.
+:w        | [filepath]      | Writes (saves) the current image, optionally specifying a new filepath.
+:wall     |                 | Writes (saves) all modified images.
