@@ -140,7 +140,7 @@ class CmdAspect( size:XY ) : EditCmd
         status.print size.x
         status.print ':'
         status.print size.y
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -342,7 +342,7 @@ class CmdCopy( a:String, b:String ) : EditCmd
   METHODS
     method update_status
       if (not ImageList.selected)
-        status = "copy channels $ -> $ [no images]"(a,b)
+        status = "copy channels $ -> $ [no image selected]"(a,b)
         return
       endIf
 
@@ -408,7 +408,7 @@ class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
           status.print " [exceeds image dimensions]"
         endIf
       else
-        status.print " [no images]"
+        status.print " [no image selected]"
       endIf
 
       StatusBar.text = status
@@ -444,7 +444,7 @@ class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -494,7 +494,7 @@ class CmdCropToScale( sx:Real?, sy:Real? ) : EditCmd
         elseIf (sy)
           status.print "sy $"(sy)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -553,6 +553,84 @@ class CmdGoToLastImage : Cmd [singleton]
       if (ImageList.count)
         ImageList.select( ImageList.count-1 )
       endIf
+endClass
+
+class CmdHSB2RGB : EditCmd [singleton]
+  METHODS
+    method update_status
+      if (ImageList.selected)
+        status = "hsb2rgb"
+      else
+        status = "hsb2rgb [no image selected]"
+      endIf
+
+    method execute
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local n = bitmap.pixels.count
+      native...
+        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+         |
+         |while (--$n >= 0)
+         |{
+         |  RogueInt32 argb = *(++data);
+         |  int   a = argb & 0xFF000000;
+         |  float hue = ((argb >> 16) & 255) / 255.0f;
+         |  float saturation = ((argb >> 8) & 255) / 255.0f;
+         |  float brightness = (argb & 255) / 255.0f;
+         |
+         |  if (saturation)
+         |  {
+         |    float r, g, b;
+         |    hue *= 6;
+         |    int i = (int)hue;
+         |    float f = hue - i;
+         |    float p = brightness * (1 - saturation);
+         |    float q = brightness * (1 - saturation * f);
+         |    float t = brightness * (1 - saturation * (1 - f));
+         |    switch (i)
+         |    {
+         |      case 0:
+         |          r = brightness;
+         |          g = t;
+         |          b = p;
+         |          break;
+         |      case 1:
+         |          r = q;
+         |          g = brightness;
+         |          b = p;
+         |          break;
+         |      case 2:
+         |          r = p;
+         |          g = brightness;
+         |          b = t;
+         |          break;
+         |      case 3:
+         |          r = p;
+         |          g = q;
+         |          b = brightness;
+         |          break;
+         |      case 4:
+         |          r = t;
+         |          g = p;
+         |          b = brightness;
+         |          break;
+         |      default:
+         |          r = brightness;
+         |          g = p;
+         |          b = q;
+         |          break;
+         |    }
+         |
+         |    *data = a | ((int)(r*255+0.5))<<16 | ((int)(g*255+0.5))<<8 | ((int)(b*255+0.5));
+         |  }
+         |  else
+         |  {
+         |    int v = (int)(brightness * 255 + 0.5);
+         |    *data = a | (v<<16) | (v<<8) | v;
+         |  }
+         |}
 endClass
 
 class CmdImageListNext : Cmd [singleton]
@@ -640,7 +718,7 @@ class CmdJoin( dims:XY ) : EditCmd
       local w = dims.x
       local h = dims.y
       local total = w * h
-      local has_images = which{ ImageList.count:"" || " [no images]" }
+      local has_images = which{ ImageList.count:"" || " [no image selected]" }
       if (total <= 1)
         status = "s (join) $x$ [no effect]"(w,h)
         return
@@ -651,7 +729,7 @@ class CmdJoin( dims:XY ) : EditCmd
         if (h == 2) status = "S (join vertical)$"(has_images)
         else        status = "$S (join vertical)$"(h,has_images)
       elseIf (ImageList.count == 0)
-        status = "join $x$ [no images]"(w,h)
+        status = "join $x$ [no image selected]"(w,h)
         return
       else
         status = "join $x$"(w,h)
@@ -751,7 +829,7 @@ class CmdFillToSize( width:Int32?, height:Int32? ) : EditCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -802,7 +880,7 @@ class CmdFillToScale( sx:Real?, sy:Real? ) : EditCmd
         elseIf (sy)
           status.print "sy $"(sy)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -828,7 +906,7 @@ class CmdFitToSize( width:Int32?, height:Int32? ) : EditCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -879,7 +957,7 @@ class CmdFitToScale( sx:Real?, sy:Real? ) : EditCmd
         elseIf (sy)
           status.print "sy $"(sy)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -899,7 +977,7 @@ class CmdFlipH : EditCmd [singleton]
       if (ImageList.selected)
         status = "f (flip horizontal)"
       else
-        status = "f (flip horizontal) [no images]"
+        status = "f (flip horizontal) [no image selected]"
       endIf
 
     method execute
@@ -916,7 +994,7 @@ class CmdFlipV : EditCmd [singleton]
       if (ImageList.selected)
         status = "F (flip vertical)"
       else
-        status = "F (flip vertical) [no images]"
+        status = "F (flip vertical) [no image selected]"
       endIf
 
     method execute
@@ -1282,7 +1360,7 @@ class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
         elseIf (height)
           status.print "height $"(height)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -1329,7 +1407,7 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
         elseIf (sy)
           status.print "sy $"(sy)
         endIf
-        if (not ImageList.selected) status.print " [no images]"
+        if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
     method execute
@@ -1343,13 +1421,64 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
       CmdResizeToSize( w, h ).execute
 endClass
 
+class CmdRGB2HSB : EditCmd [singleton]
+  METHODS
+    method update_status
+      if (ImageList.selected)
+        status = "rgb2hsb"
+      else
+        status = "rgb2hsb [no image selected]"
+      endIf
+
+    method execute
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local n = bitmap.pixels.count
+      native...
+        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+         |
+         |while (--$n >= 0)
+         |{
+         |  RogueInt32 argb = *(++data);
+         |  int   a = argb & 0xFF000000;
+         |  float r = ((argb >> 16) & 255) / 255.0f;
+         |  float g = ((argb >> 8) & 255) / 255.0f;
+         |  float b = (argb & 255) / 255.0f;
+         |
+         |  float maxrgb = (r >= g && r >= b) ? r : ((g >= b) ? g : b);
+         |  float minrgb = (r <= g && r <= b) ? r : ((g <= b) ? g : b);
+         |  float delta  = maxrgb - minrgb;
+         |
+         |  float brightness = maxrgb;
+         |  float hue = 0.0f;
+         |  float saturation = 0.0f;
+         |
+         |  if (maxrgb) saturation = delta / maxrgb;
+         |
+         |  if (delta)
+         |  {
+         |    if (r == maxrgb)      hue = (g - b) / delta;
+         |    else if (g == maxrgb) hue = 2 + ((b - r) / delta);
+         |    else                  hue = 4 + ((r - g) / delta);
+         |
+         |    hue *= 60;
+         |    while (hue < 0)    hue += 360;
+         |    while (hue >= 360) hue -= 360;
+         |    hue /= 360;
+         |  }
+         |
+         |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(brightness*255));
+         |}
+endClass
+
 class CmdRotateCW : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
         status = "r (rotate 90º clockwise)"
       else
-        status = "r (rotate 90º clockwise) [no images]"
+        status = "r (rotate 90º clockwise) [no image selected]"
       endIf
 
     method execute
@@ -1368,7 +1497,7 @@ class CmdRotateCCW : EditCmd [singleton]
       if (ImageList.selected)
         status = "r (rotate 90º counter-clockwise)"
       else
-        status = "r (rotate 90º counter-clockwise) [no images]"
+        status = "r (rotate 90º counter-clockwise) [no image selected]"
       endIf
 
     method execute
@@ -1387,7 +1516,7 @@ class CmdPasteAfter : EditCmd [singleton]
     method init
 
     method update_status
-      status = "$p (paste after)"(Vimage.repeat_count_string)
+      status = "P (paste after)"
 
     method execute( repeat_count:Int32 )
       local bitmap : Bitmap
@@ -1408,7 +1537,7 @@ class CmdPasteAfter : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "$p (paste after) [no image on clipboard]"(Vimage.repeat_count_string)
+        status = "P (paste after) [no image on clipboard]"
       endIf
 endClass
 
@@ -1417,7 +1546,7 @@ class CmdPasteBefore : EditCmd [singleton]
     method init
 
     method update_status
-      status = "$P (paste after)"(Vimage.repeat_count_string)
+      status = "p (paste before)"
 
     method execute( repeat_count:Int32 )
       local bitmap : Bitmap
@@ -1438,7 +1567,7 @@ class CmdPasteBefore : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "$p (paste before) [no image on clipboard]"(Vimage.repeat_count_string)
+        status = "p (paste before) [no image on clipboard]"
       endIf
 endClass
 
@@ -1555,7 +1684,7 @@ class CmdSplit( dims:XY ) : EditCmd
       use status = StatusBar
         status.print "split $x$ -> $ images"(tiles_wide,tiles_high,total)
         if (ImageList.count == 0)
-          status.print " [no images]"
+          status.print " [no image selected]"
           return
         elseIf (tiles_wide < 1 or tiles_high < 1)
           status.print " [invalid split count]"
@@ -1641,7 +1770,7 @@ class CmdStack : EditCmd [singleton]
           local n = which{ Vimage.repeat_count || 2 }
           if (n > available) status.print " [not enough images]"
         else
-          status.print " [no images]"
+          status.print " [no image selected]"
         endIf
       endUse
 

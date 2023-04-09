@@ -523,6 +523,15 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
 
 endClass
 
+class CmdLineHSB2RGB : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "hsb2rgb"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdHSB2RGB )
+endClass
+
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"
@@ -750,6 +759,15 @@ class CmdLineResize : CmdLineHandler [singleton]
           status = "resize [missing or invalid size specification]"
         endIf
       endIf
+endClass
+
+class CmdLineRGB2HSB : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "rgb2hsb"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdRGB2HSB )
 endClass
 
 class CmdLineSwap : CmdLineHandler [singleton]
