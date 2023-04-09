@@ -56,7 +56,7 @@ Key    | Command              | Description
 `r`    | Rotate Clockwise 90º | Rotates the current image clockwise by 90º.
 `R`    | Rotate CCW 90º       | Rotates the current image counter-clockwise by 90º.
 `t`    | Stack                | Stacks (merges) the current image on the one below it using alpha blending. Use e.g. `4t` to stack the current image and 3 images below it into a single image.
-`u`    | Undo                 | Undo the last editing command (the most recent 20 commands can undone).
+`u`    | Undo                 | Undo the last editing command (the most recent 20 commands can be undone).
 `U`    | Redo                 | Redo the last editing command that was just undone. Can also use `CONTROL+R` to Redo.
 `y`    | Yank/Copy            | Yank a copy of the current image into the clipboard.
 `z`    | Zoom In              | Enter Zoom Mode and zoom in to the current image. Use `[i,j,k,l]` to pan around. Use `Z` to zoom out and `ESCAPE` to exit Zoom Mode.
