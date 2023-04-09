@@ -46,7 +46,7 @@ endTry
 
 class Vimage [singleton]
   DEFINITIONS
-    MAX_UNDOS = 20
+    MAX_UNDOS = 50
 
   PROPERTIES
     clipboard          : Bitmap

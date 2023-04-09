@@ -56,7 +56,7 @@ Key    | Command              | Description
 `r`    | Rotate Clockwise 90º | Rotates the current image clockwise by 90º.
 `R`    | Rotate CCW 90º       | Rotates the current image counter-clockwise by 90º.
 `t`    | Stack                | Stacks (merges) the current image on the one below it using alpha blending. Use e.g. `4t` to stack the current image and 3 images below it into a single image.
-`u`    | Undo                 | Undo the last editing command (the most recent 20 commands can be undone).
+`u`    | Undo                 | Undo the last editing command (the most recent 50 commands can be undone).
 `U`    | Redo                 | Redo the last editing command that was just undone. Can also use `CONTROL+R` to Redo.
 `y`    | Yank/Copy            | Yank a copy of the current image into the clipboard.
 `z`    | Zoom In              | Enter Zoom Mode and zoom in to the current image. Use `[i,j,k,l]` to pan around. Use `Z` to zoom out and `ESCAPE` to exit Zoom Mode.
@@ -79,6 +79,9 @@ Command   | Arguments       | Description
 `:anchor`   | `[center|top|left|bottom|right]+`<br>`[c|t|l|b|r]+` | Sets the anchor used when when an image is cropped or expanded.
 `:aspect`   | `[16:9|3:4|...]`  | Crops or expands the image as necessary to achieve the specified aspect ratio.
 `:bg`       | `[V|RGB|ARGB|RRGGBB|AARRGGBB]`<br>`[transparent|white|red|...|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
+`:clamp`    | `LOW HIGH`        | Limits the range each pixel's color components to the corresponding low and high of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
+`:clamph`   | `HIGH`        | Equivalent to `:clamp 0000 HIGH`.
+`:clampl`   | `LOW`         | Equivalent to `:clamp LOW ffff`.
 `:copy`     | `[a|r|g|b|XX]` `[a|r|g|b]+` | Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:copy r gb`. See also: `:swap`.
 `:crop`     | `WxH`             | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height.
 `:crop`     | `Wx`              | Crop/expand to width W, preserving the current height.

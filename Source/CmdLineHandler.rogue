@@ -39,7 +39,7 @@ class CmdLineHandler
 
       return Anchor(RealXY(x,y))
 
-    method parse_color( arg:String )->ColorValue?
+    method parse_color( arg:String, default_alpha=255:Int32 )->ColorValue?
       local result : Color?
 
       contingent
@@ -54,10 +54,10 @@ class CmdLineHandler
           case 1  # V        -> 0xFFVVVVVV
             local v = arg->Int32( &base=16 )
             v |= v:<<:4
-            result = Color( v, v, v )
+            result = Color( v, v, v, default_alpha )
           case 2  # Vv       -> 0xFFVvVvVv
             local v = arg->Int32( &base=16 )
-            result = Color( v, v, v )
+            result = Color( v, v, v, default_alpha )
           case 3  # RGB      -> 0xFFRRGGBB
             local r = arg[0].to_number( &base=16 )
             local g = arg[1].to_number( &base=16 )
@@ -65,7 +65,7 @@ class CmdLineHandler
             r |= r:<<:4
             g |= g:<<:4
             b |= b:<<:4
-            result = Color( r, g, b )
+            result = Color( r, g, b, default_alpha )
           case 4  # ARGB     -> 0xAARRGGBB
             local a = arg[0].to_number( &base=16 )
             local r = arg[1].to_number( &base=16 )
@@ -80,7 +80,7 @@ class CmdLineHandler
             local r = arg.substring(0,2)->Int32( &base=16 )
             local g = arg.substring(2,2)->Int32( &base=16 )
             local b = arg.substring(4,2)->Int32( &base=16 )
-            result = Color( r, g, b )
+            result = Color( r, g, b, default_alpha )
           case 8  # AARRGGBB -> 0xAARRGGBB
             local a = arg.substring(0,2)->Int32( &base=16 )
             local r = arg.substring(2,2)->Int32( &base=16 )
@@ -88,6 +88,8 @@ class CmdLineHandler
             local b = arg.substring(6,2)->Int32( &base=16 )
             result = Color( r, g, b, a )
         endWhich
+
+        if (result) return ColorValue( result.value )
 
       unsatisfied
         arg .= replacing(' ','_').replacing('-','_')
@@ -118,7 +120,7 @@ class CmdLineHandler
         endWhich
       endContingent
 
-      if (result) return ColorValue( result.value )
+      if (result) return ColorValue( result.value.with_alpha(default_alpha) )
 
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
@@ -301,6 +303,61 @@ class CmdLineBG : CmdLineHandler [singleton]
       if local color = parse_color( args )
         execute( CmdSetBGColor(color) )
       endIf
+endClass
+
+class CmdLineClamp : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "clamp"
+    syntax  = "LOW HIGH (RGB/ARGB values)"
+
+  METHODS
+    method execute( args:String )
+      block args = args.split(' ')
+        if (args.count == 2)
+          local lo = parse_color( args.first, 0 )
+          local hi = parse_color( args.last, 255 )
+          if (not lo or not hi) return
+          execute( CmdClamp(lo.value,hi.value) )
+        else
+          status = "clamp [expected 'LOW HIGH' RGB/ARGB values]"
+        endIf
+      endBlock
+endClass
+
+class CmdLineClampL : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "clampl"
+    syntax  = "LOW HIGH (RGB/ARGB value)"
+
+  METHODS
+    method execute( args:String )
+      block args = args.split(' ')
+        if (args.count == 1)
+          local lo = parse_color( args.first, 0 )
+          if (not lo) return
+          execute( CmdClamp(lo.value,Color(-1)) )
+        else
+          status = "clampl [expected 'LOW' RGB/ARGB value]"
+        endIf
+      endBlock
+endClass
+
+class CmdLineClampH : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "clamph"
+    syntax  = "HIGH (RGB/ARGB value)"
+
+  METHODS
+    method execute( args:String )
+      block args = args.split(' ')
+        if (args.count == 1)
+          local hi = parse_color( args.first, 255 )
+          if (not hi) return
+          execute( CmdClamp(Color(0),hi.value) )
+        else
+          status = "clamph [expected 'HIGH' RGB/ARGB value]"
+        endIf
+      endBlock
 endClass
 
 class CmdLineCopy : CmdLineHandler [singleton]
