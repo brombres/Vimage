@@ -112,8 +112,8 @@ class CmdLineHandler
           case "rogue_blue":  result = Color( 0xff3333FF )
           case "royal_blue":  result = Color( 0xff4169E1 )
           case "sky_blue":    result = Color( 0xff87CEEB )
-          case "transparent": result = Color( 0 )
-          case "clear":       result = Color( 0 )
+          case "transparent": return ColorValue( Color(0) )
+          case "clear":       return ColorValue( Color(0) )
           case "yellow":      result = Color( 0xffFFFF00 )
           case "white":       result = Color( 0xffFFFFFF )
           case "random":      return ColorValue( Color.BLACK, &is_random )
@@ -622,17 +622,14 @@ class CmdLineNew : CmdLineHandler [singleton]
 
   METHODS
     method execute( args:String )
-      local sz : XY
-
       if (args.count == 0)
-        sz = default_size
+        local size = default_size
+        execute( CmdNew(size) )
       else
         if local size = parse_size( args )
-          sz = size
+          execute( CmdNew(size) )
         endIf
       endIf
-
-      execute( CmdNew(sz) )
 
     method default_size->XY
       if local selected = ImageList.selected

@@ -20,8 +20,18 @@ class Image
     method init( bitmap, name=null )
       is_modified = true
 
+      if (bitmap.width == 0 or bitmap.height == 0)
+        error = "Invalid zero-size bitmap"
+        bitmap = Bitmap(1,1)
+      endIf
+
     method init( bitmap, file )
       if (file) name = file.value.filepath
+
+      if (bitmap.width == 0 or bitmap.height == 0)
+        error = "Invalid zero-size bitmap"
+        bitmap = Bitmap(1,1)
+      endIf
 
     method init( file )
       name = file.value.filepath
