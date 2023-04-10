@@ -111,6 +111,7 @@ Command   | Arguments       | Description
 `:rgb2hsb`  |                 | Converts the current image's RGB color components into HSB (Hue Saturation Brightness, also called HSV or Hue Saturation Value) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:hsb2rgb`.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
+`:save`     | `[filepath]`      | An alias for `:w`.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
 `:swap`     | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with another in the current image. For example, `:swap r b` swaps the red and blue channels.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.

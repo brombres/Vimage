@@ -522,7 +522,13 @@ class CmdDelete : EditCmd [singleton]
         set_status( "d [no image to delete]" )
       endIf
 
-    method execute
+    method execute( repeat_count:Int32 )
+      loop (repeat_count-1)
+        if (ImageList.selected)
+          ImageList.remove_selected
+        endIf
+      endLoop
+
       if (ImageList.selected)
         if (Vimage.using_os_clipboard)
           Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
@@ -1248,7 +1254,9 @@ class CmdOpen( args:String[] ) : EditCmd
       status = "open images for editing"
 
     method execute
-      local index = which{ ImageList.selected:ImageList.selected.index+1 || 0 }
+      local first_index = which{ ImageList.selected:ImageList.selected.index+1 || 0 }
+      local index = first_index
+
 
       forEach (arg in args)
         forEach (filepath in File(arg).listing)
@@ -1270,6 +1278,8 @@ class CmdOpen( args:String[] ) : EditCmd
           endContingent
         endForEach
       endForEach
+
+      if (index != first_index) ImageList.select( first_index )
 
 endClass
 
@@ -1900,6 +1910,20 @@ class CmdWrite : EditCmd [singleton]
       image.is_modified = false
       ImageList.selected.request_redraw
       TitleBar.request_redraw
+endClass
+
+class CmdSave : EditCmd [singleton]
+  METHODS
+    method execute
+      local filepath : String
+      if (ImageList.selected.image.file)
+        filepath = ImageList.selected.image.file.value.filepath
+      else
+        status = "save [missing filepath]"
+        return
+      endIf
+
+      CmdWrite.execute
 endClass
 
 class CmdWriteAll : Cmd [singleton]

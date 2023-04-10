@@ -837,6 +837,45 @@ class CmdLineWrite : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineSave : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "save"
+
+  METHODS
+    method execute( args:String )
+      if (not ImageList.selected)
+        status = "save [no current image]"
+        return
+      endIf
+
+      if (args == "")
+        Vimage.execute( CmdSave )
+        return
+      endIf
+
+      which (File(args).extension.to_lowercase)
+        case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
+          noAction
+        others
+          args += ".png"
+      endWhich
+
+      local file = File( args )
+      local image = ImageList.selected.image
+      image.file = file
+
+      Vimage.execute( CmdSave )
+
+    method syntax->String
+      if (VimageUI.command.after_first(' ').count?) return "filepath.[png|jpg] (save image)"
+
+      if (ImageView.image and ImageView.image.file)
+        return "[$] (save image)"(ImageView.image.file.value.filepath)
+      else
+        return "filepath.[png|jpg] (save image)"
+      endIf
+endClass
+
 class CmdLineWriteAll : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "wall"

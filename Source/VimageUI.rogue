@@ -44,6 +44,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineRemove )
       register( CmdLineResize )
       register( CmdLineRGB2HSB )
+      register( CmdLineSave )
       register( CmdLineSplit )
       register( CmdLineSwap )
       register( CmdLineWrite )

@@ -13,6 +13,7 @@ class Image
 
     cached_text_canvas    : TextCanvas
     cached_bitmap_size    : XY
+    og_bitmap_size        : XY
     cached_view_center    : XY
     cached_display_bounds : Box
 
@@ -121,11 +122,16 @@ class Image
       return bitmap.size
 
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
-      if (cached_text_canvas and bitmap_size == cached_bitmap_size and display_bounds == cached_display_bounds and
-        camera == cached_view_center)
+      contingent
+        necessary (cached_text_canvas)
+        necessary (bitmap_size == cached_bitmap_size)
+        necessary (bitmap.size == og_bitmap_size)
+        necessary (display_bounds == cached_display_bounds)
+        necessary (camera == cached_view_center)
         return cached_text_canvas
-      endIf
+      endContingent
 
+      og_bitmap_size = bitmap.size
       cached_bitmap_size = bitmap_size
       cached_display_bounds = display_bounds
       cached_view_center = camera
