@@ -1235,9 +1235,7 @@ class CmdNew( size:XY ) : EditCmd
     method execute
       local before_index = 0
       if (ImageList.selected)
-        if local index = ImageList.locate( ImageList.selected )
-          before_index = index
-        endIf
+        before_index = ImageList.selected.index + 1
       endIf
 
       local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
