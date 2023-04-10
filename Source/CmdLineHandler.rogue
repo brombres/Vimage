@@ -51,10 +51,16 @@ class CmdLineHandler
           case 0
             set_status( "$ [missing color specification]"(keyword) )
             return null
-          case 1  # V        -> 0xFFVVVVVV
+          case 1
+            # 0 -> 0x00000000
+            # V -> 0xFFVVVVVV
             local v = arg->Int32( &base=16 )
-            v |= v:<<:4
-            result = Color( v, v, v, default_alpha )
+            if (v == 0)
+              result = Color(0)
+            else
+              v |= v:<<:4
+              result = Color( v, v, v, default_alpha )
+            endIf
           case 2  # Vv       -> 0xFFVvVvVv
             local v = arg->Int32( &base=16 )
             result = Color( v, v, v, default_alpha )
@@ -296,7 +302,7 @@ endClass
 class CmdLineBG : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...|random]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|0|red|yellow|...|random]"
 
   METHODS
     method execute( args:String )
@@ -388,6 +394,7 @@ class CmdLineCopy : CmdLineHandler [singleton]
           endIf
         endForEach
       elseIf (args.count == 1)
+        if (args == "0") return args
         if (not "bgra".locate(args) and not args[0].is_number(&base=16))
           status = ''copy [illegal source channel or value specification '$']''(args[0])
           return null
