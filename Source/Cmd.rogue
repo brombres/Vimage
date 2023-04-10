@@ -533,6 +533,12 @@ class CmdDelete : EditCmd [singleton]
       endIf
 endClass
 
+class CmdEscapeToImageListState : Cmd [singleton]
+  METHODS
+    method execute
+      state = ImageListState
+endClass
+
 class CmdGoToFirstImage : Cmd [singleton]
   METHODS
     method update_status

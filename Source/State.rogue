@@ -151,7 +151,7 @@ class ZoomState : StandardState [singleton]
       key_handlers[Keycode.J]      = CmdScroll( 0.0, 0.5 )
       key_handlers[Keycode.K]      = CmdScroll( 0.0,-0.5 )
       key_handlers[Keycode.L]      = CmdScroll( 0.5, 0.0 )
-      key_handlers[Keycode.ESCAPE] = Cmd( ImageListState )
+      key_handlers[Keycode.ESCAPE] = CmdEscapeToImageListState
 
     method on_enter
       Vimage.repeat_count = null
@@ -178,7 +178,7 @@ class CropState : StandardState [singleton]
       key_handlers[Keycode.K+SHIFT] = CmdCrop( 0,-1, 0, 0)
       key_handlers[Keycode.H+SHIFT] = CmdCrop(-1, 0, 0, 0)
       key_handlers[Keycode.L+SHIFT] = CmdCrop( 0, 0,-1, 0)
-      key_handlers[Keycode.ESCAPE]  = Cmd( ImageListState )
+      key_handlers[Keycode.ESCAPE]  = CmdEscapeToImageListState
 
     method on_enter
       status = "c (crop mode)"
