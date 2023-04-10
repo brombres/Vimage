@@ -1532,7 +1532,7 @@ class CmdPasteAfter : EditCmd [singleton]
     method init
 
     method update_status
-      status = "P (paste after)"
+      status = "p (paste after)"
 
     method execute( repeat_count:Int32 )
       local bitmap : Bitmap
@@ -1553,7 +1553,7 @@ class CmdPasteAfter : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "P (paste after) [no image on clipboard]"
+        status = "p (paste after) [no image on clipboard]"
       endIf
 endClass
 
@@ -1562,7 +1562,7 @@ class CmdPasteBefore : EditCmd [singleton]
     method init
 
     method update_status
-      status = "p (paste before)"
+      status = "P (paste before)"
 
     method execute( repeat_count:Int32 )
       local bitmap : Bitmap
@@ -1583,7 +1583,7 @@ class CmdPasteBefore : EditCmd [singleton]
           endIf
         endLoop
       else
-        status = "p (paste before) [no image on clipboard]"
+        status = "P (paste before) [no image on clipboard]"
       endIf
 endClass
 

@@ -76,8 +76,8 @@ class StandardState : State
       key_handlers[Keycode.G+SHIFT]         = CmdGoToLastImage
       key_handlers[Keycode.N]               = CmdParseJoinH
       key_handlers[Keycode.N+SHIFT]         = CmdParseJoinV
-      key_handlers[Keycode.P]               = CmdPasteBefore
-      key_handlers[Keycode.P+SHIFT]         = CmdPasteAfter
+      key_handlers[Keycode.P]               = CmdPasteAfter
+      key_handlers[Keycode.P+SHIFT]         = CmdPasteBefore
       key_handlers[Keycode.PERIOD]          = CmdRepeatLast
       key_handlers[Keycode.Q]               = CmdMacro
       key_handlers[Keycode.R]               = CmdRotateCW
