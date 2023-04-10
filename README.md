@@ -92,6 +92,7 @@ Command   | Arguments       | Description
 `:fit`      | `[WxH|Wx|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:gradient` | `LEFT RIGHT`<br>`TL TR BL BR` | Fills the current image with a color gradient using either 2 side colors or 4 corner colors.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
+`:hsb2rgb`  |                 | The corollary to `:rgb2hsb`, this assumes the current image contains HSB color components and converts them to RGB color components.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
 `:&`        | `[V|RGB|ARGB|RRGGBB|AARRGGBB]` | Bitwise-AND's each pixel in the current image with the specified constant value.
 `:|`        | `[V|RGB|ARGB|RRGGBB|AARRGGBB]` | Bitwise-OR's each pixel in the current image with the specified constant value.
@@ -106,6 +107,7 @@ Command   | Arguments       | Description
 `:q!`       |                 | Quits (closes) the current image, even if it has modifications.
 `:qq`       |                 | Quits all images and ends Vimage. Will be unsuccessful if any image has modifications.
 `:qq!`      |                 | Quits all images, even if some of them have modifications.
+`:rgb2hsb`  |                 | Converts the current image's RGB color components into HSB (Hue Saturation Brightness, also called HSV or Hue Saturation Value) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:hsb2rgb`.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:resize`   | `[WxH|Wx|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
