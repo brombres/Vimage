@@ -2,7 +2,7 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.0
+Version   | 1.1
 Date      | April 9, 2023
 Platforms | Windows, macOS, Linux
 License   | [MIT License](LICENSE)
