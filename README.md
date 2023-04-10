@@ -2,8 +2,8 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 0.1
-Date      | February 19, 2023
+Version   | 1.0
+Date      | April 9, 2023
 Platforms | Windows, macOS, Linux
 License   | [MIT License](LICENSE)
 Author    | Brom Bresenham
