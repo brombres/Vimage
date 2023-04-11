@@ -28,7 +28,8 @@ $include Image
 $include ImageList
 $include ImageView
 $include KeyHandler
-$include Lerp
+$include ColorGradient
+$include ColorLerp
 $include State
 $include StatusBar
 $include TitleBar

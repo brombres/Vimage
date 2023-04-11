@@ -1,0 +1,49 @@
+module Vimage
+
+class ColorGradient
+  PROPERTIES
+    colors     = Color[]
+    width      : Int32
+    lerp       : ColorLerp
+    midpoints  = Int32[]
+    midpoint_i : Int32
+    color_i    : Int32
+    x          : Int32
+    delta      : Real
+    log = true
+
+  METHODS
+    method init( colors:ColorValue[], width )
+      forEach (color in colors)
+        this.colors.add( color->Color )
+      endForEach
+
+      if (colors.count > 2)
+        delta = width->Real / (colors.count-1)
+        local x = delta
+        loop (colors.count - 2)
+          midpoints.add( x->Int32 )
+          x += delta
+        endLoop
+      endIf
+
+      reset
+
+    method reset
+      lerp = ColorLerp( colors[0], colors[1], midpoints.first )
+      color_i = 1
+      midpoint_i = 0
+      x = 0
+
+    method read_another->Int32?
+      local result = lerp.read_another.value
+      ++x
+      if (midpoint_i < midpoints.count and x == midpoints[midpoint_i])
+        ++midpoint_i
+        local next_midpoint = which{ midpoint_i<midpoints.count:midpoints[midpoint_i] || width-1 }
+        lerp = ColorLerp( colors[color_i], colors[color_i+1], next_midpoint-midpoints[midpoint_i-1] )
+        ++color_i
+      endIf
+      return result
+
+endClass

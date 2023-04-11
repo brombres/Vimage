@@ -1017,10 +1017,35 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
-class CmdGradient2( a:ColorValue, b:ColorValue ) : EditCmd
+class CmdFill( c:ColorValue ) : EditCmd
   METHODS
     method update_status
-      status = "gradient $ $"(a,b)
+      status = "fill $"(c)
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local color = c->Color.argb
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+           |  *(++data) = $color;
+           |}
+      endLoop
+
+endClass
+
+class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
+    method update_status
+      status = "fill $ $"(a,b)
 
     method execute( ignore_repeat_count:Int32 )
       if (not ImageList.selected) return
@@ -1047,10 +1072,10 @@ class CmdGradient2( a:ColorValue, b:ColorValue ) : EditCmd
 
 endClass
 
-class CmdGradient4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
+class CmdFill4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
   METHODS
     method update_status
-      status = "gradient $ $ $ $"(a,b,c,d)
+      status = "fill $ $ $ $"(a,b,c,d)
 
     method execute( ignore_repeat_count:Int32 )
       if (not ImageList.selected) return
@@ -1070,6 +1095,35 @@ class CmdGradient4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : E
           @|while (--$n >= 0)
            |{
               local argb = mid.read_another.value
+        native
+          @|  *(++data) = $argb;
+           |}
+      endLoop
+
+endClass
+
+class CmdFillGradient( colors:ColorValue[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "fill $"(colors)
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local gradient = ColorGradient( colors, w )
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        gradient.reset
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = gradient.read_another.value
         native
           @|  *(++data) = $argb;
            |}

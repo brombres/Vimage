@@ -91,7 +91,7 @@ Command   | Arguments       | Description
 `:crop`     | `xH`              | Crop/expand to height H, preserving the current width.
 `:crop`     | `N`               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
 `:crop`     | `LEFT TOP RIGHT BOTTOM` | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
-`:gradient` | `LEFT RIGHT`<br>`TL TR BL BR` | Fills the current image with a color gradient using either 2 side colors or 4 corner colors.
+`:fill` | `COLOR`\<br>`LEFT RIGHT`<br>`TL TR BL BR`<br>`COLORS` | Fills the current image with a single color, a color gradient that uses either 2 side colors or 4 corner colors, or a horizontal color gradient that uses 3, 5, or more colors.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:hsb2rgb`  |                 | The corollary to `:rgb2hsb`, this assumes the current image contains HSB color components and converts them to RGB color components.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.

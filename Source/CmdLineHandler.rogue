@@ -478,19 +478,25 @@ class CmdLineAspectFit : CmdLineHandler [singleton]
       endIf
 endClass
 
-class CmdLineGradient : CmdLineHandler [singleton]
+class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "gradient"
-    syntax  = "COLOR-1 COLOR-2 [COLOR-3 COLOR-4]"
+    keyword = "fill"
+    syntax  = "[COLOR | LEFT RIGHT | TL TR BL BR | COLORS ]"
 
   METHODS
     method execute( arg_line:String )
       local args = arg_line.split(' ')
       which (args.count)
+        case 0
+          execute( CmdFill(Vimage.bg_color) )
+        case 1
+          if local c = parse_color( args[0] )
+            execute( CmdFill(c) )
+          endIf
         case 2
           if local a = parse_color( args[0] )
             if local b = parse_color( args[1] )
-              execute( CmdGradient2(a,b) )
+              execute( CmdFill2(a,b) )
             endIf
           endIf
         case 4
@@ -498,12 +504,22 @@ class CmdLineGradient : CmdLineHandler [singleton]
             if local b = parse_color( args[1] )
               if local c = parse_color( args[2] )
                 if local d = parse_color( args[3] )
-                  execute( CmdGradient4(a,b,c,d) )
+                  execute( CmdFill4(a,b,c,d) )
                 endIf
               endIf
             endIf
           endIf
         others
+          # 3 or 5+ colors makes a gradient from L-R
+          local colors = ColorValue[]
+          forEach (arg in args)
+            if local c = parse_color( arg )
+              colors.add( c )
+            else
+              return
+            endIf
+          endForEach
+          execute( CmdFillGradient(colors) )
       endWhich
 
 endClass
