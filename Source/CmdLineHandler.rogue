@@ -187,7 +187,10 @@ class CmdLineHandler
 
     method parse_scale_either_or( arg:String )->(width:Real?,height:Real?)
       local pair = arg.split('x')
-      if (pair.count == 2)
+      if (pair.count == 1)
+        local scale = pair.first->Real
+        return (width:scale,height:scale)
+      elseIf (pair.count == 2)
         contingent
           necessary (pair.first != "" or pair.last != "")
 
@@ -412,7 +415,7 @@ endClass
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
-    syntax  = "[WxH|Wx|xH|N|LEFT TOP RIGHT BOTTOM]"
+    syntax  = "[WxH|Wx|xH|N|LEFT TOP RIGHT BOTTOM|SCALE]"
 
   METHODS
     method execute( arg_string:String )
@@ -441,7 +444,7 @@ endClass
 class CmdLineAspectFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "aspect-fill"
-    syntax  = "[WxH|Wx|xH]"
+    syntax  = "[WxH|Wx|xH|SCALE]"
 
   METHODS
     method execute( args:String )
@@ -461,7 +464,7 @@ endClass
 class CmdLineAspectFit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "aspect-fit"
-    syntax  = "[WxH|Wx|xH]"
+    syntax  = "[WxH|Wx|xH|SCALE]"
 
   METHODS
     method execute( args:String )
@@ -764,7 +767,7 @@ endClass
 class CmdLineResize : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "resize"
-    syntax  = "[WxH|Wx|xH]"
+    syntax  = "[WxH|Wx|xH|SCALE]"
 
   METHODS
     method execute( args:String )
