@@ -64,7 +64,7 @@ Key    | Command              | Description
 `0`    | Default Zoom         | Resets the current image zoom level to the default, which fits the image to the window.
 `.`    | Repeat Last          | Repeats the last editing command.
 `:`    | Command Line         | Begins input of a command line (see [Command Line Commands](#Command-Line-Commands)).
-`"`    | Toggle Clipboard     | Toggles between using the internal clipboard and the OS clipboard for operations `d` (delete/cut), `y` (yank/copy), and `p` (paste). The internal clipboard is faster but the OS clipboard allows image copy/paste between Vimage and other apps.
+`"`    | Toggle Clipboard     | Toggles between using the OS clipboard (default) and the internal clipboard for operations `d` (delete/cut), `y` (yank/copy), and `p` (paste). The OS clipboard allows image copy/paste between Vimage and other apps but can be slower when dealing with large images.
 `!`    | Bitwise NOT          | Inverts the RGB pixel values of the current image.
 `&`    | Bitwise AND          | Combine this image with the image below using a bitwise AND operation.
 `\|`    | Bitwise OR           | Combine this image with the image below using a bitwise OR operation.
