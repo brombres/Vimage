@@ -802,7 +802,7 @@ class CmdJoin( dims:XY ) : EditCmd
           total_h = tile_h
         else
           # Reshape all images to be max width and/or height
-          local cmd = CmdFitToSize( tile_w, tile_h )
+          local cmd = CmdAspectFitToSize( tile_w, tile_h )
           cmd.execute( (forEach in list) )
           total_w = tile_w * w
           total_h = tile_h * h
@@ -829,11 +829,11 @@ class CmdJoin( dims:XY ) : EditCmd
       endUse
 endClass
 
-class CmdFillToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
-        status.print "fill (resize to fill) "
+        status.print "aspect-fill (resize to fill) "
         if (width and height)
           status.print "$x$"(width,height)
         elseIf (width)
@@ -880,11 +880,11 @@ class CmdFillToSize( width:Int32?, height:Int32? ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdFillToScale( sx:Real?, sy:Real? ) : EditCmd
+class CmdAspectFillToScale( sx:Real?, sy:Real? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
-        status.print "fill to scale "
+        status.print "aspect-fill to scale "
         if (sx and sy)
           status.print "$x$"(sx,sy)
         elseIf (sx)
@@ -903,14 +903,14 @@ class CmdFillToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int32?
       if (sx) w = (image.bitmap.width  * sx.value)->Int32
       if (sy) h = (image.bitmap.height * sy.value)->Int32
-      CmdFillToSize( w, h ).execute
+      CmdAspectFillToSize( w, h ).execute
 endClass
 
-class CmdFitToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
-        status.print "fit (resize to fit) "
+        status.print "aspect-fit (resize to fit) "
         if (width and height)
           status.print "$x$"(width,height)
         elseIf (width)
@@ -957,11 +957,11 @@ class CmdFitToSize( width:Int32?, height:Int32? ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdFitToScale( sx:Real?, sy:Real? ) : EditCmd
+class CmdAspectFitToScale( sx:Real?, sy:Real? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
-        status.print "fit to scale "
+        status.print "aspect-fit to scale "
         if (sx and sy)
           status.print "$x$"(sx,sy)
         elseIf (sx)
@@ -980,7 +980,7 @@ class CmdFitToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int32?
       if (sx) w = (image.bitmap.width  * sx.value)->Int32
       if (sy) h = (image.bitmap.height * sy.value)->Int32
-      CmdFitToSize( w, h ).execute
+      CmdAspectFitToSize( w, h ).execute
 endClass
 
 class CmdFlipH : EditCmd [singleton]

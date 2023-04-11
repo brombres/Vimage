@@ -77,6 +77,8 @@ Type `:` to begin a Command Line command. Type one of the following and then tap
 
 Command   | Arguments       | Description
 ----------|-----------------|----------------------------------------------------------------------
+`:aspect-fill`     | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
+`:aspect-fit`      | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:anchor`   | `[center\|top\|left\|bottom\|right]+`<br>`[c\|t\|l\|b\|r]+` | Sets the anchor used when when an image is cropped or expanded.
 `:aspect`   | `[16:9\|3:4\|...]`  | Crops or expands the image as necessary to achieve the specified aspect ratio.
 `:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
@@ -89,8 +91,6 @@ Command   | Arguments       | Description
 `:crop`     | `xH`              | Crop/expand to height H, preserving the current width.
 `:crop`     | `N`               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
 `:crop`     | `LEFT TOP RIGHT BOTTOM` | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
-`:fill`     | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
-`:fit`      | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:gradient` | `LEFT RIGHT`<br>`TL TR BL BR` | Fills the current image with a color gradient using either 2 side colors or 4 corner colors.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:hsb2rgb`  |                 | The corollary to `:rgb2hsb`, this assumes the current image contains HSB color components and converts them to RGB color components.

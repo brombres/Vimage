@@ -438,42 +438,42 @@ class CmdLineCrop : CmdLineHandler [singleton]
 
 endClass
 
-class CmdLineFill : CmdLineHandler [singleton]
+class CmdLineAspectFill : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "fill"
+    keyword = "aspect-fill"
     syntax  = "[WxH|Wx|xH]"
 
   METHODS
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( CmdFillToSize(w,h) )
+        execute( CmdAspectFillToSize(w,h) )
       else
         local (sx,sy) = parse_scale_either_or( args )
         if (sx or sy)
-          execute( CmdFillToScale(sx,sy) )
+          execute( CmdAspectFillToScale(sx,sy) )
         else
-          status = "fill [missing or invalid size specification]"
+          status = "aspect-fill [missing or invalid size specification]"
         endIf
       endIf
 endClass
 
-class CmdLineFit : CmdLineHandler [singleton]
+class CmdLineAspectFit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "fit"
+    keyword = "aspect-fit"
     syntax  = "[WxH|Wx|xH]"
 
   METHODS
     method execute( args:String )
       local (w,h) = parse_size_either_or( args )
       if (w or h)
-        execute( CmdFitToSize(w,h) )
+        execute( CmdAspectFitToSize(w,h) )
       else
         local (sx,sy) = parse_scale_either_or( args )
         if (sx or sy)
-          execute( CmdFitToScale(sx,sy) )
+          execute( CmdAspectFitToScale(sx,sy) )
         else
-          status = "fit [missing or invalid size specification]"
+          status = "aspect-fit [missing or invalid size specification]"
         endIf
       endIf
 endClass
