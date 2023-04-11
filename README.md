@@ -18,9 +18,16 @@ Vimage uses character block graphics to display and edit JPEGs, PNGs, and BMPs i
 
 Vimage focuses on general image manipulations such as resizing, cropping, flipping, rotating, splitting, and joining. It does not currently offer pixel-level editing.
 
-# Demo
+# Demos
 
 ![Vimage Logo Creation](Media/LogoCreation.gif)
+
+![Vimage Logo Creation](Media/VimageDemo.gif)
+
+# Tutorial
+
+[![Vimage Tutorial](Media/TutorialCover.png)](https://odysee.com/@Programbling:b/E005-Vimage:c)
+<center>**Programbling Episode 005 - Vimage Tutorial**</center>
 
 # Installation
 
@@ -83,10 +90,10 @@ Type `:` to begin a Command Line command. Type one of the following and then tap
 
 Command   | Arguments       | Description
 ----------|-----------------|----------------------------------------------------------------------
-`:aspect-fill`     | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
-`:aspect-fit`      | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:anchor`   | `[center\|top\|left\|bottom\|right]+`<br>`[c\|t\|l\|b\|r]+` | Sets the anchor used when when an image is cropped or expanded.
-`:aspect`   | `[16:9\|3:4\|...]`  | Crops or expands the image as necessary to achieve the specified aspect ratio.
+`:aspect`   | `[16:9\|3:4\|...]`  | Crops the image as necessary to achieve the specified aspect ratio.
+`:aspect-fill` | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
+`:aspect-fit`  | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
 `:clamp`    | `LOW HIGH`        | Limits the range each pixel's color components to the corresponding low and high of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
 `:clamph`   | `HIGH`        | Equivalent to `:clamp 0000 HIGH`.
@@ -114,9 +121,9 @@ Command   | Arguments       | Description
 `:q!`       |                 | Quits (closes) the current image, even if it has modifications.
 `:qq`       |                 | Quits all images and ends Vimage. Will be unsuccessful if any image has modifications.
 `:qq!`      |                 | Quits all images, even if some of them have modifications.
+`:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
 `:rgb2hsb`  |                 | Converts the current image's RGB color components into HSB (Hue Saturation Brightness, also called HSV or Hue Saturation Value) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:hsb2rgb`.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
-`:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
 `:save`     | `[filepath]`      | An alias for `:w`.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
 `:swap`     | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with another in the current image. For example, `:swap r b` swaps the red and blue channels.
