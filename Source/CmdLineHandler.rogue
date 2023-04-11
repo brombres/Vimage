@@ -488,10 +488,13 @@ class CmdLineFill : CmdLineHandler [singleton]
 
   METHODS
     method execute( arg_line:String )
+      if (arg_line == "")
+        execute( CmdFill(Vimage.bg_color) )
+        return
+      endIf
+
       local args = arg_line.split(' ')
       which (args.count)
-        case 0
-          execute( CmdFill(Vimage.bg_color) )
         case 1
           if local c = parse_color( args[0] )
             execute( CmdFill(c) )
