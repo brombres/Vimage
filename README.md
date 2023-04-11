@@ -27,7 +27,6 @@ Vimage focuses on general image manipulations such as resizing, cropping, flippi
 # Tutorial
 
 [![Vimage Tutorial](Media/TutorialCover.png)](https://odysee.com/@Programbling:b/E005-Vimage:c)
-<center>**Programbling Episode 005 - Vimage Tutorial**</center>
 
 # Installation
 
