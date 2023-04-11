@@ -1,3 +1,5 @@
+![Vimage Logo](Media/Logo.png)
+
 # Vimage
 
 Summary   | Current Release
