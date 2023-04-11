@@ -18,6 +18,10 @@ Vimage uses character block graphics to display and edit JPEGs, PNGs, and BMPs i
 
 Vimage focuses on general image manipulations such as resizing, cropping, flipping, rotating, splitting, and joining. It does not currently offer pixel-level editing.
 
+# Demo
+
+![Vimage Logo Creation](Media/LogoCreation.gif)
+
 # Installation
 
 ## New Installation
