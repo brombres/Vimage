@@ -732,14 +732,14 @@ class CmdJoin( dims:XY ) : EditCmd
       local total = w * h
       local has_images = which{ ImageList.count:"" || " [no image selected]" }
       if (total <= 1)
-        status = "s (join) $x$ [no effect]"(w,h)
+        status = "join $x$ [no effect]"(w,h)
         return
       elseIf (h == 1)
-        if (w == 2) status = "s (join horizontal)$"(has_images)
-        else        status = "$s (join horizontal)$"(w,has_images)
+        if (w == 2) status = "n (join horizontal)$"(has_images)
+        else        status = "$n (join horizontal)$"(w,has_images)
       elseIf (w == 1)
-        if (h == 2) status = "S (join vertical)$"(has_images)
-        else        status = "$S (join vertical)$"(h,has_images)
+        if (h == 2) status = "N (join vertical)$"(has_images)
+        else        status = "$N (join vertical)$"(h,has_images)
       elseIf (ImageList.count == 0)
         status = "join $x$ [no image selected]"(w,h)
         return
