@@ -1281,6 +1281,61 @@ class CmdMacro : Cmd [singleton]
       endIf
 endClass
 
+class CmdMerge : EditCmd [singleton]
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "e (merge images)"
+        if (ImageList.selected)
+          local available = ImageList.count - ImageList.selected.index
+          local n = which{ Vimage.repeat_count || 2 }
+          if (n > available) status.print " [not enough images]"
+        else
+          status.print " [no image selected]"
+        endIf
+      endUse
+
+    method execute( n:Int32 )
+      if (n == 1) n = 2
+
+      local available : Int32
+      if (ImageList.selected)
+        available = ImageList.count - ImageList.selected.index
+      endIf
+      if (n <= 1 or available < n) return
+
+      local original_index = ImageList.selected.index
+
+      use list = WorkList<<Image>>
+        loop (n)
+          local index = ImageList.selected.index
+          list.add( ImageList.selected.image )
+          ImageList.remove( ImageList.selected )
+          if (index < ImageList.count)
+            ImageList.select( index )
+          elseIf (ImageList.count > 0)
+            ImageList.select( ImageList.last_child->(as ImageListItem) )
+            escapeLoop
+          else
+            ImageList.select( null )
+            escapeLoop
+          endIf
+        endLoop
+
+        local result = list.remove_last.cloned_bitmap
+        forEach (image in list step -1)
+          image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
+        endForEach
+
+        local result_image = Image( result )
+        ImageList.insert( result_image, original_index )
+        ImageList.select( result_image )
+
+      endUse
+
+      ImageView.mark_modified
+endClass
+
 class CmdNew( size:XY ) : EditCmd
   METHODS
     method update_status
@@ -1826,61 +1881,6 @@ class CmdSplit( dims:XY ) : EditCmd
       ImageList.remove( ImageList.selected )
       ImageList.select( index )
 
-endClass
-
-class CmdStack : EditCmd [singleton]
-  METHODS
-    method update_status
-      use status = StatusBar
-        status.print "t (stack images)"
-        if (ImageList.selected)
-          local available = ImageList.count - ImageList.selected.index
-          local n = which{ Vimage.repeat_count || 2 }
-          if (n > available) status.print " [not enough images]"
-        else
-          status.print " [no image selected]"
-        endIf
-      endUse
-
-    method execute( n:Int32 )
-      if (n == 1) n = 2
-
-      local available : Int32
-      if (ImageList.selected)
-        available = ImageList.count - ImageList.selected.index
-      endIf
-      if (n <= 1 or available < n) return
-
-      local original_index = ImageList.selected.index
-
-      use list = WorkList<<Image>>
-        loop (n)
-          local index = ImageList.selected.index
-          list.add( ImageList.selected.image )
-          ImageList.remove( ImageList.selected )
-          if (index < ImageList.count)
-            ImageList.select( index )
-          elseIf (ImageList.count > 0)
-            ImageList.select( ImageList.last_child->(as ImageListItem) )
-            escapeLoop
-          else
-            ImageList.select( null )
-            escapeLoop
-          endIf
-        endLoop
-
-        local result = list.remove_last.cloned_bitmap
-        forEach (image in list step -1)
-          image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
-        endForEach
-
-        local result_image = Image( result )
-        ImageList.insert( result_image, original_index )
-        ImageList.select( result_image )
-
-      endUse
-
-      ImageView.mark_modified
 endClass
 
 class CmdSwap( a:Int32, b:Int32 ) : EditCmd
