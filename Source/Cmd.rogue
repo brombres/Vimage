@@ -1951,7 +1951,7 @@ class CmdWrite : EditCmd [singleton]
       which (ext)
         case "png"
           file.save( bitmap.to_png_bytes )
-        case "jpg", ".jpeg"
+        case "jpg", "jpeg"
           file.save( bitmap.to_jpeg_bytes )
         others
           status = "[saving image type '$' is unsupported]"(ext)
