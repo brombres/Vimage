@@ -137,6 +137,9 @@ class Image
       cached_view_center = camera
 
       local canvas_size = bitmap_size / XY(1,2)
+      if (bitmap_size.y & 1)
+        canvas_size += XY(0,1)
+      endIf
 
       local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
       canvas_bounds .= clamped( Box(display_bounds.size) )
@@ -152,7 +155,10 @@ class Image
         endIf
       endIf
 
-      local piece = Bitmap( bitmap, Box(-bitmap_bounds.position/zoom,piece_size) )
+      local origin = -bitmap_bounds.position/zoom
+      origin .= clamped_low( XY.zero )
+      origin .= clamped_high( bitmap.size - piece_size )
+      local piece = Bitmap( bitmap, Box(origin,piece_size) )
       local target_size = (piece_size*zoom)->XY.clamped_low(XY(1,1))
 
       piece.resize( target_size )
