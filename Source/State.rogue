@@ -73,8 +73,6 @@ class StandardState : State
       key_handlers[Keycode.E]               = CmdMerge
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
-      key_handlers[Keycode.G]               = CmdGoToFirstImage
-      key_handlers[Keycode.G+SHIFT]         = CmdGoToLastImage
       key_handlers[Keycode.N]               = CmdParseJoinH
       key_handlers[Keycode.N+SHIFT]         = CmdParseJoinV
       key_handlers[Keycode.P]               = CmdPasteAfter
@@ -123,6 +121,10 @@ class ImageListState : StandardState [singleton]
   METHODS
     method init
       prior.init
+      key_handlers[Keycode.NUMBER_3+SHIFT]  = CmdPanToLeftAndEnterZoomMode
+      key_handlers[Keycode.NUMBER_4+SHIFT]  = CmdPanToRightAndEnterZoomMode
+      key_handlers[Keycode.G]       = CmdGoToFirstImage
+      key_handlers[Keycode.G+SHIFT] = CmdGoToLastImage
       key_handlers[Keycode.J]       = CmdImageListNext
       key_handlers[Keycode.K]       = CmdImageListPrevious
       key_handlers[Keycode.J+SHIFT] = CmdImageListShiftDown
@@ -147,11 +149,15 @@ class ZoomState : StandardState [singleton]
   METHODS
     method init
       prior.init
-      key_handlers[Keycode.H]      = CmdScroll(-0.5, 0.0 )
-      key_handlers[Keycode.J]      = CmdScroll( 0.0, 0.5 )
-      key_handlers[Keycode.K]      = CmdScroll( 0.0,-0.5 )
-      key_handlers[Keycode.L]      = CmdScroll( 0.5, 0.0 )
-      key_handlers[Keycode.ESCAPE] = CmdEscapeToImageListState
+      key_handlers[Keycode.NUMBER_3+SHIFT]  = CmdPanToLeft
+      key_handlers[Keycode.NUMBER_4+SHIFT]  = CmdPanToRight
+      key_handlers[Keycode.G]       = CmdPanToTop
+      key_handlers[Keycode.G+SHIFT] = CmdPanToBottom
+      key_handlers[Keycode.H]       = CmdScroll(-0.5, 0.0 )
+      key_handlers[Keycode.J]       = CmdScroll( 0.0, 0.5 )
+      key_handlers[Keycode.K]       = CmdScroll( 0.0,-0.5 )
+      key_handlers[Keycode.L]       = CmdScroll( 0.5, 0.0 )
+      key_handlers[Keycode.ESCAPE]  = CmdEscapeToImageListState
 
     method on_enter
       Vimage.repeat_count = null
@@ -170,6 +176,10 @@ class CropState : StandardState [singleton]
   METHODS
     method init
       prior.init
+      key_handlers[Keycode.NUMBER_3+SHIFT] = CmdPanToLeft
+      key_handlers[Keycode.NUMBER_4+SHIFT] = CmdPanToRight
+      key_handlers[Keycode.G]       = CmdPanToTop
+      key_handlers[Keycode.G+SHIFT] = CmdPanToBottom
       key_handlers[Keycode.J]       = CmdCrop( 0, 0, 0, 1)
       key_handlers[Keycode.K]       = CmdCrop( 0, 1, 0, 0)
       key_handlers[Keycode.H]       = CmdCrop( 1, 0, 0, 0)

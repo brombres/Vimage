@@ -94,8 +94,7 @@ class ImageView : UIComponent [singleton]
           delta *= display_bounds.size / (image.bitmap.size * image.zoom)
           image.camera = (image.camera + delta).clamped( 0.0, 1.0 )
         endIf
-        is_modified = true
-        request_redraw
+        mark_modified
       endIf
 
     method show( new_image:Image )

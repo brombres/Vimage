@@ -708,6 +708,66 @@ class CmdImageListShiftUp : Cmd [singleton]
       endIf
 endClass
 
+class CmdPanToBottom : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera = RealXY( item.image.camera.x, 1.0 )
+        ImageView.mark_modified
+      endIf
+endClass
+
+class CmdPanToLeft : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera .= yv
+        ImageView.mark_modified
+      endIf
+endClass
+
+class CmdPanToLeftAndEnterZoomMode : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera .= yv
+        ImageView.mark_modified
+        if (State.current is not ZoomState and item.image.zoom != ImageView.default_zoom)
+          State.change_state( ZoomState )
+        endIf
+      endIf
+endClass
+
+class CmdPanToRight : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera = RealXY( 1.0, item.image.camera.y )
+        ImageView.mark_modified
+      endIf
+endClass
+
+class CmdPanToRightAndEnterZoomMode : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera = RealXY( 1.0, item.image.camera.y )
+        ImageView.mark_modified
+        if (State.current is not ZoomState and item.image.zoom != ImageView.default_zoom)
+          State.change_state( ZoomState )
+        endIf
+      endIf
+endClass
+
+class CmdPanToTop : Cmd [singleton]
+  METHODS
+    method execute
+      if local item = ImageList.selected
+        item.image.camera .= xv
+        ImageView.mark_modified
+      endIf
+endClass
+
 class CmdParseJoinH : Cmd [singleton]
   METHODS
     method on( e:KeyEvent )
