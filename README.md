@@ -4,8 +4,8 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.4
-Date      | April 19, 2023
+Version   | 1.5
+Date      | April 20, 2023
 Platforms | Windows, macOS, Linux
 License   | [MIT License](LICENSE)
 Author    | Brom Bresenham
