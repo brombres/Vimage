@@ -1430,9 +1430,9 @@ class CmdOpen( args:String[] ) : EditCmd
           local file = File( filepath )
           contingent
             necessary (not file.is_folder)
-            local ext = file.extension
+            local ext = file.extension.to_lowercase
             which (ext)
-              case "bmp", "jpg", "jpeg", "png", "tif", "tiff"
+              case "bmp", "heic", "jpg", "jpeg", "png", "tif", "tiff", "webp"
                 noAction
               others
                 escapeContingent

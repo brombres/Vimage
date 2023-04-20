@@ -7,7 +7,7 @@
 $define VERSION "1.4"
 $define DATE    "April 19, 2023"
 
-$requireRogue "2.12"
+$requireRogue "2.16"
 
 module Vimage
 
@@ -84,11 +84,13 @@ class Vimage [singleton]
         if (file.is_folder)
           local files = Files( file.filepath )
           files.add( "*.bmp" )
+          files.add( "*.heic" )
           files.add( "*.jpg" )
           files.add( "*.jpeg" )
           files.add( "*.png" )
           files.add( "*.tif" )
           files.add( "*.tiff" )
+          files.add( "*.webp" )
           local nested_filepaths = files->String[]
           nested_filepaths.sort( (a,b)=>a.compare_to(b,&ignore_case) < 0 )
           forEach (nested_filepath in nested_filepaths)
