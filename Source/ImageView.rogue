@@ -48,8 +48,9 @@ class ImageView : UIComponent [singleton]
             endIf
           endIf
 
-          local sz = (display_bounds.size * XY(1,2) / image.zoom).clamped_high( image.size ) / image.size
-          camera_bounds_tl = (sz->RealXY / 2) - RealXY(1,2)
+          local sz = (display_bounds.size * XY(1,2))->RealXY
+          sz = (sz / image.zoom).clamped_high( image.size ) / image.size
+          camera_bounds_tl = (sz / 2) - RealXY(1,2)/image.size
           camera_bounds_br = (RealXY(1,1) - sz/2)
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
@@ -85,6 +86,7 @@ class ImageView : UIComponent [singleton]
       endIf
 
     method scroll( delta:RealXY )
+      delta *= RealXY(1,2)
       if (image)
         if (image.zoom == default_zoom)
           image.camera = RealXY(0.5,0.5)
