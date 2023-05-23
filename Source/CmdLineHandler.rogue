@@ -552,13 +552,13 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
 
 endClass
 
-class CmdLineHSB2RGB : CmdLineHandler [singleton]
+class CmdLineHSV2RGB : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "hsb2rgb"
+    keyword = "hsv2rgb"
 
   METHODS
     method execute( args:String )
-      execute( CmdHSB2RGB )
+      execute( CmdHSV2RGB )
 endClass
 
 class CmdLineJoin : CmdLineHandler [singleton]
@@ -787,13 +787,13 @@ class CmdLineResize : CmdLineHandler [singleton]
       endIf
 endClass
 
-class CmdLineRGB2HSB : CmdLineHandler [singleton]
+class CmdLineRGB2HSV : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "rgb2hsb"
+    keyword = "rgb2hsv"
 
   METHODS
     method execute( args:String )
-      execute( CmdRGB2HSB )
+      execute( CmdRGB2HSV )
 endClass
 
 class CmdLineSwap : CmdLineHandler [singleton]

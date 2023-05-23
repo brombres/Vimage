@@ -567,13 +567,13 @@ class CmdGoToLastImage : Cmd [singleton]
       endIf
 endClass
 
-class CmdHSB2RGB : EditCmd [singleton]
+class CmdHSV2RGB : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
-        status = "hsb2rgb"
+        status = "hsv2rgb"
       else
-        status = "hsb2rgb [no image selected]"
+        status = "hsv2rgb [no image selected]"
       endIf
 
     method execute
@@ -590,7 +590,7 @@ class CmdHSB2RGB : EditCmd [singleton]
          |  int   a = argb & 0xFF000000;
          |  float hue = ((argb >> 16) & 255) / 255.0f;
          |  float saturation = ((argb >> 8) & 255) / 255.0f;
-         |  float brightness = (argb & 255) / 255.0f;
+         |  float value = (argb & 255) / 255.0f;
          |
          |  if (saturation)
          |  {
@@ -598,38 +598,38 @@ class CmdHSB2RGB : EditCmd [singleton]
          |    hue *= 6;
          |    int i = (int)hue;
          |    float f = hue - i;
-         |    float p = brightness * (1 - saturation);
-         |    float q = brightness * (1 - saturation * f);
-         |    float t = brightness * (1 - saturation * (1 - f));
+         |    float p = value * (1 - saturation);
+         |    float q = value * (1 - saturation * f);
+         |    float t = value * (1 - saturation * (1 - f));
          |    switch (i)
          |    {
          |      case 0:
-         |          r = brightness;
+         |          r = value;
          |          g = t;
          |          b = p;
          |          break;
          |      case 1:
          |          r = q;
-         |          g = brightness;
+         |          g = value;
          |          b = p;
          |          break;
          |      case 2:
          |          r = p;
-         |          g = brightness;
+         |          g = value;
          |          b = t;
          |          break;
          |      case 3:
          |          r = p;
          |          g = q;
-         |          b = brightness;
+         |          b = value;
          |          break;
          |      case 4:
          |          r = t;
          |          g = p;
-         |          b = brightness;
+         |          b = value;
          |          break;
          |      default:
-         |          r = brightness;
+         |          r = value;
          |          g = p;
          |          b = q;
          |          break;
@@ -639,7 +639,7 @@ class CmdHSB2RGB : EditCmd [singleton]
          |  }
          |  else
          |  {
-         |    int v = (int)(brightness * 255 + 0.5);
+         |    int v = (int)(value * 255 + 0.5);
          |    *data = a | (v<<16) | (v<<8) | v;
          |  }
          |}
@@ -1604,13 +1604,13 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
       CmdResizeToSize( w, h ).execute
 endClass
 
-class CmdRGB2HSB : EditCmd [singleton]
+class CmdRGB2HSV : EditCmd [singleton]
   METHODS
     method update_status
       if (ImageList.selected)
-        status = "rgb2hsb"
+        status = "rgb2hsv"
       else
-        status = "rgb2hsb [no image selected]"
+        status = "rgb2hsv [no image selected]"
       endIf
 
     method execute
@@ -1633,7 +1633,7 @@ class CmdRGB2HSB : EditCmd [singleton]
          |  float minrgb = (r <= g && r <= b) ? r : ((g <= b) ? g : b);
          |  float delta  = maxrgb - minrgb;
          |
-         |  float brightness = maxrgb;
+         |  float value = maxrgb;
          |  float hue = 0.0f;
          |  float saturation = 0.0f;
          |
@@ -1651,7 +1651,7 @@ class CmdRGB2HSB : EditCmd [singleton]
          |    hue /= 360;
          |  }
          |
-         |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(brightness*255));
+         |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
          |}
 endClass
 
