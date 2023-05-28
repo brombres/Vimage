@@ -12,8 +12,8 @@ $requireRogue "2.16"
 module Vimage
 
 uses Console/CommandLineParser
-uses Bitmap
-uses Bitmap/IO
+uses Graphics
+uses Graphics/BitmapIO
 uses Control/Action
 uses Epilog
 uses UI

@@ -1,5 +1,5 @@
 module Vimage
-uses Bitmap
+uses Graphics
 
 class Image
   PROPERTIES
