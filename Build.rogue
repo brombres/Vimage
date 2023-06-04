@@ -19,8 +19,8 @@ uses Utility/VersionNumber
 #$ LIBRARIES(Windows) = brombres/windowsmedialibs
 #$ CC_LINK(Windows)   = /link /LTCG
 
-uses Bitmap
-uses Bitmap/IO
+uses Graphics
+uses Graphics/BitmapIO
 
 augment Build
   # You can create a Local.settings file with overrides for these values, e.g.:
