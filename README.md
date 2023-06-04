@@ -36,7 +36,7 @@ Vimage focuses on general image manipulations such as resizing, cropping, flippi
 2. `morlock install brombres/vimage`
 
 ## Updating Existing Installation
-`morlock update shellview`
+`morlock update vimage`
 
 # Usage
 
