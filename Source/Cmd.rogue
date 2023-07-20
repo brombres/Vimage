@@ -1924,7 +1924,7 @@ class CmdSplit( dims:XY ) : EditCmd
 
       forEach (j in tiles_high-1 downTo 0)
         forEach (i in tiles_wide-1 downTo 0)
-          local seq = j*tiles_wide + i
+          local seq = j*tiles_wide + i + 1
           local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
           local img : Image
           if (image.file)
