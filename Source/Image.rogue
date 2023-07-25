@@ -36,10 +36,6 @@ class Image
 
     method init( file )
       name = file.value.filepath
-      if (not file.value.exists)
-        error = "File not found: " + file
-        bitmap = Bitmap(1,1)
-      endIf
 
     method bitmap->Bitmap
       if (@bitmap) return @bitmap
@@ -51,8 +47,8 @@ class Image
           bitmap = Bitmap(1,1)
         endIf
       else
-        error = "File not found: " + file
-        bitmap = Bitmap(1,1)
+        bitmap = Bitmap(16,16)
+        is_modified = true
       endIf
 
       forEach (item in ImageList)
