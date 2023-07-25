@@ -532,9 +532,9 @@ class CmdDelete : EditCmd [singleton]
       if (ImageList.selected)
         if (Vimage.using_os_clipboard)
           Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
-        else
-          Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
         endIf
+        Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
+        Vimage.clipboard_file = ImageList.selected->(as ImageListItem).image.file
         ImageList.remove_selected
       endIf
 endClass
@@ -832,6 +832,22 @@ class CmdJoin( dims:IntXY ) : EditCmd
           endIf
         endLoop
 
+        local file : File?
+        forEach (image in list)
+          if (image.file)
+            file = image.file
+            escapeForEach
+          endIf
+        endForEach
+
+        if (file)
+          local ext = file.value.extension
+          local filepath = file.value.filepath
+          local existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
+          if (existing_suffix) filepath = "$.$"(filepath.before_last("_"+existing_suffix),ext)
+          file = ImageList.make_filepath_unique( File(filepath) )
+        endIf
+
         while (list.count < total)
           list.add( Image(Bitmap(1,1).[clear(Vimage.bg_color)]) )
         endWhile
@@ -882,7 +898,7 @@ class CmdJoin( dims:IntXY ) : EditCmd
           cursor_y += dy
         endForEach
 
-        local result_image = Image( result )
+        local result_image = Image( result, file ).[ is_modified=true ]
         ImageList.insert( result_image, original_index )
         ImageList.select( result_image )
 
@@ -1403,12 +1419,20 @@ class CmdNew( size:IntXY ) : EditCmd
 
     method execute
       local before_index = 0
+      local file = File( "NewImage.png" )
       if (ImageList.selected)
         before_index = ImageList.selected.index + 1
+        if local cur_file = ImageList.selected.image.file
+          local ext = cur_file.extension
+          if (not String.exists(ext)) ext = "png"
+          file = File( cur_file.parent/"NewImage.$"(ext) )
+        endIf
       endIf
 
+      file = ImageList.make_filepath_unique( file )
+
       local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
-      local image  = Image( bitmap )
+      local image  = Image( bitmap, file ).[ is_modified=true ]
       local item   = ImageListItem( image )
       ImageList.insert( item, before_index )
       ImageList.select( item )
@@ -1708,14 +1732,21 @@ class CmdPasteAfter : EditCmd [singleton]
       else
         bitmap = Vimage.clipboard
       endIf
+
       if (bitmap)
+        local file = File("NewImage.png")
+        if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
+          file = Vimage.clipboard_file.value
+        endIf
+        file = ImageList.make_filepath_unique( file )
+
         loop repeat_count
           if (ImageList.selected)
             local before_index = ImageList.selected.index + 1
-            ImageList.insert( Image(bitmap), before_index )
+            ImageList.insert( Image(bitmap,file).[is_modified=true], before_index )
             ImageList.select( before_index )
           else
-            ImageList.add( Image(bitmap) )
+            ImageList.add( Image(bitmap,file).[is_modified=true] )
             ImageList.select( ImageList.count-1 )
           endIf
         endLoop
@@ -2057,9 +2088,9 @@ class CmdYank : Cmd [singleton]
       if (ImageList.selected)
         if (Vimage.using_os_clipboard)
           Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap
-        else
-          Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
         endIf
+        Vimage.clipboard = ImageList.selected->(as ImageListItem).image.bitmap
+        Vimage.clipboard_file = ImageList.selected->(as ImageListItem).image.file
       endIf
 endClass
 

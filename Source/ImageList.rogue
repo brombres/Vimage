@@ -39,6 +39,34 @@ class ImageList : UIList [singleton]
       insert( ImageListItem(image), before_index )
       request_layout
 
+    method make_filepath_unique( file:File )->File
+      local filepath = file.filepath
+      if (not is_filepath_used(filepath)) return file
+
+      local ext = file.extension
+      local existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
+      if (existing_suffix) filepath .= before_last( "_"+existing_suffix )
+      else filepath = File(filepath).without_extension
+
+      local suffix = 2
+      local candidate = "$_$.$"(File(filepath),suffix,ext)
+      while (is_filepath_used(candidate))
+        ++suffix
+        candidate = "$_$.$"(File(filepath),suffix,ext)
+      endWhile
+
+      return File(candidate)
+
+    method is_filepath_used( filepath:String )->Logical
+      forEach (child in children)
+        if local item = child->(as ImageListItem)
+          if local existing_file = item.image.file
+            if (existing_file.filepath == filepath) return true
+          endIf
+        endIf
+      endForEach
+      return false
+
     method on_draw
       if (is_dim) ConsoleUICanvas.style.dim
 

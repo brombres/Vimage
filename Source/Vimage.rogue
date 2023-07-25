@@ -51,6 +51,7 @@ class Vimage [singleton]
 
   PROPERTIES
     clipboard          : Bitmap
+    clipboard_file     : File?
     using_os_clipboard = true
     repeat_count       : Int32?
     last_repeat_count  : Int32
