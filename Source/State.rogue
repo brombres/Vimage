@@ -263,7 +263,11 @@ class EnterCmdLineState : State
               local args = VimageUI.command.after_first( ' ' ).trimmed
 
               if (keyword == cmds.first.keyword)
-                VimageUI.command.print ' '
+                if (e.keycode == Keycode.TAB)
+                  cmds.first.on_tab
+                else
+                  VimageUI.command.print ' '
+                endIf
                 update_status( VimageUI.command )
               else
                 VimageUI.command.clear

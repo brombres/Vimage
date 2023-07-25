@@ -1448,9 +1448,19 @@ class CmdOpen( args:String[] ) : EditCmd
       local first_index = which{ ImageList.selected:ImageList.selected.index+1 || 0 }
       local index = first_index
 
-
       forEach (arg in args)
-        forEach (filepath in File(arg).listing)
+        arg .= unescaped
+        local listing = File(arg).listing
+
+        if (not listing.count)
+          if (ImageList.selected)
+            if local selected_file = ImageList.selected.image.file
+              listing = (selected_file.parent/arg).listing
+            endIf
+          endIf
+        endIf
+
+        forEach (filepath in listing)
           local file = File( filepath )
           contingent
             necessary (not file.is_folder)
@@ -1461,7 +1471,11 @@ class CmdOpen( args:String[] ) : EditCmd
               others
                 escapeContingent
             endWhich
-            necessary (not ImageList.contains(file))
+
+            if (ImageList.contains(file))
+              ImageList.select( ImageList.find(file) )
+              return
+            endIf
 
             ImageList.insert( Image(file), index )
             if (not ImageList.selected) ImageList.select( index )
@@ -1471,6 +1485,7 @@ class CmdOpen( args:String[] ) : EditCmd
       endForEach
 
       if (index != first_index) ImageList.select( first_index )
+      else                      status = " [file not found]"
 
 endClass
 

@@ -35,6 +35,16 @@ class ImageList : UIList [singleton]
       if (e.is_consumed) return
       handle( e )
 
+    method find( file:File )->ImageListItem
+      file .= abs
+      forEach (child in children)
+        local image = child->(as ImageListItem).image
+        if (image.file and image.file.value.abs == file.filepath)
+          return child->(as ImageListItem)
+        endIf
+      endForEach
+      return null
+
     method insert( image:Image, before_index=0:Int32 )
       insert( ImageListItem(image), before_index )
       request_layout

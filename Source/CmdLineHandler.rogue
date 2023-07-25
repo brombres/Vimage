@@ -17,6 +17,9 @@ class CmdLineHandler
     method keyword->String
       return @keyword
 
+    method on_tab
+      noAction
+
     method parse_anchor( args:String )->Anchor?
       if (args == "") return Vimage.anchor
 
@@ -680,11 +683,115 @@ class CmdLineOpen : CmdLineHandler [singleton]
     keyword = "open"
     syntax  = "[filepath|wildcard/**/*.filepath]"
 
+    cur_tab_base   : String
+    cur_tab_arg    : String
+    cur_tab_count  : Int32
+
   METHODS
     method execute( arg_line:String )
       if (arg_line == "") return
       local args = Scanner( arg_line ).scan_args
       execute( CmdOpen(args) )
+
+    method on_tab
+      local img_file : File?
+      if (ImageList.selected)
+        if local image_file = ImageList.selected.image.file
+          img_file = image_file
+        endIf
+      endIf
+
+      local args = Scanner( VimageUI.command ).scan_args
+      if (args.count >= 2)
+        local arg = args.remove_last.unescaped
+        contingent
+          necessary  (cur_tab_base)
+          sufficient (arg != cur_tab_arg)
+          sufficient (File(arg).contains_wildcards)
+          necessary (not File(cur_tab_base).listing.contains(arg))
+          escapeContingent
+        satisfied
+          cur_tab_base = null
+        endContingent
+
+        if (not cur_tab_base)
+          if (arg.contains(".."))
+            if (img_file) arg = img_file.value.folder / arg
+            arg = File(arg).filepath
+          endIf
+          cur_tab_base = arg
+          cur_tab_count = 0
+        endIf
+
+        local listing = File(cur_tab_base.with_suffix("*")).listing(&ignore_hidden)
+        if (listing.count == 0)
+          if (img_file)
+            cur_tab_base = img_file.value.parent / cur_tab_base
+            listing = File(cur_tab_base.with_suffix("*")).listing(&ignore_hidden)
+          endIf
+        endIf
+
+        if (listing.count >= 1)
+          cur_tab_count %= listing.count
+          local file = File( listing[cur_tab_count] )
+          if (listing.count == 1 and file.is_folder)
+            cur_tab_base = file.filepath + "/"
+            local result_file = File(cur_tab_base)
+            if (img_file) result_file .= relative_to( img_file.value.parent )
+            cur_tab_arg = result_file.filepath
+            args.add( result_file.esc )
+          else
+            local result_file = File(file.filepath)
+            if (img_file) result_file .= relative_to( img_file.value.parent )
+            cur_tab_arg = result_file.filepath
+            args.add( result_file.esc )
+          endIf
+          ++cur_tab_count
+        endIf
+
+      else
+        local folder = File(".")
+
+        if (ImageList.selected)
+          if local cur_file = ImageList.selected.image.file
+            folder = cur_file.parent
+            local abs_cwd = File(".").abs
+            if (folder.filepath == abs_cwd)
+              folder = File("*")
+            else
+              abs_cwd += "/"
+              if (folder.filepath.begins_with(abs_cwd))
+                folder = File( folder.filepath.after_first(abs_cwd) )
+              endIf
+            endIf
+          endIf
+        endIf
+
+        if (folder.filepath == "*")
+          cur_tab_base = "*"
+        else
+          cur_tab_base  = folder.filepath + "/*"
+        endIf
+        cur_tab_count = 0
+        local listing = folder.listing(&ignore_hidden)
+        if (listing.count)
+          cur_tab_count %= folder.listing.count
+
+          local result_file = File(listing[cur_tab_count])
+          if (img_file) result_file .= relative_to( img_file.value.parent )
+          cur_tab_arg = result_file.filepath
+          args.add( result_file.esc )
+
+          ++cur_tab_count
+          if (listing.count == 1)
+            cur_tab_base = listing[0]
+            cur_tab_count = 0
+          endIf
+        endIf
+      endIf
+
+      VimageUI.command.[clear].print( args.join(' ') )
+
 
 endClass
 
