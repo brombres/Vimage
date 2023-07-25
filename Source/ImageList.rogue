@@ -106,10 +106,10 @@ class ImageList : UIList [singleton]
             local i1 = -scroll_view.content_offset.y
             local i2 = i1 + scroll_view.size.y
             if (index < i1)
-              scroll_view.content_offset = XY(0,-index)
+              scroll_view.content_offset = IntXY(0,-index)
               scroll_view.request_redraw
             elseIf (index >= i2)
-              scroll_view.content_offset = XY(0,-(index-(scroll_view.size.y-1)))
+              scroll_view.content_offset = IntXY(0,-(index-(scroll_view.size.y-1)))
               scroll_view.request_redraw
             endIf
           endIf
@@ -179,13 +179,13 @@ class ImageListItem : UIComponent
       endTemporarily
 
     method on_resize
-      fixed_size = XY( ImageList.FIXED_WIDTH, 1 )
+      fixed_size = IntXY( ImageList.FIXED_WIDTH, 1 )
 endClass
 
 class ImageListScrollView : UIScrollView
   METHODS
     method after_draw
-      local bounds = display_bounds.with_width(1) + XY(ImageList.FIXED_WIDTH-1,0)
+      local bounds = display_bounds.with_width(1) + IntXY(ImageList.FIXED_WIDTH-1,0)
       ConsoleUICanvas.fill( bounds, '\[2502]' )
 
     method on_draw

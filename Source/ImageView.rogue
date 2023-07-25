@@ -11,9 +11,9 @@ class ImageView : UIComponent [singleton]
     max_zoom         : Real64
     default_zoom     : Real64
     is_modified      : Logical
-    visible_bounds   : Box
-    camera_bounds_tl : RealXY
-    camera_bounds_br : RealXY
+    visible_bounds   : IntBox
+    camera_bounds_tl : XY
+    camera_bounds_br : XY
 
   METHODS
     method init
@@ -26,32 +26,32 @@ class ImageView : UIComponent [singleton]
       if (image)
         if (is_modified)
           is_modified = false
-          visible_bounds = Box( image.bitmap.size )
-          local new_size : RealXY
+          visible_bounds = IntBox( image.bitmap.size )
+          local new_size : XY
           if (min_zoom)
-            new_size = (image.bitmap.size->RealXY * image.zoom)
+            new_size = (image.bitmap.size->XY * image.zoom)
           else
-            local scale = ((display_bounds.size->RealXY*RealXY(1,2)) / image.bitmap.size->RealXY).min
-            new_size = (image.bitmap.size->RealXY * scale)
+            local scale = ((display_bounds.size->XY*XY(1,2)) / image.bitmap.size->XY).min
+            new_size = (image.bitmap.size->XY * scale)
             default_zoom = (new_size.x->Real64 / image.bitmap.width)
             min_zoom = default_zoom.or_smaller( 1.0 )
             max_zoom = which{ default_zoom>1.0:default_zoom || 1.0 }
             if (image.zoom)
               if (image.zoom < min_zoom)
                 image.zoom = min_zoom
-                image.camera = RealXY(0.5,0.5)
+                image.camera = XY(0.5,0.5)
               else
-                new_size = (image.bitmap.size->RealXY * image.zoom)
+                new_size = (image.bitmap.size->XY * image.zoom)
               endIf
             else
               image.zoom = default_zoom
             endIf
           endIf
 
-          local sz = (display_bounds.size * XY(1,2))->RealXY
+          local sz = (display_bounds.size * IntXY(1,2))->XY
           sz = (sz / image.zoom).clamped_high( image.size ) / image.size
-          camera_bounds_tl = (sz / 2) - RealXY(1,2)/image.size
-          camera_bounds_br = (RealXY(1,1) - sz/2)
+          camera_bounds_tl = (sz / 2) - XY(1,2)/image.size
+          camera_bounds_br = (XY(1,1) - sz/2)
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
           TitleBar.zoom = image.zoom
@@ -62,7 +62,7 @@ class ImageView : UIComponent [singleton]
 
         temporarily ConsoleUICanvas.clip = display_bounds
           local sz = canvas.size
-          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
+          local pos = IntBox( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
 
@@ -79,17 +79,17 @@ class ImageView : UIComponent [singleton]
       if (image)
         if (image.zoom != default_zoom)
           image.zoom = default_zoom
-          image.camera = RealXY(0.5,0.5)
+          image.camera = XY(0.5,0.5)
           TitleBar.zoom = image.zoom
           mark_modified
         endIf
       endIf
 
-    method scroll( delta:RealXY )
-      delta *= RealXY(1,2)
+    method scroll( delta:XY )
+      delta *= XY(1,2)
       if (image)
         if (image.zoom == default_zoom)
-          image.camera = RealXY(0.5,0.5)
+          image.camera = XY(0.5,0.5)
         elseIf (image.zoom)
           delta *= display_bounds.size / (image.bitmap.size * image.zoom)
           image.camera = (image.camera + delta).clamped( 0.0, 1.0 )
@@ -132,7 +132,7 @@ class ImageView : UIComponent [singleton]
           image.zoom /= 2
           if (image.zoom < min_zoom)
             image.zoom = min_zoom
-            image.camera = RealXY(0.5,0.5)
+            image.camera = XY(0.5,0.5)
           endIf
         endIf
         TitleBar.zoom = image.zoom

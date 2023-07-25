@@ -15,13 +15,13 @@ class StatusBar : UIComponent [singleton]
       localize display_bounds
       if (Vimage.recording_macro)
         local tag = "[recording]"
-        builder.cursor = XY( Console.width-(State.current.state_name.count+tag.count+1), 0 )
+        builder.cursor = IntXY( Console.width-(State.current.state_name.count+tag.count+1), 0 )
         builder.style.reset
         builder.style.bg_red
         builder.style.fg_white
         builder.print tag
       endIf
-      builder.cursor = XY( Console.width-State.current.state_name.count, 0 )
+      builder.cursor = IntXY( Console.width-State.current.state_name.count, 0 )
       builder.style.reset
       builder.print State.current.state_name
       builder.flush

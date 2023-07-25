@@ -95,7 +95,7 @@ class VimageUI : ConsoleUI [singleton]
       prior.on_update
 
       if (actions)
-        actions .= update
+        actions .= updated
         keep_active( 0.1 )
       endIf
 

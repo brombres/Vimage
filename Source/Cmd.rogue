@@ -132,7 +132,7 @@ class CmdApplyAll : EditCmd [singleton]
       VimageUI.actions += ActionApplyAll( this )
 endClass
 
-class CmdAspect( size:XY ) : EditCmd
+class CmdAspect( size:IntXY ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -190,7 +190,7 @@ class CmdBitwiseAND : EditCmd [singleton]
           local top    = selected.image.bitmap
           local bottom_image  = selected.next->(as ImageListItem).image
           local bottom_bitmap = bottom_image.cloned_bitmap
-          top.blit( bottom_bitmap, XY(0,0), BlitModeAND )
+          top.blit( bottom_bitmap, IntXY(0,0), BlitModeAND )
           ImageList.remove( selected )
           ImageList.select( bottom_image )
         endIf
@@ -211,7 +211,7 @@ class CmdBitwiseOR : EditCmd [singleton]
           local top    = selected.image.bitmap
           local bottom_image  = selected.next->(as ImageListItem).image
           local bottom_bitmap = bottom_image.cloned_bitmap
-          top.blit( bottom_bitmap, XY(0,0), BlitModeOR )
+          top.blit( bottom_bitmap, IntXY(0,0), BlitModeOR )
           ImageList.remove( selected )
           ImageList.select( bottom_image )
         endIf
@@ -232,7 +232,7 @@ class CmdBitwiseXOR : EditCmd [singleton]
           local top    = selected.image.bitmap
           local bottom_image  = selected.next->(as ImageListItem).image
           local bottom_bitmap = bottom_image.cloned_bitmap
-          top.blit( bottom_bitmap, XY(0,0), BlitModeXOR )
+          top.blit( bottom_bitmap, IntXY(0,0), BlitModeXOR )
           ImageList.remove( selected )
           ImageList.select( bottom_image )
         endIf
@@ -458,12 +458,12 @@ class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
         if (height)
           local height = this.height.value
           if (height < 0) height = image.bitmap.height + height
-          if (image.bitmap.size == XY(width,height)) return
+          if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = XY( width, image.bitmap.height )
+          local new_size = IntXY( width, image.bitmap.height )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -472,7 +472,7 @@ class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
       elseIf (height)
         local height = this.height.value
         if (height < 0) height = image.bitmap.height + height
-        local new_size = XY( image.bitmap.width, height )
+        local new_size = IntXY( image.bitmap.width, height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -712,7 +712,7 @@ class CmdPanToBottom : Cmd [singleton]
   METHODS
     method execute
       if local item = ImageList.selected
-        item.image.camera = RealXY( item.image.camera.x, 1.0 )
+        item.image.camera = XY( item.image.camera.x, 1.0 )
         ImageView.mark_modified
       endIf
 endClass
@@ -742,7 +742,7 @@ class CmdPanToRight : Cmd [singleton]
   METHODS
     method execute
       if local item = ImageList.selected
-        item.image.camera = RealXY( 1.0, item.image.camera.y )
+        item.image.camera = XY( 1.0, item.image.camera.y )
         ImageView.mark_modified
       endIf
 endClass
@@ -751,7 +751,7 @@ class CmdPanToRightAndEnterZoomMode : Cmd [singleton]
   METHODS
     method execute
       if local item = ImageList.selected
-        item.image.camera = RealXY( 1.0, item.image.camera.y )
+        item.image.camera = XY( 1.0, item.image.camera.y )
         ImageView.mark_modified
         if (State.current is not ZoomState and item.image.zoom != ImageView.default_zoom)
           State.change_state( ZoomState )
@@ -771,7 +771,7 @@ endClass
 class CmdParseJoinH : Cmd [singleton]
   METHODS
     method on( e:KeyEvent )
-      local cmd = CmdJoin( XY( which{Vimage.repeat_count||2}, 1 ) )
+      local cmd = CmdJoin( IntXY( which{Vimage.repeat_count||2}, 1 ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
@@ -779,12 +779,12 @@ endClass
 class CmdParseJoinV : Cmd [singleton]
   METHODS
     method on( e:KeyEvent )
-      local cmd = CmdJoin( XY( 1, which{Vimage.repeat_count||2} ) )
+      local cmd = CmdJoin( IntXY( 1, which{Vimage.repeat_count||2} ) )
       Vimage.repeat_count = null
       Vimage.execute( cmd )
 endClass
 
-class CmdJoin( dims:XY ) : EditCmd
+class CmdJoin( dims:IntXY ) : EditCmd
   METHODS
     method update_status
       local w = dims.x
@@ -913,7 +913,7 @@ class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
         local width = this.width.value
         if (height)
           local height = this.height.value
-          if (image.bitmap.size == XY(width,height)) return
+          if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
           local x_scale = width->Real64 / image.bitmap.size.x
@@ -922,7 +922,7 @@ class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
           bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -930,7 +930,7 @@ class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = XY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -990,7 +990,7 @@ class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
         local width = this.width.value
         if (height)
           local height = this.height.value
-          if (image.bitmap.size == XY(width,height)) return
+          if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
           local x_scale = width->Real64 / image.bitmap.size.x
@@ -999,7 +999,7 @@ class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
           bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -1007,7 +1007,7 @@ class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = XY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -1396,7 +1396,7 @@ class CmdMerge : EditCmd [singleton]
       ImageView.mark_modified
 endClass
 
-class CmdNew( size:XY ) : EditCmd
+class CmdNew( size:IntXY ) : EditCmd
   METHODS
     method update_status
       status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
@@ -1555,12 +1555,12 @@ class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
         local width = this.width.value
         if (height)
           local height = this.height.value
-          if (image.bitmap.size == XY(width,height)) return
+          if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
           bitmap.resize( width, height )
         else
-          local new_size = XY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -1568,7 +1568,7 @@ class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = XY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -1848,7 +1848,7 @@ class CmdScroll( dx:Real, dy:Real ) : Cmd
       else            status = "k (scroll up)"
 
     method execute
-      ImageView.scroll( RealXY(dx,dy) )
+      ImageView.scroll( XY(dx,dy) )
       if (State.current not instanceOf ZoomState)
         if (ImageView.image and ImageView.image.zoom != ImageView.default_zoom)
           state = ZoomState
@@ -1857,7 +1857,7 @@ class CmdScroll( dx:Real, dy:Real ) : Cmd
 
 endClass
 
-class CmdSplit( dims:XY ) : EditCmd
+class CmdSplit( dims:IntXY ) : EditCmd
   METHODS
     method update_status
       local tiles_wide = dims.x
@@ -1925,7 +1925,7 @@ class CmdSplit( dims:XY ) : EditCmd
       forEach (j in tiles_high-1 downTo 0)
         forEach (i in tiles_wide-1 downTo 0)
           local seq = j*tiles_wide + i + 1
-          local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
+          local tile = Bitmap( bitmap, IntBox(i*w,j*h,w,h) )
           local img : Image
           if (image.file)
             img = Image( tile, image.file.value.appending("_$"(seq.format(fmt))) ).[ is_modified=true ]

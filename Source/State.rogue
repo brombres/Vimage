@@ -291,7 +291,7 @@ class EnterCmdLineState : State
       use builder = StatusBar
         builder.print ':'
 
-        local cursor_pos = builder.cursor + XY( cmd_line.count+1, 0 )
+        local cursor_pos = builder.cursor + IntXY( cmd_line.count+1, 0 )
 
         local keyword = cmd_line.before_first(' ')
         local args = cmd_line.after_first(' ')

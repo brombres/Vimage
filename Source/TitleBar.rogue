@@ -29,7 +29,7 @@ class TitleBar : UIComponent [singleton]
           else
             ratio = "$:1"(zoom->Int32)
           endIf
-          ConsoleUICanvas.cursor = display_bounds.top_right - XY(ratio.count,0)
+          ConsoleUICanvas.cursor = display_bounds.top_right - IntXY(ratio.count,0)
           ConsoleUICanvas.print ratio
         endIf
         ConsoleUICanvas.style.inverse_off
