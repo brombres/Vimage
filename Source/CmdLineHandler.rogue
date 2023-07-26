@@ -759,6 +759,26 @@ class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineName : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "name"
+    syntax  = "New image name"
+
+  METHODS
+    method execute( arg_string:String )
+      local args = Scanner(arg_string).scan_args
+      if (args.count == 0)
+        status = "name [no new name given]"
+      elseIf (args.count > 1)
+        status = "name [too many arguments]"
+      elseIf (not ImageList.selected)
+        status = "name [no current image]"
+      else
+        execute( CmdName(args.first) )
+      endIf
+
+endClass
+
 class CmdLineNew : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "new"

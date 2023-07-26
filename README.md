@@ -111,13 +111,7 @@ Command   | Arguments       | Description
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:hsv2rgb`  |                 | The corollary to `:rgb2hsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
-`:&`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-AND's each pixel in the current image with the specified constant value.
-`:\|`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-OR's each pixel in the current image with the specified constant value.
-`:~`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-XOR's each pixel in the current image with the specified constant value.
-`:<`        | `N`               | Left-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:< 8`.
-`:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
-`:>`        | `N`               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:> 8`.
-`:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.
+`:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
 `:new`      | `WxH`             | Creates a new image of the specified pixel size.
 `:open`     | `<filepaths>`     | Opens one or more specified images and adds them to the Image List.
 `:q`        |                 | Quits (closes) the current image. Will be unsuccessful if the image has modifications.
@@ -133,3 +127,10 @@ Command   | Arguments       | Description
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.
 `:wall`     |                   | Writes (saves) all modified images.
 `:wq`       |                   | Writes (saves) and quits (closes) the current image.
+`:&`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-AND's each pixel in the current image with the specified constant value.
+`:\|`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-OR's each pixel in the current image with the specified constant value.
+`:~`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-XOR's each pixel in the current image with the specified constant value.
+`:<`        | `N`               | Left-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:< 8`.
+`:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
+`:>`        | `N`               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:> 8`.
+`:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.

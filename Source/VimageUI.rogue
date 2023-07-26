@@ -35,6 +35,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineLiteralBitwiseROL )
       register( CmdLineLiteralBitwiseROR )
       register( CmdLineLiteralBitwiseXOR )
+      register( CmdLineName )
       register( CmdLineNew )
       register( CmdLineOpen )
       register( CmdLineQuit )

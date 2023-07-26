@@ -1412,6 +1412,35 @@ class CmdMerge : EditCmd [singleton]
       ImageView.mark_modified
 endClass
 
+class CmdName( new_name:String ) : EditCmd
+  METHODS
+    method update_status
+      noAction
+
+    method execute
+      if (ImageList.selected)
+        ImageList.selected.request_redraw
+        local image = ImageList.selected.image
+
+        if local file = image.file
+          local ext = file.extension
+          if (not ext) ext = "png"
+          if (String.exists(file.folder))
+            new_name = "$/$.$"(file.folder,new_name,ext)
+          else
+            new_name = "$.$"(new_name,ext)
+          endIf
+          image.file = File(new_name)
+        else
+          if (not String.exists(File(new_name).extension)) new_name = File(new_name).with_extension("png").filepath
+          image.file = File( new_name )
+        endIf
+        image.name = image.file.value.filepath
+        image.is_modified = true
+        status = "renamed image to " + File(new_name).filename
+      endIf
+endClass
+
 class CmdNew( size:IntXY ) : EditCmd
   METHODS
     method update_status
