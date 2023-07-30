@@ -57,9 +57,9 @@ Key    | Command              | Description
 `f`    | Flip Horizontal      | Flips (mirrors) the current image horizontally.
 `F`    | Flip Vertical        | Flips (mirrors) the current image vertically.
 `g`    | Go to First Image    | [Image List] Selects the first image in the image list.
-       | Jump to Top          | [Zoom/Crop] Pans the image window to make the top side of the image visible.
+&nbsp; | Jump to Top          | [Zoom/Crop] Pans the image window to make the top side of the image visible.
 `G`    | Go to Last Image     | [Image List] Selects the last image in the image list.
-       | Jump to Bottom       | [Zoom/Crop] Pans the image window to make the bottom side of the image visible.
+&nbsp; | Jump to Bottom       | [Zoom/Crop] Pans the image window to make the bottom side of the image visible.
 `j`,`k`| Next/Previous Image  | Selects the next or previous image in the Image List to view or edit.
 `J`,`K`| Shift List Position  | Shifts the current image up or down in the Image List, reordering the list.
 `n`    | Join Horizontal      | Joins (splices) the current image with the one below it, placing them side-by-side horizontally.
