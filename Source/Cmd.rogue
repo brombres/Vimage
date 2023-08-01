@@ -1478,7 +1478,7 @@ class CmdOpen( args:String[] ) : EditCmd
       local index = first_index
 
       forEach (arg in args)
-        arg .= unescaped
+        arg = arg.trimmed.unescaped
         local listing = File(arg).listing
 
         if (not listing.count)
