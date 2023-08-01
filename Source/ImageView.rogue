@@ -75,6 +75,15 @@ class ImageView : UIComponent [singleton]
       is_modified = true
       request_redraw
 
+    method maximum_zoom
+      if (image)
+        if (image.zoom != max_zoom)
+          image.zoom = max_zoom
+          TitleBar.zoom = image.zoom
+          mark_modified
+        endIf
+      endIf
+
     method reset_zoom
       if (image)
         if (image.zoom != default_zoom)

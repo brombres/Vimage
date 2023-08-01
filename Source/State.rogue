@@ -59,6 +59,7 @@ class StandardState : State
   METHODS
     method init
       key_handlers[Keycode.SEMICOLON+SHIFT] = CmdBeginCommandLine
+      key_handlers[Keycode.NUMBER_0+SHIFT]  = CmdMaxZoom
       key_handlers[Keycode.NUMBER_1+SHIFT]  = CmdBitwiseNOT
       key_handlers[Keycode.NUMBER_7+SHIFT]  = CmdBitwiseAND
       key_handlers[Keycode.BACKSLASH+SHIFT] = CmdBitwiseOR

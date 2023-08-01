@@ -76,6 +76,7 @@ Key    | Command              | Description
 `z`    | Zoom In              | Enter Zoom Mode and zoom in to the current image. Use `[i,j,k,l]` to pan around. Use `Z` to zoom out and `ESCAPE` to exit Zoom Mode.
 `Z`    | Zoom Out             | Enter Zoom Mode and zoom out of the current image. Use `[i,j,k,l]` to pan around. Use `z` to zoom in and `ESCAPE` to exit Zoom Mode.
 `0`    | Default Zoom         | Resets the current image zoom level to the default, which fits the image to the window.
+`0+SHIFT` | Maximum Zoom      | Sets the zoom level to maximum.
 `.`    | Repeat Last          | Repeats the last editing command.
 `:`    | Command Line         | Begins input of a command line (see [Command Line Commands](#Command-Line-Commands)).
 `"`    | Toggle Clipboard     | Toggles between using the OS clipboard (default) and the internal clipboard for operations `d` (delete/cut), `y` (yank/copy), and `p` (paste). The OS clipboard allows image copy/paste between Vimage and other apps but can be slower when dealing with large images.

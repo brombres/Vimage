@@ -1599,6 +1599,18 @@ class CmdResetZoom : Cmd [singleton]
       endIf
 endClass
 
+class CmdMaxZoom : Cmd [singleton]
+  METHODS
+    method update_status
+      status = "SHIFT+0 (maximum zoom)"
+
+    method execute
+      ImageView.maximum_zoom
+      if (State.current instanceOf ZoomState)
+        state = ImageListState
+      endIf
+endClass
+
 class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
   METHODS
     method update_status
