@@ -1,0 +1,10 @@
+class RogoPackage : Package
+  PROPERTIES
+    name = "brombres/vimage"
+
+  METHODS
+    method init
+      dependency "brombres/rogue@2.28"
+      scan_repo_releases
+
+endClass
