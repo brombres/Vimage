@@ -2,12 +2,11 @@ module Vimage
 uses UI
 
 class ImageList : UIList [singleton]
-  DEFINITIONS
-    FIXED_WIDTH = 21
-
   PROPERTIES
     selected : ImageListItem
     is_dim   : Logical
+
+    fixed_width = 21
 
   METHODS
     method init
@@ -81,7 +80,8 @@ class ImageList : UIList [singleton]
       if (is_dim) ConsoleUICanvas.style.dim
 
     method on_resize
-      fixed_width = FIXED_WIDTH
+      @fixed_width = (Console.width / 4 + 1).clamped( 21, 33 )
+      fixed_width = fixed_width
 
     method remove_selected
       if (not selected) return
@@ -212,18 +212,18 @@ class ImageListItem : UIComponent
         ConsoleUICanvas.cursor = display_bounds.position
         if (is_selected) ConsoleUICanvas.style.inverse
         ConsoleUICanvas.print image.compact_name
-        loop (ImageList.FIXED_WIDTH) ConsoleUICanvas.print ' '
+        loop (ImageList.fixed_width) ConsoleUICanvas.print ' '
         if (is_selected) ConsoleUICanvas.style.inverse_off
       endTemporarily
 
     method on_resize
-      fixed_size = IntXY( ImageList.FIXED_WIDTH, 1 )
+      fixed_size = IntXY( ImageList.fixed_width, 1 )
 endClass
 
 class ImageListScrollView : UIScrollView
   METHODS
     method after_draw
-      local bounds = display_bounds.with_width(1) + IntXY(ImageList.FIXED_WIDTH-1,0)
+      local bounds = display_bounds.with_width(1) + IntXY(ImageList.fixed_width-1,0)
       ConsoleUICanvas.fill( bounds, '\[2502]' )
 
     method on_draw
