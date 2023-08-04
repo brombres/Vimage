@@ -1605,9 +1605,9 @@ class CmdMaxZoom : Cmd [singleton]
       status = "SHIFT+0 (maximum zoom)"
 
     method execute
-      ImageView.maximum_zoom
-      if (State.current instanceOf ZoomState)
-        state = ImageListState
+      if (ImageView.image)
+        ImageView.maximum_zoom
+        if (State.current not instanceOf ZoomState) state = ZoomState
       endIf
 endClass
 
