@@ -121,6 +121,7 @@ class CmdLineHandler
           case "rogue_blue":  result = Color( 0xff3333FF )
           case "royal_blue":  result = Color( 0xff4169E1 )
           case "sky_blue":    result = Color( 0xff87CEEB )
+          case "t":           return ColorValue( Color(0) )
           case "transparent": return ColorValue( Color(0) )
           case "clear":       return ColorValue( Color(0) )
           case "yellow":      result = Color( 0xffFFFF00 )

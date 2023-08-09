@@ -98,7 +98,7 @@ Command   | Arguments       | Description
 `:aspect`   | `[16:9\|3:4\|...]`  | Crops the image as necessary to achieve the specified aspect ratio.
 `:aspect-fill` | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
 `:aspect-fit`  | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
-`:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
+`:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[t\|transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
 `:clamp`    | `LOW HIGH`        | Limits the range each pixel's color components to the corresponding low and high of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
 `:clamph`   | `HIGH`        | Equivalent to `:clamp 0000 HIGH`.
 `:clampl`   | `LOW`         | Equivalent to `:clamp LOW ffff`.
