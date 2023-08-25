@@ -53,9 +53,17 @@ class ImageList : UIList [singleton]
       if (not is_filepath_used(filepath)) return file
 
       local ext = file.extension
-      local existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
-      if (existing_suffix) filepath .= before_last( "_"+existing_suffix )
-      else filepath = File(filepath).without_extension
+      local existing_suffix = filepath.extract_string( "*-$(I).$"('$',ext) )
+      if (existing_suffix)
+        filepath .= before_last( "-"+existing_suffix )
+      else
+        existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
+        if (existing_suffix)
+          filepath .= before_last( "_"+existing_suffix )
+        else
+          filepath = File(filepath).without_extension
+        endIf
+      endIf
 
       local suffix = 2
       local candidate = "$_$.$"(File(filepath),suffix,ext)

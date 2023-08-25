@@ -843,8 +843,16 @@ class CmdJoin( dims:IntXY ) : EditCmd
         if (file)
           local ext = file.value.extension
           local filepath = file.value.filepath
-          local existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
-          if (existing_suffix) filepath = "$.$"(filepath.before_last("_"+existing_suffix),ext)
+          local existing_suffix = filepath.extract_string( "*-$(I).$"('$',ext) )
+          if (existing_suffix)
+            filepath = "$.$"(filepath.before_last("-"+existing_suffix),ext)
+          else
+            existing_suffix = filepath.extract_string( "*_$(I).$"('$',ext) )
+            if (existing_suffix)
+              filepath = "$.$"(filepath.before_last("_"+existing_suffix),ext)
+            endIf
+          endIf
+
           file = ImageList.make_filepath_unique( File(filepath) )
         endIf
 
@@ -2015,9 +2023,9 @@ class CmdSplit( dims:IntXY ) : EditCmd
           local tile = Bitmap( bitmap, IntBox(i*w,j*h,w,h) )
           local img : Image
           if (image.file)
-            img = Image( tile, image.file.value.appending("_$"(seq.format(fmt))) ).[ is_modified=true ]
+            img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]
           elseIf (image.name)
-            img = Image( tile, "$_$"(image.name,seq.format(fmt)) )
+            img = Image( tile, "$-$"(image.name,seq.format(fmt)) )
           else
             img = Image( tile, seq.format(fmt) )
           endIf
