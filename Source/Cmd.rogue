@@ -1833,14 +1833,21 @@ class CmdPasteBefore : EditCmd [singleton]
       else
         bitmap = Vimage.clipboard
       endIf
+
       if (bitmap)
+        local file = File("NewImage.png")
+        if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
+          file = Vimage.clipboard_file.value
+        endIf
+        file = ImageList.make_filepath_unique( file )
+
         loop repeat_count
           if (ImageList.selected)
             local before_index = ImageList.selected.index
-            ImageList.insert( Image(bitmap), before_index )
+            ImageList.insert( Image(bitmap,file), before_index )
             ImageList.select( before_index )
           else
-            ImageList.add( Image(bitmap) )
+            ImageList.add( Image(bitmap,file) )
             ImageList.select( 0 )
           endIf
         endLoop
