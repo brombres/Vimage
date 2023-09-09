@@ -135,6 +135,13 @@ class CmdLineHandler
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
 
+    method parse_filter( arg:String )->String
+      which (arg)
+        case "gold":         return arg
+        case "gray", "grey": return "gray"
+        others:              return null
+      endWhich
+
     method parse_ratio( arg:String )->IntXY?
       local pair = arg.split(':')
       if (pair.count == 2)
@@ -573,6 +580,21 @@ class CmdLineAspectFill : CmdLineHandler [singleton]
         else
           status = "aspect-fill [missing or invalid size specification]"
         endIf
+      endIf
+endClass
+
+class CmdLineFilter : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "filter"
+    syntax  = "[gold|gray]"
+
+  METHODS
+    method execute( args:String )
+      local filter = parse_filter( args )
+      if (filter)
+        execute( CmdFilter(filter) )
+      else
+        status = "filter [missing or invalid filter name]"
       endIf
 endClass
 

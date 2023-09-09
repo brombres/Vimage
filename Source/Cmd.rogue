@@ -1215,6 +1215,55 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
 
 endClass
 
+
+class CmdFilter( name:String ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter $"(name)
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      which (name)
+        case "gold"
+          loop (bitmap.width * bitmap.height)
+            local color = Color( native("*(++data)")->Int32 )
+            local hsv = HSV( color )
+            if (hsv.value >= 2.0/3.0)
+              # Yellow to white
+              hsv.hue = 60.0/360.0
+              hsv.saturation = ((hsv.value - 2.0/3.0) * 3.0).lerp( 1.0, 0.0 )
+              hsv.value = 1.0
+              color = hsv->Color.with_alpha( color.alpha )
+            elseIf (hsv.value >= 1.0/3.0)
+              # Orange to yellow
+              hsv.hue = ((hsv.value - 1.0/3.0) * 3).lerp( 30.0/360.0, 60.0/360.0 )
+              hsv.saturation = 1.0
+              hsv.value = 1.0
+              color = hsv->Color.with_alpha( color.alpha )
+            else
+              # Black to orange
+              color = (hsv.value*3).lerp( Color.BLACK, Color.ORANGE ).with_alpha( color.alpha )
+            endIf
+            native @|*data = $color.argb;
+          endLoop
+
+        case "gray"
+          loop (bitmap.width * bitmap.height)
+            local color = Color( native("*(++data)")->Int32 )
+            local hsv = HSV( color )
+            hsv.saturation = 0
+            color = hsv->Color.with_alpha( color.alpha )
+            native @|*data = $color.argb;
+          endLoop
+      endWhich
+
+endClass
+
+
 class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
   METHODS
     method update_status
