@@ -1406,12 +1406,14 @@ class CmdMerge : EditCmd [singleton]
           endIf
         endLoop
 
-        local result = list.remove_last.cloned_bitmap
+        local original = list.remove_last
+        local result = original.cloned_bitmap
         forEach (image in list step -1)
           image.bitmap.blit( result, 0, 0, BitmapBlitFn.ALPHA )
         endForEach
 
-        local result_image = Image( result )
+        local result_image = Image( result, original.name )
+        result_image.file = original.file
         ImageList.insert( result_image, original_index )
         ImageList.select( result_image )
 
