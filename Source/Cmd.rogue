@@ -1228,36 +1228,69 @@ class CmdFilter( name:String ) : EditCmd
       native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
       which (name)
+        case "brightgold"
+          loop (bitmap.width * bitmap.height)
+            local color = Color( native("*(++data)")->Int32 )
+
+            # Save alpha
+            local alpha = (color.argb & 0xff00_0000)
+
+            # Grayscale value 'v' is the max of all color components
+            local v = (color.argb:>>>:16) & 0xff
+            v .= or_larger( (color.argb:>>>:8) & 0xff )
+            v .= or_larger( color.argb & 0xff )
+
+            if (v >= 255*2/3)
+              # Top 33% grayscale: yellow to white
+              color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
+            elseIf (v >= 255*1/3)
+              # Middle 33% grayscale: orange to yellow
+              color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
+            else
+              # Bottom 33% grayscale: black to orange
+              color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
+            endIf
+
+            # Write gold value back with original alpha
+            native @|*data = $alpha | ($color.argb & 0x00ffffff);
+          endLoop
+
         case "gold"
           loop (bitmap.width * bitmap.height)
             local color = Color( native("*(++data)")->Int32 )
-            local hsv = HSV( color )
-            if (hsv.value >= 2.0/3.0)
-              # Yellow to white
-              hsv.hue = 60.0/360.0
-              hsv.saturation = ((hsv.value - 2.0/3.0) * 3.0).lerp( 1.0, 0.0 )
-              hsv.value = 1.0
-              color = hsv->Color.with_alpha( color.alpha )
-            elseIf (hsv.value >= 1.0/3.0)
-              # Orange to yellow
-              hsv.hue = ((hsv.value - 1.0/3.0) * 3).lerp( 30.0/360.0, 60.0/360.0 )
-              hsv.saturation = 1.0
-              hsv.value = 1.0
-              color = hsv->Color.with_alpha( color.alpha )
+
+            # Save alpha
+            local alpha = (color.argb & 0xff00_0000)
+
+            # Compute grayscale value 'v'
+            local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
+            v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
+            v += ((color.argb & 0xff) * 11) / 100                # 11% blue
+
+            if (v >= 255*2/3)
+              # Top 33% grayscale: yellow to white
+              color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
+            elseIf (v >= 255*1/3)
+              # Middle 33% grayscale: orange to yellow
+              color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
             else
-              # Black to orange
-              color = (hsv.value*3).lerp( Color.BLACK, Color.ORANGE ).with_alpha( color.alpha )
+              # Bottom 33% grayscale: black to orange
+              color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
             endIf
-            native @|*data = $color.argb;
+
+            # Write gold value back with original alpha
+            native @|*data = $alpha | ($color.argb & 0x00ffffff);
           endLoop
 
         case "gray"
           loop (bitmap.width * bitmap.height)
             local color = Color( native("*(++data)")->Int32 )
-            local hsv = HSV( color )
-            hsv.saturation = 0
-            color = hsv->Color.with_alpha( color.alpha )
-            native @|*data = $color.argb;
+            local a = ((color.argb:>>>:24) & 0xff)
+            local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
+            v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
+            v += ((color.argb & 0xff) * 11) / 100                # 11% blue
+            local argb = (a:<<:24) | (v:<<:16) | (v:<<:8) | v
+            native @|*data = $argb;
           endLoop
       endWhich
 

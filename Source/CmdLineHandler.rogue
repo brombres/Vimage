@@ -137,6 +137,7 @@ class CmdLineHandler
 
     method parse_filter( arg:String )->String
       which (arg)
+        case "brightgold":   return arg
         case "gold":         return arg
         case "gray", "grey": return "gray"
         others:              return null
@@ -586,7 +587,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[gold|gray]"
+    syntax  = "[brightgold|gold|gray]"
 
   METHODS
     method execute( args:String )
