@@ -296,48 +296,6 @@ class CmdBitwiseRotateRight : EditCmd [singleton]
       endIf
 endClass
 
-class CmdClamp( lo:ColorValue, hi:ColorValue ) : EditCmd
-  METHODS
-    method update_status
-      use status = StatusBar
-        status.print "clamp $ $"(lo,hi)
-        if (not ImageList.selected)
-          status.print " [no image selected]"
-        endIf
-      endUse
-
-    method execute
-      if local selected = ImageList.selected
-        local bitmap = selected.image.cloned_bitmap
-        local n = bitmap.size.product
-        local lo = lo->Color
-        local hi = hi->Color
-        local min_a = lo.alpha_byte
-        local min_r = lo.red_byte
-        local min_g = lo.green_byte
-        local min_b = lo.blue_byte
-        local max_a = hi.alpha_byte
-        local max_r = hi.red_byte
-        local max_g = hi.green_byte
-        local max_b = hi.blue_byte
-        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-                |
-                |while (--$n >= 0)
-                |{
-                |  RogueInt32 argb = *(++data);
-                |  int a = (argb >> 24) & 255;
-                |  int r = (argb >> 16) & 255;
-                |  int g = (argb >> 8) & 255;
-                |  int b = argb & 255;
-                |  a = (a < $min_a) ? $min_a : (a > $max_a ? $max_a : a);
-                |  r = (r < $min_r) ? $min_r : (r > $max_r ? $max_r : r);
-                |  g = (g < $min_g) ? $min_g : (g > $max_g ? $max_g : g);
-                |  b = (b < $min_b) ? $min_b : (b > $max_b ? $max_b : b);
-                |  *data = (a<<24) | (r<<16) | (g<<8) | b;
-                |}
-      endIf
-endClass
-
 class CmdCopy( a:String, b:String ) : EditCmd
   METHODS
     method update_status
@@ -987,6 +945,48 @@ class CmdAspectFitToScale( sx:Real?, sy:Real? ) : EditCmd
       if (sx) w = (image.bitmap.width  * sx.value)->Int32
       if (sy) h = (image.bitmap.height * sy.value)->Int32
       CmdAspectFitToSize( w, h ).execute
+endClass
+
+class CmdFilterClamp( lo:ColorValue, hi:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "filter clamp $ $"(lo,hi)
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        endIf
+      endUse
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.size.product
+        local lo = lo->Color
+        local hi = hi->Color
+        local min_a = lo.alpha_byte
+        local min_r = lo.red_byte
+        local min_g = lo.green_byte
+        local min_b = lo.blue_byte
+        local max_a = hi.alpha_byte
+        local max_r = hi.red_byte
+        local max_g = hi.green_byte
+        local max_b = hi.blue_byte
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  int a = (argb >> 24) & 255;
+                |  int r = (argb >> 16) & 255;
+                |  int g = (argb >> 8) & 255;
+                |  int b = argb & 255;
+                |  a = (a < $min_a) ? $min_a : (a > $max_a ? $max_a : a);
+                |  r = (r < $min_r) ? $min_r : (r > $max_r ? $max_r : r);
+                |  g = (g < $min_g) ? $min_g : (g > $max_g ? $max_g : g);
+                |  b = (b < $min_b) ? $min_b : (b > $max_b ? $max_b : b);
+                |  *data = (a<<24) | (r<<16) | (g<<8) | b;
+                |}
+      endIf
 endClass
 
 class CmdFlipH : EditCmd [singleton]
