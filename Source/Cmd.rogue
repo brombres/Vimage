@@ -296,52 +296,6 @@ class CmdBitwiseRotateRight : EditCmd [singleton]
       endIf
 endClass
 
-class CmdCopy( a:String, b:String ) : EditCmd
-  METHODS
-    method update_status
-      if (not ImageList.selected)
-        status = "copy channels $ -> $ [no image selected]"(a,b)
-        return
-      endIf
-
-      status = "copy channels $ -> $"(a,b)
-
-    method execute
-      if (not ImageList.selected)
-        return
-      endIf
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-
-      if (a.count == 1 and "bgra".contains(a))
-        local a_shift = ("bgra".locate(a).value :<<: 3)
-        forEach (dest_channel in b)
-          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
-          forEach (color in rewriter=bitmap.pixels.rewriter)
-            local a = (color.argb :>>>: a_shift) & 0xFF
-            local b = (color.argb :>>>: b_shift) & 0xFF
-            local argb = color.argb & !(0xFF:<<:b_shift)
-            argb |= (a :<<: b_shift)
-            rewriter.write( Color(argb) )
-          endForEach
-        endForEach
-      else
-        # Replace color channel with constant value 00-ff
-        local a = a->Int32(&base=16)
-        forEach (dest_channel in b)
-          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
-          local write_a = a :<<: b_shift
-          forEach (color in rewriter=bitmap.pixels.rewriter)
-            local argb = color.argb & !(0xFF:<<:b_shift)
-            argb |= write_a
-            rewriter.write( Color(argb) )
-          endForEach
-        endForEach
-      endIf
-
-      ImageView.mark_modified
-endClass
-
 class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
   METHODS
     method update_status
@@ -989,6 +943,52 @@ class CmdFilterClamp( lo:ColorValue, hi:ColorValue ) : EditCmd
       endIf
 endClass
 
+class CmdFilterCopy( a:String, b:String ) : EditCmd
+  METHODS
+    method update_status
+      if (not ImageList.selected)
+        status = "filter copy channel $ -> channels $ [no image selected]"(a,b)
+        return
+      endIf
+
+      status = "filter copy channel $ -> channels $"(a,b)
+
+    method execute
+      if (not ImageList.selected)
+        return
+      endIf
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+
+      if (a.count == 1 and "bgra".contains(a))
+        local a_shift = ("bgra".locate(a).value :<<: 3)
+        forEach (dest_channel in b)
+          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            local a = (color.argb :>>>: a_shift) & 0xFF
+            local b = (color.argb :>>>: b_shift) & 0xFF
+            local argb = color.argb & !(0xFF:<<:b_shift)
+            argb |= (a :<<: b_shift)
+            rewriter.write( Color(argb) )
+          endForEach
+        endForEach
+      else
+        # Replace color channel with constant value 00-ff
+        local a = a->Int32(&base=16)
+        forEach (dest_channel in b)
+          local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
+          local write_a = a :<<: b_shift
+          forEach (color in rewriter=bitmap.pixels.rewriter)
+            local argb = color.argb & !(0xFF:<<:b_shift)
+            argb |= write_a
+            rewriter.write( Color(argb) )
+          endForEach
+        endForEach
+      endIf
+
+      ImageView.mark_modified
+endClass
+
 class CmdFlipH : EditCmd [singleton]
   METHODS
     method update_status
@@ -1379,6 +1379,28 @@ class CmdFilterRGBToHSV( args:String[] ) : EditCmd
 
 endClass
 
+class CmdFilterSwap( a:Int32, b:Int32 ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter swap channels $<>$"("bgra"[a],"bgra"[b])
+
+    method execute
+      if ((a or b) and ImageView.image)
+        local bitmap = ImageView.image.cloned_bitmap
+
+        local a_shift = a * 8
+        local b_shift = b * 8
+        forEach (color at i in rewriter=bitmap.pixels.rewriter)
+          local a = (color.argb :>>>: a_shift) & 0xFF
+          local b = (color.argb :>>>: b_shift) & 0xFF
+          local argb = color.argb & !(0xFF:<<:a_shift) & !(0xFF:<<:b_shift)
+          argb |= (a :<<: b_shift) | (b :<<: a_shift)
+          rewriter.write( Color(argb) )
+        endForEach
+
+        ImageView.mark_modified
+      endIf
+endClass
 
 class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
   METHODS
@@ -2159,29 +2181,6 @@ class CmdSplit( dims:IntXY ) : EditCmd
       ImageList.remove( ImageList.selected )
       ImageList.select( index )
 
-endClass
-
-class CmdSwap( a:Int32, b:Int32 ) : EditCmd
-  METHODS
-    method update_status
-      status = "swap channels $<>$"("bgra"[a],"bgra"[b])
-
-    method execute
-      if ((a or b) and ImageView.image)
-        local bitmap = ImageView.image.cloned_bitmap
-
-        local a_shift = a * 8
-        local b_shift = b * 8
-        forEach (color at i in rewriter=bitmap.pixels.rewriter)
-          local a = (color.argb :>>>: a_shift) & 0xFF
-          local b = (color.argb :>>>: b_shift) & 0xFF
-          local argb = color.argb & !(0xFF:<<:a_shift) & !(0xFF:<<:b_shift)
-          argb |= (a :<<: b_shift) | (b :<<: a_shift)
-          rewriter.write( Color(argb) )
-        endForEach
-
-        ImageView.mark_modified
-      endIf
 endClass
 
 class CmdToggleClipboard : Cmd [singleton]

@@ -18,6 +18,12 @@
 
 Limits the range of each pixel's color components to the corresponding low and high byte of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
 
+### copy
+
+    :filter copy [a|r|g|b|XX] [a|r|g|b]+
+
+Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:filter copy r gb`. See also: `:filter swap`.
+
 ### gray
 
     :filter gray
@@ -37,3 +43,10 @@ Treats pixel RGB color components as HSV (likely from a prior `:filter rgbtohsv`
     :filter rgbtohsv
 
 Converts pixel RGB color components to HSV (Hue, Saturation, Value) format. After the filter is applied, the Red component 0-255 indicates Hue 0-255, Green indicates Saturation, and Blue indicates Value. Use `:filter hsvtorgb` to perform the reverse conversion.
+
+### swap
+
+    :filter swap [a|r|g|b] [a|r|g|b]
+
+Swaps one color channel with another. For example, `:filter swap r b` swaps the red and blue channels. See also: `:filter copy`.
+

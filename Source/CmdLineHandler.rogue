@@ -487,49 +487,6 @@ class CmdLineClampH : CmdLineHandler [singleton]
       endBlock
 endClass
 
-class CmdLineCopy : CmdLineHandler [singleton]
-  PROPERTIES
-    keyword = "copy"
-    syntax  = "source:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
-
-  METHODS
-    method execute( args:String )
-      block args = args.split(' ')
-        if (args.count == 2)
-          local a = parse_channels( args.first )
-          local b = parse_channels( args.last, &allow_multiple )
-          if (not a or not b) return
-          execute( CmdCopy(a,b) )
-        else
-          status = "copy [expected <source-channel> <destination-channels>]"
-        endIf
-      endBlock
-
-    method parse_channels( args:String, &allow_multiple )->String
-      if (allow_multiple)
-        local channels = 0
-        forEach (ch in args)
-          if (not "bgra".locate(ch))
-            status = ''copy [illegal destination channel specification '$']''(ch)
-            return null
-          endIf
-        endForEach
-      elseIf (args.count == 1)
-        if (args == "0") return args
-        if (not "bgra".locate(args) and not args[0].is_number(&base=16))
-          status = ''copy [illegal source channel or value specification '$']''(args[0])
-          return null
-        endIf
-      else
-        if (args->Int32(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
-          status = ''copy [illegal source channel or value specification '$']''(args)
-          return null
-        endIf
-      endIf
-
-      return args
-endClass
-
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
@@ -582,7 +539,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|clamp|gold|gray|hsvtorgb|rgbtohsv]"
+    syntax  = "[brightgold|clamp|copy|gold|gray|hsvtorgb|rgbtohsv|swap]"
 
   METHODS
     method execute( arg_string:String )
@@ -604,10 +561,30 @@ class CmdLineFilter : CmdLineHandler [singleton]
           endIf
           filter = CmdFilterClamp( low.value, high.value )
         case "brightgold":   filter = CmdFilterBrightGold( args )
+        case "copy":
+          if (args.count == 2)
+            local a = parse_copy_channels( args.first )
+            local b = parse_copy_channels( args.last, &allow_multiple )
+            if (not a or not b) return
+            filter = CmdFilterCopy(a,b)
+          else
+            status = "filter copy [expected <source-channel> <destination-channels>]"
+            return
+          endIf
         case "gold":         filter = CmdFilterGold( args )
         case "gray", "grey": filter = CmdFilterGray( args )
         case "hsvtorgb":     filter = CmdFilterHSVToRGB( args )
         case "rgbtohsv":     filter = CmdFilterRGBToHSV( args )
+        case "swap":
+          if (args.count == 2)
+            local a = parse_swap_channel( args.first )
+            local b = parse_swap_channel( args.last )
+            if (not a or not b) return
+            filter = CmdFilterSwap(a.value,b.value)
+          else
+            status = "filter swap [expected <source-channel> <destination-channel>]"
+            return
+          endIf
       endWhich
 
       if (filter)
@@ -616,12 +593,51 @@ class CmdLineFilter : CmdLineHandler [singleton]
         status = "filter [missing or invalid filter name]"
       endIf
 
+    method parse_copy_channels( args:String, &allow_multiple )->String
+      if (allow_multiple)
+        local channels = 0
+        forEach (ch in args)
+          if (not "bgra".locate(ch))
+            status = ''filter copy [illegal destination channel specification '$']''(ch)
+            return null
+          endIf
+        endForEach
+      elseIf (args.count == 1)
+        if (args == "0") return args
+        if (not "bgra".locate(args) and not args[0].is_number(&base=16))
+          status = ''filter copy [illegal source channel or value specification '$']''(args[0])
+          return null
+        endIf
+      else
+        if (args->Int32(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
+          status = ''filter copy [illegal source channel or value specification '$']''(args)
+          return null
+        endIf
+      endIf
+
+      return args
+
+    method parse_swap_channel( arg:String )->Int32?
+      # Returns a channel index. Each value:
+      #   b -> 0
+      #   g -> 1
+      #   r -> 2
+      #   a -> 3
+      if (arg.count == 1)
+        local index = "bgra".locate( arg )
+        if (index) return index.value
+      endIf
+      status = ''filter swap [illegal channel specification '$']''(arg)
+      return null
+
     method syntax( arg_string:String )->String
       if (not arg_string.count) return @syntax
       local args = arg_string.split(' ')
       which (args.first)
         case "clamp": return "<low-color> <high-color>"
+        case "copy": return "source-channel:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
         case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
+        case "swap": return "source-channel:[a|r|g|b] destination-channel:[a|r|g|b]"
         others: return @syntax
       endWhich
 
@@ -963,37 +979,6 @@ class CmdLineResize : CmdLineHandler [singleton]
         endIf
       endIf
 endClass
-
-class CmdLineSwap : CmdLineHandler [singleton]
-  PROPERTIES
-    keyword = "swap"
-    syntax  = "[a|r|g|b] [a|r|g|b]"
-
-  METHODS
-    method execute( args:String )
-      local (a,b) = parse_channels( args )
-      execute( CmdSwap(a,b) )
-
-    method parse_channels( args:String )->(Int32,Int32)
-      # Returns a channel index pair. Each value:
-      #   b -> 0
-      #   g -> 1
-      #   r -> 2
-      #   a -> 3
-      block args = args.split(' ')
-        if (args.count == 2 and args[0].count == 1 and args[1].count == 1)
-          if local a_index = "bgra".locate( args[0] )
-            if local b_index = "bgra".locate( args[1] )
-              return (a_index,b_index)
-            endIf
-          endIf
-        endIf
-      endBlock
-
-      status = ''swap [expected [a|r|g|b] pair (e.g. 'swap r b')]''
-      return (0,0)
-endClass
-
 
 class CmdLineWrite : CmdLineFilepathHandler [singleton]
   PROPERTIES
