@@ -1216,10 +1216,10 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
 endClass
 
 
-class CmdFilter( name:String ) : EditCmd
+class CmdFilterBrightGold( args:String[] ) : EditCmd
   METHODS
     method update_status
-      status = "filter $"(name)
+      status = "filter brightgold".appending(args.join(" "))
 
     method execute( ignore_repeat_count:Int32 )
       if (not ImageList.selected) return
@@ -1227,72 +1227,110 @@ class CmdFilter( name:String ) : EditCmd
       local bitmap = ImageList.selected.image.cloned_bitmap
       native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
-      which (name)
-        case "brightgold"
-          loop (bitmap.width * bitmap.height)
-            local color = Color( native("*(++data)")->Int32 )
+      loop (bitmap.width * bitmap.height)
+        local color = Color( native("*(++data)")->Int32 )
 
-            # Save alpha
-            local alpha = (color.argb & 0xff00_0000)
+        # Save alpha
+        local alpha = (color.argb & 0xff00_0000)
 
-            # Grayscale value 'v' is the max of all color components
-            local v = (color.argb:>>>:16) & 0xff
-            v .= or_larger( (color.argb:>>>:8) & 0xff )
-            v .= or_larger( color.argb & 0xff )
+        # Grayscale value 'v' is the max of all color components
+        local v = (color.argb:>>>:16) & 0xff
+        v .= or_larger( (color.argb:>>>:8) & 0xff )
+        v .= or_larger( color.argb & 0xff )
 
-            if (v >= 255*2/3)
-              # Top 33% grayscale: yellow to white
-              color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
-            elseIf (v >= 255*1/3)
-              # Middle 33% grayscale: orange to yellow
-              color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
-            else
-              # Bottom 33% grayscale: black to orange
-              color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
-            endIf
+        if (v >= 255*2/3)
+          # Top 33% grayscale: yellow to white
+          color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
+        elseIf (v >= 255*1/3)
+          # Middle 33% grayscale: orange to yellow
+          color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
+        else
+          # Bottom 33% grayscale: black to orange
+          color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
+        endIf
 
-            # Write gold value back with original alpha
-            native @|*data = $alpha | ($color.argb & 0x00ffffff);
-          endLoop
+        # Write gold value back with original alpha
+        native @|*data = $alpha | ($color.argb & 0x00ffffff);
+      endLoop
+endClass
 
-        case "gold"
-          loop (bitmap.width * bitmap.height)
-            local color = Color( native("*(++data)")->Int32 )
 
-            # Save alpha
-            local alpha = (color.argb & 0xff00_0000)
+class CmdFilterGold( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter gold".appending(args.join(" "))
 
-            # Compute grayscale value 'v'
-            local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
-            v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
-            v += ((color.argb & 0xff) * 11) / 100                # 11% blue
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
 
-            if (v >= 255*2/3)
-              # Top 33% grayscale: yellow to white
-              color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
-            elseIf (v >= 255*1/3)
-              # Middle 33% grayscale: orange to yellow
-              color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
-            else
-              # Bottom 33% grayscale: black to orange
-              color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
-            endIf
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
-            # Write gold value back with original alpha
-            native @|*data = $alpha | ($color.argb & 0x00ffffff);
-          endLoop
+      loop (bitmap.width * bitmap.height)
+        local color = Color( native("*(++data)")->Int32 )
 
-        case "gray"
-          loop (bitmap.width * bitmap.height)
-            local color = Color( native("*(++data)")->Int32 )
-            local a = ((color.argb:>>>:24) & 0xff)
-            local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
-            v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
-            v += ((color.argb & 0xff) * 11) / 100                # 11% blue
-            local argb = (a:<<:24) | (v:<<:16) | (v:<<:8) | v
-            native @|*data = $argb;
-          endLoop
+        # Save alpha
+        local alpha = (color.argb & 0xff00_0000)
+
+        # Compute grayscale value 'v'
+        local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
+        v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
+        v += ((color.argb & 0xff) * 11) / 100                # 11% blue
+
+        if (v >= 255*2/3)
+          # Top 33% grayscale: yellow to white
+          color = ((v/255.0 - 2.0/3.0) * 3).lerp( Color.YELLOW, Color.WHITE )
+        elseIf (v >= 255*1/3)
+          # Middle 33% grayscale: orange to yellow
+          color = ((v/255.0 - 1.0/3.0) * 3).lerp( Color.ORANGE, Color.YELLOW )
+        else
+          # Bottom 33% grayscale: black to orange
+          color = (v/255.0 * 3).lerp( Color.BLACK, Color.ORANGE )
+        endIf
+
+        # Write gold value back with original alpha
+        native @|*data = $alpha | ($color.argb & 0x00ffffff);
+      endLoop
+
+endClass
+
+
+class CmdFilterGray( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter gray".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local rw = 2990
+      local gw = 5870
+      local bw = 1140
+      which (args.count)
+        case 3
+          local r = args[0]->Real
+          local g = args[1]->Real
+          local b = args[2]->Real
+          local sum = r + g + b
+          if (sum > 0)
+            rw = ((r / sum) * 10000)->Int32
+            gw = ((g / sum) * 10000)->Int32
+            bw = ((b / sum) * 10000)->Int32
+          endIf
       endWhich
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (bitmap.width * bitmap.height)
+        local color = Color( native("*(++data)")->Int32 )
+        local a = ((color.argb:>>>:24) & 0xff)
+        local v = (((color.argb:>>>:16) & 0xff) * rw) / 10000
+        v += (((color.argb:>>>:8) & 0xff) * gw) / 10000
+        v += ((color.argb & 0xff) * bw) / 10000
+        local argb = (a:<<:24) | (v:<<:16) | (v:<<:8) | v
+        native @|*data = $argb;
+      endLoop
 
 endClass
 

@@ -109,7 +109,7 @@ Command   | Arguments       | Description
 `:crop`     | `N`               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
 `:crop`     | `LEFT TOP RIGHT BOTTOM` | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
 `:fill` | `COLOR`\<br>`LEFT RIGHT`<br>`TL TR BL BR`<br>`COLORS` | Fills the current image with a single color, a color gradient that uses either 2 side colors or 4 corner colors, or a horizontal color gradient that uses 3, 5, or more colors.
-`:filter` | `[brightgold\|gold\|gray]` | Applies an image filter.
+`:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:hsv2rgb`  |                 | The corollary to `:rgb2hsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
@@ -136,3 +136,13 @@ Command   | Arguments       | Description
 `:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
 `:>`        | `N`               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:> 8`.
 `:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.
+
+# Filters
+
+    :filter <filter-name> [ARGS]
+
+Filter Name    | Arguments  | Description
+---------------|------------|------------
+brightgold     | &nbsp;     | Map max(R,G,B) to gradient [Black,Orange,Yellow,White]
+gold           | &nbsp;     | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
+gray, grey     | [RW GW BW] | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.

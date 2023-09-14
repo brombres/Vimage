@@ -135,14 +135,6 @@ class CmdLineHandler
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
 
-    method parse_filter( arg:String )->String
-      which (arg)
-        case "brightgold":   return arg
-        case "gold":         return arg
-        case "gray", "grey": return "gray"
-        others:              return null
-      endWhich
-
     method parse_ratio( arg:String )->IntXY?
       local pair = arg.split(':')
       if (pair.count == 2)
@@ -230,6 +222,9 @@ class CmdLineHandler
 
     method syntax->String
       return @syntax
+
+    method syntax( args:String )->String
+      return syntax
 endClass
 
 class CmdLineFilepathHandler : CmdLineHandler
@@ -590,13 +585,33 @@ class CmdLineFilter : CmdLineHandler [singleton]
     syntax  = "[brightgold|gold|gray]"
 
   METHODS
-    method execute( args:String )
-      local filter = parse_filter( args )
+    method execute( arg_string:String )
+      local filter : Cmd
+
+      local args = arg_string.split(' ')
+      local filter_name = args.remove_first
+      which (filter_name)
+        case "brightgold":   filter = CmdFilterBrightGold( args )
+        case "gold":         filter = CmdFilterGold( args )
+        case "gray", "grey": filter = CmdFilterGray( args )
+      endWhich
+
       if (filter)
-        execute( CmdFilter(filter) )
+        execute( filter )
       else
         status = "filter [missing or invalid filter name]"
       endIf
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      which (args.first)
+        case "brightgold":  return ""
+        case "gold":        return ""
+        case "gray","grey": return "[red-weight green-weight blue-weight] (default: 0.299 0.587 0.114)"
+        others: return @syntax
+      endWhich
+
 endClass
 
 class CmdLineAspectFit : CmdLineHandler [singleton]
