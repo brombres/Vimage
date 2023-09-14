@@ -582,7 +582,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|gold|gray]"
+    syntax  = "[brightgold|gold|gray|hsvtorgb|rgbtohsv]"
 
   METHODS
     method execute( arg_string:String )
@@ -594,6 +594,8 @@ class CmdLineFilter : CmdLineHandler [singleton]
         case "brightgold":   filter = CmdFilterBrightGold( args )
         case "gold":         filter = CmdFilterGold( args )
         case "gray", "grey": filter = CmdFilterGray( args )
+        case "hsvtorgb":     filter = CmdFilterHSVToRGB( args )
+        case "rgbtohsv":     filter = CmdFilterRGBToHSV( args )
       endWhich
 
       if (filter)
@@ -606,9 +608,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
       if (not arg_string.count) return @syntax
       local args = arg_string.split(' ')
       which (args.first)
-        case "brightgold":  return ""
-        case "gold":        return ""
-        case "gray","grey": return "[red-weight green-weight blue-weight] (default: 0.299 0.587 0.114)"
+        case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
         others: return @syntax
       endWhich
 
@@ -703,15 +703,6 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
       if (Vimage.hard_alpha) return "(turn hard alpha off)"
       else                   return "(turn hard alpha on)"
 
-endClass
-
-class CmdLineHSV2RGB : CmdLineHandler [singleton]
-  PROPERTIES
-    keyword = "hsv2rgb"
-
-  METHODS
-    method execute( args:String )
-      execute( CmdHSV2RGB )
 endClass
 
 class CmdLineJoin : CmdLineHandler [singleton]
@@ -958,15 +949,6 @@ class CmdLineResize : CmdLineHandler [singleton]
           status = "resize [missing or invalid size specification]"
         endIf
       endIf
-endClass
-
-class CmdLineRGB2HSV : CmdLineHandler [singleton]
-  PROPERTIES
-    keyword = "rgb2hsv"
-
-  METHODS
-    method execute( args:String )
-      execute( CmdRGB2HSV )
 endClass
 
 class CmdLineSwap : CmdLineHandler [singleton]

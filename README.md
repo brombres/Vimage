@@ -7,6 +7,7 @@ Summary   | Current Release
 Version   | 1.13
 Date      | September 10, 2023
 Platforms | Windows, macOS, Linux
+Change Log| [Change Log](ChangeLog.md)
 License   | [MIT License](LICENSE)
 Author    | Brom Bresenham
 
@@ -111,7 +112,6 @@ Command   | Arguments       | Description
 `:fill` | `COLOR`\<br>`LEFT RIGHT`<br>`TL TR BL BR`<br>`COLORS` | Fills the current image with a single color, a color gradient that uses either 2 side colors or 4 corner colors, or a horizontal color gradient that uses 3, 5, or more colors.
 `:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
-`:hsv2rgb`  |                 | The corollary to `:rgb2hsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
 `:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
 `:new`      | `WxH`             | Creates a new image of the specified pixel size.
@@ -121,7 +121,6 @@ Command   | Arguments       | Description
 `:qq`       |                 | Quits all images and ends Vimage. Will be unsuccessful if any image has modifications.
 `:qq!`      |                 | Quits all images, even if some of them have modifications.
 `:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
-`:rgb2hsv`  |                 | Converts the current image's RGB color components into HSV (Hue Saturation Value, also called HSB or Hue Saturation Brightness) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:hsv2rgb`.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:save`     | `[filepath]`      | An alias for `:w`.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
@@ -146,3 +145,5 @@ Filter Name    | Arguments  | Description
 brightgold     | &nbsp;     | Map max(R,G,B) to gradient [Black,Orange,Yellow,White]
 gold           | &nbsp;     | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
 gray, grey     | [RW GW BW] | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
+hsvtorgb       | &nbsp;     | The corollary to `:filter rgbtohsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
+rgbtohsv       | &nbsp;     | Converts the current image's RGB color components into HSV (Hue Saturation Value, also called HSB or Hue Saturation Brightness) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:filter hsvtorgb`.

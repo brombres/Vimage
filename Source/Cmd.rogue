@@ -567,84 +567,6 @@ class CmdGoToLastImage : Cmd [singleton]
       endIf
 endClass
 
-class CmdHSV2RGB : EditCmd [singleton]
-  METHODS
-    method update_status
-      if (ImageList.selected)
-        status = "hsv2rgb"
-      else
-        status = "hsv2rgb [no image selected]"
-      endIf
-
-    method execute
-      if (not ImageList.selected) return
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-      local n = bitmap.pixels.count
-      native...
-        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-         |
-         |while (--$n >= 0)
-         |{
-         |  RogueInt32 argb = *(++data);
-         |  int   a = argb & 0xFF000000;
-         |  float hue = ((argb >> 16) & 255) / 255.0f;
-         |  float saturation = ((argb >> 8) & 255) / 255.0f;
-         |  float value = (argb & 255) / 255.0f;
-         |
-         |  if (saturation)
-         |  {
-         |    float r, g, b;
-         |    hue *= 6;
-         |    int i = (int)hue;
-         |    float f = hue - i;
-         |    float p = value * (1 - saturation);
-         |    float q = value * (1 - saturation * f);
-         |    float t = value * (1 - saturation * (1 - f));
-         |    switch (i)
-         |    {
-         |      case 0:
-         |          r = value;
-         |          g = t;
-         |          b = p;
-         |          break;
-         |      case 1:
-         |          r = q;
-         |          g = value;
-         |          b = p;
-         |          break;
-         |      case 2:
-         |          r = p;
-         |          g = value;
-         |          b = t;
-         |          break;
-         |      case 3:
-         |          r = p;
-         |          g = q;
-         |          b = value;
-         |          break;
-         |      case 4:
-         |          r = t;
-         |          g = p;
-         |          b = value;
-         |          break;
-         |      default:
-         |          r = value;
-         |          g = p;
-         |          b = q;
-         |          break;
-         |    }
-         |
-         |    *data = a | ((int)(r*255+0.5))<<16 | ((int)(g*255+0.5))<<8 | ((int)(b*255+0.5));
-         |  }
-         |  else
-         |  {
-         |    int v = (int)(value * 255 + 0.5);
-         |    *data = a | (v<<16) | (v<<8) | v;
-         |  }
-         |}
-endClass
-
 class CmdImageListNext : Cmd [singleton]
   METHODS
     method update_status
@@ -1334,6 +1256,129 @@ class CmdFilterGray( args:String[] ) : EditCmd
 
 endClass
 
+class CmdFilterHSVToRGB( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter rgbtohsv".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local n = bitmap.pixels.count
+      native...
+        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+         |
+         |while (--$n >= 0)
+         |{
+         |  RogueInt32 argb = *(++data);
+         |  int   a = argb & 0xFF000000;
+         |  float hue = ((argb >> 16) & 255) / 255.0f;
+         |  float saturation = ((argb >> 8) & 255) / 255.0f;
+         |  float value = (argb & 255) / 255.0f;
+         |
+         |  if (saturation)
+         |  {
+         |    float r, g, b;
+         |    hue *= 6;
+         |    int i = (int)hue;
+         |    float f = hue - i;
+         |    float p = value * (1 - saturation);
+         |    float q = value * (1 - saturation * f);
+         |    float t = value * (1 - saturation * (1 - f));
+         |    switch (i)
+         |    {
+         |      case 0:
+         |          r = value;
+         |          g = t;
+         |          b = p;
+         |          break;
+         |      case 1:
+         |          r = q;
+         |          g = value;
+         |          b = p;
+         |          break;
+         |      case 2:
+         |          r = p;
+         |          g = value;
+         |          b = t;
+         |          break;
+         |      case 3:
+         |          r = p;
+         |          g = q;
+         |          b = value;
+         |          break;
+         |      case 4:
+         |          r = t;
+         |          g = p;
+         |          b = value;
+         |          break;
+         |      default:
+         |          r = value;
+         |          g = p;
+         |          b = q;
+         |          break;
+         |    }
+         |
+         |    *data = a | ((int)(r*255+0.5))<<16 | ((int)(g*255+0.5))<<8 | ((int)(b*255+0.5));
+         |  }
+         |  else
+         |  {
+         |    int v = (int)(value * 255 + 0.5);
+         |    *data = a | (v<<16) | (v<<8) | v;
+         |  }
+         |}
+
+endClass
+
+class CmdFilterRGBToHSV( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter rgbtohsv".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local n = bitmap.pixels.count
+      native...
+        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+         |
+         |while (--$n >= 0)
+         |{
+         |  RogueInt32 argb = *(++data);
+         |  int   a = argb & 0xFF000000;
+         |  float r = ((argb >> 16) & 255) / 255.0f;
+         |  float g = ((argb >> 8) & 255) / 255.0f;
+         |  float b = (argb & 255) / 255.0f;
+         |
+         |  float maxrgb = (r >= g && r >= b) ? r : ((g >= b) ? g : b);
+         |  float minrgb = (r <= g && r <= b) ? r : ((g <= b) ? g : b);
+         |  float delta  = maxrgb - minrgb;
+         |
+         |  float value = maxrgb;
+         |  float hue = 0.0f;
+         |  float saturation = 0.0f;
+         |
+         |  if (maxrgb) saturation = delta / maxrgb;
+         |
+         |  if (delta)
+         |  {
+         |    if (r == maxrgb)      hue = (g - b) / delta;
+         |    else if (g == maxrgb) hue = 2 + ((b - r) / delta);
+         |    else                  hue = 4 + ((r - g) / delta);
+         |
+         |    hue *= 60;
+         |    while (hue < 0)    hue += 360;
+         |    while (hue >= 360) hue -= 360;
+         |    hue /= 360;
+         |  }
+         |
+         |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
+         |}
+
+endClass
+
 
 class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
   METHODS
@@ -1812,57 +1857,6 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
       if (sx) w = (image.bitmap.width  * sx.value)->Int32
       if (sy) h = (image.bitmap.height * sy.value)->Int32
       CmdResizeToSize( w, h ).execute
-endClass
-
-class CmdRGB2HSV : EditCmd [singleton]
-  METHODS
-    method update_status
-      if (ImageList.selected)
-        status = "rgb2hsv"
-      else
-        status = "rgb2hsv [no image selected]"
-      endIf
-
-    method execute
-      if (not ImageList.selected) return
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-      local n = bitmap.pixels.count
-      native...
-        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-         |
-         |while (--$n >= 0)
-         |{
-         |  RogueInt32 argb = *(++data);
-         |  int   a = argb & 0xFF000000;
-         |  float r = ((argb >> 16) & 255) / 255.0f;
-         |  float g = ((argb >> 8) & 255) / 255.0f;
-         |  float b = (argb & 255) / 255.0f;
-         |
-         |  float maxrgb = (r >= g && r >= b) ? r : ((g >= b) ? g : b);
-         |  float minrgb = (r <= g && r <= b) ? r : ((g <= b) ? g : b);
-         |  float delta  = maxrgb - minrgb;
-         |
-         |  float value = maxrgb;
-         |  float hue = 0.0f;
-         |  float saturation = 0.0f;
-         |
-         |  if (maxrgb) saturation = delta / maxrgb;
-         |
-         |  if (delta)
-         |  {
-         |    if (r == maxrgb)      hue = (g - b) / delta;
-         |    else if (g == maxrgb) hue = 2 + ((b - r) / delta);
-         |    else                  hue = 4 + ((r - g) / delta);
-         |
-         |    hue *= 60;
-         |    while (hue < 0)    hue += 360;
-         |    while (hue >= 360) hue -= 360;
-         |    hue /= 360;
-         |  }
-         |
-         |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
-         |}
 endClass
 
 class CmdRotateCW : EditCmd [singleton]
