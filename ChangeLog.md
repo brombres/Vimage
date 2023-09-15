@@ -38,6 +38,13 @@ Copy the specified source channel (a,r,g,b) or a constant channel value (such as
 
 Treats pixel RGB color components as HSV (likely from a prior `:filter rgbtohsv` conversion) and performs an HSV→RGB conversion on them.
 
+### normalize
+
+    :filter normalize
+    :filter normalize lowvalue highvalue
+
+Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
+
 ### rgbtohsv
 
     :filter rgbtohsv
@@ -50,3 +57,8 @@ Converts pixel RGB color components to HSV (Hue, Saturation, Value) format. Afte
 
 Swaps one color channel with another. For example, `:filter swap r b` swaps the red and blue channels. See also: `:filter copy`.
 
+## info
+
+    :info range
+
+Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.

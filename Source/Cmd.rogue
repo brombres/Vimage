@@ -1261,9 +1261,7 @@ class CmdFilterHSVToRGB( args:String[] ) : EditCmd
     method update_status
       status = "filter rgbtohsv".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int32 )
-      if (not ImageList.selected) return
-
+    method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
       local n = bitmap.pixels.count
       native...
@@ -1329,6 +1327,43 @@ class CmdFilterHSVToRGB( args:String[] ) : EditCmd
          |  }
          |}
 
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+      apply
+
+endClass
+
+class CmdFilterNormalize( lo:Int32, hi:Int32 ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "filter normalize $ $"(lo,hi)
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        endIf
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+
+      local (original_lo,original_hi) = CmdInfoRange.range
+      local original_range = (original_hi - original_lo) + 1
+      local new_range = ((hi.clamped(0,255) - lo.clamped(0,255)) + 1).clamped_low(1)
+
+      CmdFilterRGBToHSV(null).apply
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local n = bitmap.size.product
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+              |
+              |while (--$n >= 0)
+              |{
+              |  RogueInt32 ahsv = *(++data);
+              |  int v = ahsv & 255;
+              |  *data = (ahsv & 0xFFFFFF00) | (((((v - $original_lo) * $new_range) / $original_range) + $lo) & 255);
+              |}
+
+      CmdFilterHSVToRGB(null).apply
 endClass
 
 class CmdFilterRGBToHSV( args:String[] ) : EditCmd
@@ -1336,9 +1371,7 @@ class CmdFilterRGBToHSV( args:String[] ) : EditCmd
     method update_status
       status = "filter rgbtohsv".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int32 )
-      if (not ImageList.selected) return
-
+    method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
       local n = bitmap.pixels.count
       native...
@@ -1377,6 +1410,11 @@ class CmdFilterRGBToHSV( args:String[] ) : EditCmd
          |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
          |}
 
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+      apply
+
 endClass
 
 class CmdFilterSwap( a:Int32, b:Int32 ) : EditCmd
@@ -1400,6 +1438,51 @@ class CmdFilterSwap( a:Int32, b:Int32 ) : EditCmd
 
         ImageView.mark_modified
       endIf
+endClass
+
+class CmdInfoRange : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "info range"
+
+    method execute( ignore_repeat_count:Int32 )
+      if (not ImageList.selected) return
+
+      local r = range
+      status = "info range low:$ high:$"(r.low,r.high)
+
+    method range->(low:Int32,high:Int32)
+      local first = true
+      local min_value = 0
+      local max_value = 0
+
+      local bitmap = ImageList.selected.image.bitmap
+      local n = bitmap.pixels.count
+      native...
+        @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+         |
+         |while (--$n >= 0)
+         |{
+         |  RogueInt32 argb = *(++data);
+         |  int r = (argb >> 16) & 255;
+         |  int g = (argb >> 8) & 255;
+         |  int b = argb & 255;
+         |
+         |  int rgb_max = (r >= g && r >= b) ? r : ((g >= b) ? g : b);
+         |
+         |  if ($first)
+         |  {
+         |    $first = 0;
+         |    $min_value = rgb_max;
+         |    $max_value = rgb_max;
+         |  }
+         |  else
+         |  {
+         |    $min_value = (rgb_max <= $min_value) ? rgb_max : $min_value;
+         |    $max_value = (rgb_max >= $max_value) ? rgb_max : $max_value;
+         |  }
+         |}
+      return (low:min_value,high:max_value)
 endClass
 
 class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd

@@ -108,6 +108,7 @@ Command   | Arguments       | Description
 `:fill` | `COLOR`\<br>`LEFT RIGHT`<br>`TL TR BL BR`<br>`COLORS` | Fills the current image with a single color, a color gradient that uses either 2 side colors or 4 corner colors, or a horizontal color gradient that uses 3, 5, or more colors.
 `:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
+`:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
 `:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
 `:new`      | `WxH`             | Creates a new image of the specified pixel size.
@@ -143,5 +144,6 @@ copy           | `[a\|r\|g\|b\|XX]` `[a\|r\|g\|b]+` | Copy the specified source 
 gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
 hsvtorgb       | &nbsp;     | The corollary to `:filter rgbtohsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
+normalize      | [low high] (defaults: 0 255) | Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
 rgbtohsv       | &nbsp;     | Converts the current image's RGB color components into HSV (Hue Saturation Value, also called HSB or Hue Saturation Brightness) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:filter hsvtorgb`.
 swap           | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with another. For example, `:filter swap r b` swaps the red and blue channels. See also: `:filter copy`.

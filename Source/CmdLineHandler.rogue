@@ -539,7 +539,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|clamp|copy|gold|gray|hsvtorgb|rgbtohsv|swap]"
+    syntax  = "[brightgold|clamp|copy|gold|gray|hsvtorgb|normalize|rgbtohsv|swap]"
 
   METHODS
     method execute( arg_string:String )
@@ -574,6 +574,16 @@ class CmdLineFilter : CmdLineHandler [singleton]
         case "gold":         filter = CmdFilterGold( args )
         case "gray", "grey": filter = CmdFilterGray( args )
         case "hsvtorgb":     filter = CmdFilterHSVToRGB( args )
+        case "normalize"
+          which (args.count)
+            case 0
+              filter = CmdFilterNormalize(0,255)
+            case 2
+              filter = CmdFilterNormalize(args[0]->Int32,args[1]->Int32)
+            others
+              status = "filter normalize [expected no arguments or two arguments]"
+              return
+          endWhich
         case "rgbtohsv":     filter = CmdFilterRGBToHSV( args )
         case "swap":
           if (args.count == 2)
@@ -637,6 +647,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
         case "clamp": return "<low-color> <high-color>"
         case "copy": return "source-channel:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
         case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
+        case "normalize":   return "[low high] (defaults: 0 255)"
         case "swap": return "source-channel:[a|r|g|b] destination-channel:[a|r|g|b]"
         others: return @syntax
       endWhich
@@ -733,6 +744,38 @@ class CmdLineHardAlpha : CmdLineHandler [singleton]
       else                   return "(turn hard alpha on)"
 
 endClass
+
+class CmdLineInfo : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "info"
+    syntax  = "[range]"
+
+  METHODS
+    method execute( arg_string:String )
+      local cmd : Cmd
+
+      local args = arg_string.split(' ')
+      local info_name = args.remove_first
+      which (info_name)
+        case "range":
+          cmd = CmdInfoRange
+      endWhich
+
+      if (cmd)
+        execute( cmd )
+      else
+        status = "info [missing or invalid info type name]"
+      endIf
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      which (args.first)
+        others: return @syntax
+      endWhich
+
+endClass
+
 
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
