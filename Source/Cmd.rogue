@@ -2020,9 +2020,9 @@ class CmdPasteAfter : EditCmd [singleton]
 
       if (bitmap)
         local file = File("NewImage.png")
-        if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
-          file = Vimage.clipboard_file.value
-        endIf
+        #if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
+        #  file = Vimage.clipboard_file.value
+        #endIf
         file = ImageList.make_filepath_unique( file )
 
         loop repeat_count
@@ -2057,9 +2057,9 @@ class CmdPasteBefore : EditCmd [singleton]
 
       if (bitmap)
         local file = File("NewImage.png")
-        if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
-          file = Vimage.clipboard_file.value
-        endIf
+        #if (Vimage.clipboard and bitmap.size == Vimage.clipboard.size and Vimage.clipboard_file)
+        #  file = Vimage.clipboard_file.value
+        #endIf
         file = ImageList.make_filepath_unique( file )
 
         loop repeat_count
