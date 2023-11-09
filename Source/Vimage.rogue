@@ -7,7 +7,7 @@
 $define VERSION "1.14"
 $define DATE    "September 18, 2023"
 
-$requireRogue "2.16"
+$requireRogue "2.33"
 
 module Vimage
 
