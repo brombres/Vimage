@@ -27,7 +27,7 @@ class Cmd
     method execute
       noAction
 
-    method execute( repeat_count:Int32 )
+    method execute( repeat_count:Int )
       loop (repeat_count)
         execute
       endLoop
@@ -150,8 +150,8 @@ class CmdAspect( size:IntXY ) : EditCmd
     method execute( image:Image )
       local w = image.bitmap.width
       local h = image.bitmap.height
-      local adjusted_height = (w->Real64 / size.x) * size.y : Int32
-      local adjusted_width  = (h->Real64 / size.y) * size.x : Int32
+      local adjusted_height = (w->Real / size.x) * size.y : Int
+      local adjusted_width  = (h->Real / size.y) * size.x : Int
       if (adjusted_width == w and adjusted_height == h) return
 
       local bitmap = image.cloned_bitmap
@@ -296,7 +296,7 @@ class CmdBitwiseRotateRight : EditCmd [singleton]
       endIf
 endClass
 
-class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
+class CmdCrop( left:Int, top:Int, right:Int, bottom:Int ) : EditCmd
   METHODS
     method update_status
       local status = String()
@@ -325,11 +325,11 @@ class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
 
       StatusBar.text = status
 
-    method execute( repeat_count:Int32 )
+    method execute( repeat_count:Int )
       if (not ImageList.selected) return
       execute( ImageList.selected.image, repeat_count )
 
-    method execute( image:Image, n:Int32 )
+    method execute( image:Image, n:Int )
       localize left, top, right, bottom
       left *= n
       top *= n
@@ -344,7 +344,7 @@ class CmdCrop( left:Int32, top:Int32, right:Int32, bottom:Int32 ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdCropToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdCropToSize( width:Int?, height:Int? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -414,9 +414,9 @@ class CmdCropToScale( sx:Real?, sy:Real? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      local w, h : Int32?
-      if (sx) w = (image.bitmap.width  * sx.value)->Int32
-      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      local w, h : Int?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int
+      if (sy) h = (image.bitmap.height * sy.value)->Int
       CmdCropToSize( w, h ).execute
 endClass
 
@@ -434,7 +434,7 @@ class CmdDelete : EditCmd [singleton]
         set_status( "d [no image to delete]" )
       endIf
 
-    method execute( repeat_count:Int32 )
+    method execute( repeat_count:Int )
       loop (repeat_count-1)
         if (ImageList.selected)
           ImageList.remove_selected
@@ -695,8 +695,8 @@ class CmdJoin( dims:IntXY ) : EditCmd
         endWhile
 
         # Find largest width and largest height
-        local max_width = Best<<Int32>>( (a,b) => a > b )
-        local max_height = Best<<Int32>>( (a,b) => a > b )
+        local max_width = Best<<Int>>( (a,b) => a > b )
+        local max_height = Best<<Int>>( (a,b) => a > b )
         forEach (item in list)
           max_width.consider( item.bitmap.width )
           max_height.consider( item.bitmap.height )
@@ -705,7 +705,7 @@ class CmdJoin( dims:IntXY ) : EditCmd
         local tile_w = max_width.value
         local tile_h = max_height.value
 
-        local total_w, total_h : Int32
+        local total_w, total_h : Int
         if (w == 1)
           # Resize all images to be max width
           local cmd = CmdResizeToSize( tile_w, null )
@@ -727,9 +727,9 @@ class CmdJoin( dims:IntXY ) : EditCmd
         endIf
 
         local result = Bitmap( total_w, total_h )
-        local cursor_y = 0
+        local cursor_y = 0L
         forEach (j in 0..<h)
-          local cursor_x = 0
+          local cursor_x = 0L
           local dy = tile_h
           forEach (i in 0..<w)
             local bitmap = list[ j*w+i ].bitmap
@@ -747,7 +747,7 @@ class CmdJoin( dims:IntXY ) : EditCmd
       endUse
 endClass
 
-class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -774,13 +774,13 @@ class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
           if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
-          local x_scale = width->Real64 / image.bitmap.size.x
-          local y_scale = height->Real64 / image.bitmap.size.y
+          local x_scale = width->Real / image.bitmap.size.x
+          local y_scale = height->Real / image.bitmap.size.y
           local scale = x_scale.or_larger( y_scale )
           bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -788,7 +788,7 @@ class CmdAspectFillToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -818,13 +818,13 @@ class CmdAspectFillToScale( sx:Real?, sy:Real? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      local w, h : Int32?
-      if (sx) w = (image.bitmap.width  * sx.value)->Int32
-      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      local w, h : Int?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int
+      if (sy) h = (image.bitmap.height * sy.value)->Int
       CmdAspectFillToSize( w, h ).execute
 endClass
 
-class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdAspectFitToSize( width:Int?, height:Int? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -851,13 +851,13 @@ class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
           if (image.bitmap.size == IntXY(width,height)) return
 
           local bitmap = image.cloned_bitmap
-          local x_scale = width->Real64 / image.bitmap.size.x
-          local y_scale = height->Real64 / image.bitmap.size.y
+          local x_scale = width->Real / image.bitmap.size.x
+          local y_scale = height->Real / image.bitmap.size.y
           local scale = x_scale.or_smaller( y_scale )
           bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -865,7 +865,7 @@ class CmdAspectFitToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -895,9 +895,9 @@ class CmdAspectFitToScale( sx:Real?, sy:Real? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      local w, h : Int32?
-      if (sx) w = (image.bitmap.width  * sx.value)->Int32
-      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      local w, h : Int?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int
+      if (sy) h = (image.bitmap.height * sy.value)->Int
       CmdAspectFitToSize( w, h ).execute
 endClass
 
@@ -974,7 +974,7 @@ class CmdFilterCopy( a:String, b:String ) : EditCmd
         endForEach
       else
         # Replace color channel with constant value 00-ff
-        local a = a->Int32(&base=16)
+        local a = a->Int(&base=16)
         forEach (dest_channel in b)
           local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
           local write_a = a :<<: b_shift
@@ -1028,7 +1028,7 @@ class CmdFill( c:ColorValue ) : EditCmd
     method update_status
       status = "fill $"(c)
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1053,7 +1053,7 @@ class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
     method update_status
       status = "fill $ $"(a,b)
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1083,7 +1083,7 @@ class CmdFill4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditC
     method update_status
       status = "fill $ $ $ $"(a,b,c,d)
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1113,7 +1113,7 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
     method update_status
       status = "fill $"(colors)
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1143,14 +1143,14 @@ class CmdFilterBrightGold( args:String[] ) : EditCmd
     method update_status
       status = "filter brightgold".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
       native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
       loop (bitmap.width * bitmap.height)
-        local color = Color( native("*(++data)")->Int32 )
+        local color = Color( native("*(++data)")->Int )
 
         # Save alpha
         local alpha = (color.argb & 0xff00_0000)
@@ -1182,14 +1182,14 @@ class CmdFilterGold( args:String[] ) : EditCmd
     method update_status
       status = "filter gold".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
       native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
       loop (bitmap.width * bitmap.height)
-        local color = Color( native("*(++data)")->Int32 )
+        local color = Color( native("*(++data)")->Int )
 
         # Save alpha
         local alpha = (color.argb & 0xff00_0000)
@@ -1222,12 +1222,12 @@ class CmdFilterGray( args:String[] ) : EditCmd
     method update_status
       status = "filter gray".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
-      local rw = 2990
-      local gw = 5870
-      local bw = 1140
+      local rw = 2990L
+      local gw = 5870L
+      local bw = 1140L
       which (args.count)
         case 3
           local r = args[0]->Real
@@ -1235,9 +1235,9 @@ class CmdFilterGray( args:String[] ) : EditCmd
           local b = args[2]->Real
           local sum = r + g + b
           if (sum > 0)
-            rw = ((r / sum) * 10000)->Int32
-            gw = ((g / sum) * 10000)->Int32
-            bw = ((b / sum) * 10000)->Int32
+            rw = ((r / sum) * 10000)->Int
+            gw = ((g / sum) * 10000)->Int
+            bw = ((b / sum) * 10000)->Int
           endIf
       endWhich
 
@@ -1245,7 +1245,7 @@ class CmdFilterGray( args:String[] ) : EditCmd
       native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
       loop (bitmap.width * bitmap.height)
-        local color = Color( native("*(++data)")->Int32 )
+        local color = Color( native("*(++data)")->Int )
         local a = ((color.argb:>>>:24) & 0xff)
         local v = (((color.argb:>>>:16) & 0xff) * rw) / 10000
         v += (((color.argb:>>>:8) & 0xff) * gw) / 10000
@@ -1327,13 +1327,13 @@ class CmdFilterHSVToRGB( args:String[] ) : EditCmd
          |  }
          |}
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
       apply
 
 endClass
 
-class CmdFilterNormalize( lo:Int32, hi:Int32 ) : EditCmd
+class CmdFilterNormalize( lo:Int, hi:Int ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -1411,13 +1411,13 @@ class CmdFilterRGBToHSV( args:String[] ) : EditCmd
          |}
 
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
       apply
 
 endClass
 
-class CmdFilterSwap( a:Int32, b:Int32 ) : EditCmd
+class CmdFilterSwap( a:Int, b:Int ) : EditCmd
   METHODS
     method update_status
       status = "filter swap channels $<>$"("bgra"[a],"bgra"[b])
@@ -1445,16 +1445,16 @@ class CmdInfoRange : EditCmd [singleton]
     method update_status
       status = "info range"
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
       local r = range
       status = "info range low:$ high:$"(r.low,r.high)
 
-    method range->(low:Int32,high:Int32)
+    method range->(low:Int,high:Int)
       local first = true
-      local min_value = 0
-      local max_value = 0
+      local min_value = 0L
+      local max_value = 0L
 
       local bitmap = ImageList.selected.image.bitmap
       local n = bitmap.pixels.count
@@ -1485,7 +1485,7 @@ class CmdInfoRange : EditCmd [singleton]
       return (low:min_value,high:max_value)
 endClass
 
-class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
+class CmdLiteralBitwiseAND( argb:Int )  : EditCmd
   METHODS
     method update_status
       status = "& $ (bitwise AND)"(argb->String(&hex))
@@ -1505,7 +1505,7 @@ class CmdLiteralBitwiseAND( argb:Int32 )  : EditCmd
       endIf
 endClass
 
-class CmdLiteralBitwiseOR( argb:Int32 )  : EditCmd
+class CmdLiteralBitwiseOR( argb:Int )  : EditCmd
   METHODS
     method update_status
       status = "| $ (bitwise OR)"(argb->String(&hex))
@@ -1525,7 +1525,7 @@ class CmdLiteralBitwiseOR( argb:Int32 )  : EditCmd
       endIf
 endClass
 
-class CmdLiteralBitwiseROL( bit_count:Int32, include_alpha:Logical )  : EditCmd
+class CmdLiteralBitwiseROL( bit_count:Int, include_alpha:Logical )  : EditCmd
   METHODS
     method update_status
       status = "< $ (bitwise ROL)"(bit_count)
@@ -1561,7 +1561,7 @@ class CmdLiteralBitwiseROL( bit_count:Int32, include_alpha:Logical )  : EditCmd
       endIf
 endClass
 
-class CmdLiteralBitwiseROR( bit_count:Int32, include_alpha:Logical )  : EditCmd
+class CmdLiteralBitwiseROR( bit_count:Int, include_alpha:Logical )  : EditCmd
   METHODS
     method update_status
       status = "> $ (bitwise ROR)"(bit_count)
@@ -1597,7 +1597,7 @@ class CmdLiteralBitwiseROR( bit_count:Int32, include_alpha:Logical )  : EditCmd
       endIf
 endClass
 
-class CmdLiteralBitwiseXOR( argb:Int32 )  : EditCmd
+class CmdLiteralBitwiseXOR( argb:Int )  : EditCmd
   METHODS
     method update_status
       status = "~ $ (bitwise XOR)"(argb->String(&hex))
@@ -1624,7 +1624,7 @@ class CmdMacro : Cmd [singleton]
 
     method update_status
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (Vimage.recording_macro)
         Vimage.recording_macro = false
         status = "q (end macro) [can now (a)pply or apply to (A)ll]"
@@ -1649,10 +1649,10 @@ class CmdMerge : EditCmd [singleton]
         endIf
       endUse
 
-    method execute( n:Int32 )
+    method execute( n:Int )
       if (n == 1) n = 2
 
-      local available : Int32
+      local available : Int
       if (ImageList.selected)
         available = ImageList.count - ImageList.selected.index
       endIf
@@ -1727,7 +1727,7 @@ class CmdNew( size:IntXY ) : EditCmd
       status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
 
     method execute
-      local before_index = 0
+      local before_index = 0L
       local file = File( "NewImage.png" )
       if (ImageList.selected)
         before_index = ImageList.selected.index + 1
@@ -1891,7 +1891,7 @@ class CmdMaxZoom : Cmd [singleton]
       endIf
 endClass
 
-class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
+class CmdResizeToSize( width:Int?, height:Int? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -1920,7 +1920,7 @@ class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
           local bitmap = image.cloned_bitmap
           bitmap.resize( width, height )
         else
-          local new_size = IntXY( width, image.bitmap.size.y*(width->Real64/image.bitmap.size.x) )
+          local new_size = IntXY( width, image.bitmap.size.y*(width->Real/image.bitmap.size.x) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
@@ -1928,7 +1928,7 @@ class CmdResizeToSize( width:Int32?, height:Int32? ) : EditCmd
         endIf
       elseIf (height)
         local height = this.height.value
-        local new_size = IntXY( image.bitmap.size.x*(height->Real64/image.bitmap.size.y), height )
+        local new_size = IntXY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
         local bitmap = image.cloned_bitmap
@@ -1958,9 +1958,9 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      local w, h : Int32?
-      if (sx) w = (image.bitmap.width  * sx.value)->Int32
-      if (sy) h = (image.bitmap.height * sy.value)->Int32
+      local w, h : Int?
+      if (sx) w = (image.bitmap.width  * sx.value)->Int
+      if (sy) h = (image.bitmap.height * sy.value)->Int
       CmdResizeToSize( w, h ).execute
 endClass
 
@@ -2010,7 +2010,7 @@ class CmdPasteAfter : EditCmd [singleton]
     method update_status
       status = "p (paste after)"
 
-    method execute( repeat_count:Int32 )
+    method execute( repeat_count:Int )
       local bitmap : Bitmap
       if (Vimage.using_os_clipboard)
         bitmap = Clipboard.bitmap
@@ -2047,7 +2047,7 @@ class CmdPasteBefore : EditCmd [singleton]
     method update_status
       status = "P (paste before)"
 
-    method execute( repeat_count:Int32 )
+    method execute( repeat_count:Int )
       local bitmap : Bitmap
       if (Vimage.using_os_clipboard)
         bitmap = Clipboard.bitmap
@@ -2105,7 +2105,7 @@ endClass
 
 class CmdRepeatLast : Cmd [singleton]
   PROPERTIES
-    repeat_count : Int32
+    repeat_count : Int
 
   METHODS
     method allowed_in_macro->Logical
@@ -2129,7 +2129,7 @@ class CmdRepeatLast : Cmd [singleton]
       endIf
 endClass
 
-class CmdSelectIndex( index:Int32 ) : Cmd [singleton]
+class CmdSelectIndex( index:Int ) : Cmd [singleton]
   METHODS
     method update_status
       if (index >= 0 and index < ImageList.count)
@@ -2155,7 +2155,7 @@ class CmdSetBGColor( color:ColorValue ) : Cmd [singleton]
       Vimage.bg_color = color
 endClass
 
-class CmdSetRepeatCount( n:Int32? ) : Cmd
+class CmdSetRepeatCount( n:Int? ) : Cmd
   METHODS
     method execute
       Vimage.repeat_count = n
@@ -2234,8 +2234,8 @@ class CmdSplit( dims:IntXY ) : EditCmd
       endIf
 
       local index = ImageList.selected.index
-      local digits = 1
-      local limit = 10
+      local digits = 1L
+      local limit = 10L
       while (limit < total)
         ++digits
         limit *= 10
@@ -2340,7 +2340,7 @@ endClass
 
 class CmdWriteAll : Cmd [singleton]
   METHODS
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       VimageUI.actions += ActionWriteAll( this )
 endClass
 
@@ -2353,7 +2353,7 @@ class CmdYank : Cmd [singleton]
         set_status( "y [no image to copy]" )
       endIf
 
-    method execute( ignore_repeat_count:Int32 )
+    method execute( ignore_repeat_count:Int )
       if (ImageList.selected)
         if (Vimage.using_os_clipboard)
           Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap

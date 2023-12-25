@@ -5,7 +5,7 @@ uses UI
 class VimageUI : ConsoleUI [singleton]
   PROPERTIES
     image_list_scroller : UIScrollView
-    repeat_count        : Int32?
+    repeat_count        : Int?
     command             = String()
     cmd_line_handlers   = [String:CmdLineHandler]
     last_input_timer    = Timer()

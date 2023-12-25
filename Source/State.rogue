@@ -15,7 +15,7 @@ class State
       current.set_state( new_state )
 
   PROPERTIES
-    key_handlers = [Int32:Cmd]
+    key_handlers = [Int:Cmd]
 
   METHODS
     method cancel
@@ -208,7 +208,7 @@ class EnterCmdLineState : State
       local cmds = CmdLineHandler[]
 
       if (keyword.count and keyword[0].is_number)
-        cmds.add( CmdLineSelectIndex(keyword->Int32) )
+        cmds.add( CmdLineSelectIndex(keyword->Int) )
         return cmds
       endIf
 

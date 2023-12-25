@@ -4,7 +4,7 @@ uses UI
 class TitleBar : UIComponent [singleton]
   PROPERTIES
     image : Image
-    zoom  : Real64
+    zoom  : Real
 
   METHODS
     method init
@@ -27,7 +27,7 @@ class TitleBar : UIComponent [singleton]
             ratio = "1:$"((1/zoom).format(".1"))
             if (ratio.ends_with(".0")) ratio .= leftmost(-2)
           else
-            ratio = "$:1"(zoom->Int32)
+            ratio = "$:1"(zoom->Int)
           endIf
           ConsoleUICanvas.cursor = display_bounds.top_right - IntXY(ratio.count,0)
           ConsoleUICanvas.print ratio
@@ -35,7 +35,7 @@ class TitleBar : UIComponent [singleton]
         ConsoleUICanvas.style.inverse_off
       endIf
 
-    method set_zoom( new_zoom:Real64 )
+    method set_zoom( new_zoom:Real )
       if (new_zoom != zoom)
         @zoom = new_zoom
         request_redraw

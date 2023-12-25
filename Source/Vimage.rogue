@@ -7,7 +7,7 @@
 $define VERSION "1.14.1"
 $define DATE    "November 9, 2023"
 
-$requireRogue "2.33"
+$requireRogue "2.34"
 
 module Vimage
 
@@ -53,8 +53,8 @@ class Vimage [singleton]
     clipboard          : Bitmap
     clipboard_file     : File?
     using_os_clipboard = true
-    repeat_count       : Int32?
-    last_repeat_count  : Int32
+    repeat_count       : Int?
+    last_repeat_count  : Int
     last_cmd           : Cmd
     anchor             = Anchor.CENTER
     bg_color           = ColorValue( Color.BLACK )
@@ -116,7 +116,7 @@ class Vimage [singleton]
       if (recording_macro and cmd.allowed_in_macro) macro.add( cmd )
       cmd()
 
-    method parse_args( args:String[] )->Value
+    method parse_args( args:String[] )->Variant
       local command = CommandLineParser().
       [
         #option( "--flag",     &alias="-f" )
@@ -137,7 +137,7 @@ class Vimage [singleton]
                |  --help, -h, -?
                |    Show this help text.
 
-    method read_and_reset_repeat_count->Int32
+    method read_and_reset_repeat_count->Int
       local result = which{ repeat_count || 1 }.clamped_low(1)
       repeat_count = null
       return result
@@ -148,18 +148,18 @@ class Vimage [singleton]
 
     method save_undo
       if (undo_stack.count > MAX_UNDOS) undo_stack.remove_first
-      local state  = ImageList->Value
+      local state  = ImageList->Variant
       undo_stack.add( state )
       redo_stack.clear
 
     method undo
       if (undo_stack.is_empty) return
-      redo_stack.add( ImageList->Value )  # save current state as a redo
+      redo_stack.add( ImageList->Variant )  # save current state as a redo
       ImageList.unpack( undo_stack.remove_last )
 
     method redo
       if (redo_stack.is_empty) return
-      undo_stack.add( ImageList->Value )  # save current state as an undo
+      undo_stack.add( ImageList->Variant )  # save current state as an undo
       ImageList.unpack( redo_stack.remove_last )
 
 endClass

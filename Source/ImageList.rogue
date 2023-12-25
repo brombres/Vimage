@@ -6,7 +6,7 @@ class ImageList : UIList [singleton]
     selected : ImageListItem
     is_dim   : Logical
 
-    fixed_width = 21
+    fixed_width = 21L
 
   METHODS
     method init
@@ -44,7 +44,7 @@ class ImageList : UIList [singleton]
       endForEach
       return null
 
-    method insert( image:Image, before_index=0:Int32 )
+    method insert( image:Image, before_index=0:Int )
       insert( ImageListItem(image), before_index )
       request_layout
 
@@ -113,7 +113,7 @@ class ImageList : UIList [singleton]
       endWhile
       return null
 
-    method select( index:Int32 )
+    method select( index:Int )
       local item = this[index]->(as ImageListItem)
       if (item) select( item )
 
@@ -164,7 +164,7 @@ class ImageList : UIList [singleton]
         VimageUI.show( null )
       endIf
 
-    method to->Value
+    method to->Variant
       local result = ...
       @{
         selected_index:which{ selected:selected.index || -1 },
@@ -173,19 +173,19 @@ class ImageList : UIList [singleton]
 
       local images = @[]
       forEach (child in children)
-        images.add( child->(as ImageListItem).image->Value )
+        images.add( child->(as ImageListItem).image->Variant )
       endForEach
       result//images = images
 
       return result
 
-    method unpack( state:Value )
+    method unpack( state:Variant )
       clear
       is_dim = state//is_dim
       forEach (image_info in state//images)
         add( ImageListItem(Image(image_info)) )
       endForEach
-      if (state//selected_index < count) select( state//selected_index->Int32 )
+      if (state//selected_index < count) select( state//selected_index->Int )
 
 endClass  # ImageList
 
@@ -199,7 +199,7 @@ class ImageListItem : UIComponent
 
     method deselect
 
-    method index->Int32
+    method index->Int
       return which{ ImageList.locate(this) || -1 }
 
     method is_selected->Logical

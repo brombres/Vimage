@@ -1,6 +1,6 @@
-class IntLerp( a:Int32, b:Int32, steps:Int32, index=0:Int32 ) [compound]
+class IntLerp( a:Int, b:Int, steps:Int, index=0:Int ) [compound]
   METHODS
-    method read_another->Int32? [mutating]
+    method read_another->Int? [mutating]
       if (steps == 0) return a
       local result = a + ((b - a) * index) / steps
       ++index
@@ -9,7 +9,7 @@ endClass
 
 class ColorLerp( a:IntLerp, r:IntLerp, g:IntLerp, b:IntLerp ) [compound]
   GLOBAL METHODS
-    method create( a:Color, b:Color, steps:Int32 )->ColorLerp
+    method create( a:Color, b:Color, steps:Int )->ColorLerp
       return ColorLerp(
         IntLerp( a.alpha_byte, b.alpha_byte, steps ),
         IntLerp( a.red_byte,   b.red_byte,   steps ),
@@ -18,7 +18,7 @@ class ColorLerp( a:IntLerp, r:IntLerp, g:IntLerp, b:IntLerp ) [compound]
       )
 
   METHODS
-    method read_another->Int32? [mutating]
+    method read_another->Int? [mutating]
       local a = a.read_another.value & 255
       local r = r.read_another.value & 255
       local g = g.read_another.value & 255

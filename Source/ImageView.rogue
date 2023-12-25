@@ -7,9 +7,9 @@ class ImageView : UIComponent [singleton]
     image            : Image
     canvas           : TextCanvas
     scale_to_fit     = true
-    min_zoom         : Real64
-    max_zoom         : Real64
-    default_zoom     : Real64
+    min_zoom         : Real
+    max_zoom         : Real
+    default_zoom     : Real
     is_modified      : Logical
     visible_bounds   : IntBox
     camera_bounds_tl : XY
@@ -33,7 +33,7 @@ class ImageView : UIComponent [singleton]
           else
             local scale = ((display_bounds.size->XY*XY(1,2)) / image.bitmap.size->XY).min
             new_size = (image.bitmap.size->XY * scale)
-            default_zoom = (new_size.x->Real64 / image.bitmap.width)
+            default_zoom = (new_size.x->Real / image.bitmap.width)
             min_zoom = default_zoom.or_smaller( 1.0 )
             max_zoom = which{ default_zoom>1.0:default_zoom || 1.0 }
             if (image.zoom)

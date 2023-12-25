@@ -6,7 +6,7 @@ class Image
     file        : File?
     bitmap      : Bitmap
     name        : String
-    zoom        : Real64
+    zoom        : Real
     camera      = XY(0.5,0.5)
     is_modified : Logical
     error       : String
@@ -63,11 +63,11 @@ class Image
 
       return @bitmap
 
-    method init( info:Value )
+    method init( info:Variant )
       bitmap = info//bitmap.to<<Bitmap>>
       name = which{ info//name:info//name->String || null }
       zoom = info//zoom
-      camera = XY( info//camera//x->Int32, info//camera//y->Int32 )
+      camera = XY( info//camera//x->Int, info//camera//y->Int )
       error = which{ info//error:info//error->String || null }
       is_modified = info//is_modified
 
@@ -141,7 +141,7 @@ class Image
       canvas_bounds .= clamped( IntBox(display_bounds.size) )
       local bitmap_bounds = canvas_bounds * IntXY(1,2)
       local piece_size = ((display_bounds.size * IntXY(1,2) / zoom) + IntXY(0.5,0.5))->IntXY.clamped_high( bitmap.size )
-      if ((piece_size.y * zoom)->Int32 & 1)
+      if ((piece_size.y * zoom)->Int & 1)
         local new_piece_size = ((piece_size * zoom) + IntXY(0,1)) / zoom
         local piece_bounds = IntBox( -bitmap_bounds.position/zoom, new_piece_size )
         if local intersection = piece_bounds & IntBox(bitmap.size)
@@ -198,11 +198,11 @@ class Image
         endIf
       endIf
 
-    method to->Value
+    method to->Variant
       return ...
       @{
         filepath:which{file:file.value.filepath||null},
-        bitmap:Value(@bitmap),
+        bitmap:Variant(@bitmap),
         :name,
         :zoom,
         camera:{x:camera.x,y:camera.y},

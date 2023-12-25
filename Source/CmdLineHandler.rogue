@@ -42,7 +42,7 @@ class CmdLineHandler
 
       return Anchor(XY(x,y))
 
-    method parse_color( arg:String, default_alpha=255:Int32 )->ColorValue?
+    method parse_color( arg:String, default_alpha=255:Int )->ColorValue?
       local result : Color?
 
       contingent
@@ -57,7 +57,7 @@ class CmdLineHandler
           case 1
             # 0 -> 0x00000000
             # V -> 0xFFVVVVVV
-            local v = arg->Int32( &base=16 )
+            local v = arg->Int( &base=16 )
             if (v == 0)
               result = Color(0)
             else
@@ -65,7 +65,7 @@ class CmdLineHandler
               result = Color( v, v, v, default_alpha )
             endIf
           case 2  # Vv       -> 0xFFVvVvVv
-            local v = arg->Int32( &base=16 )
+            local v = arg->Int( &base=16 )
             result = Color( v, v, v, default_alpha )
           case 3  # RGB      -> 0xFFRRGGBB
             local r = arg[0].to_number( &base=16 )
@@ -86,15 +86,15 @@ class CmdLineHandler
             b |= b:<<:4
             result = Color( r, g, b, a )
           case 6  # RRGGBB   -> 0xFFRRGGBB
-            local r = arg.substring(0,2)->Int32( &base=16 )
-            local g = arg.substring(2,2)->Int32( &base=16 )
-            local b = arg.substring(4,2)->Int32( &base=16 )
+            local r = arg.substring(0,2)->Int( &base=16 )
+            local g = arg.substring(2,2)->Int( &base=16 )
+            local b = arg.substring(4,2)->Int( &base=16 )
             result = Color( r, g, b, default_alpha )
           case 8  # AARRGGBB -> 0xAARRGGBB
-            local a = arg.substring(0,2)->Int32( &base=16 )
-            local r = arg.substring(2,2)->Int32( &base=16 )
-            local g = arg.substring(4,2)->Int32( &base=16 )
-            local b = arg.substring(6,2)->Int32( &base=16 )
+            local a = arg.substring(0,2)->Int( &base=16 )
+            local r = arg.substring(2,2)->Int( &base=16 )
+            local g = arg.substring(4,2)->Int( &base=16 )
+            local b = arg.substring(6,2)->Int( &base=16 )
             result = Color( r, g, b, a )
         endWhich
 
@@ -138,8 +138,8 @@ class CmdLineHandler
     method parse_ratio( arg:String )->IntXY?
       local pair = arg.split(':')
       if (pair.count == 2)
-        local x = pair.first->Int32
-        local y = pair.last->Int32
+        local x = pair.first->Int
+        local y = pair.last->Int
         if (x->String == pair.first and y->String == pair.last)
           return IntXY(x,y)
         else
@@ -154,8 +154,8 @@ class CmdLineHandler
     method parse_size( arg:String )->IntXY?
       local pair = arg.split('x')
       if (pair.count == 2)
-        local x = pair.first->Int32
-        local y = pair.last->Int32
+        local x = pair.first->Int
+        local y = pair.last->Int
         if (x->String == pair.first and y->String == pair.last)
           return IntXY(x,y)
         else
@@ -167,21 +167,21 @@ class CmdLineHandler
         return null
       endIf
 
-    method parse_size_either_or( arg:String )->(width:Int32?,height:Int32?)
+    method parse_size_either_or( arg:String )->(width:Int?,height:Int?)
       if (arg.contains('.')) return (width:null,height:null) # contains a scale, not a size
 
       local pair = arg.split('x')
       if (pair.count == 2)
         contingent
           necessary (pair.first != "" or pair.last != "")
-          necessary (pair.first == "" or pair.first->Int32->String == pair.first)
-          necessary (pair.last == "" or pair.last->Int32->String == pair.last)
+          necessary (pair.first == "" or pair.first->Int->String == pair.first)
+          necessary (pair.last == "" or pair.last->Int->String == pair.last)
 
           if (pair.first == "")
-            return (width:null,height:pair.last->Int32)
+            return (width:null,height:pair.last->Int)
           else
-            if (pair.last == "") return (width:pair.first->Int32,height:null)
-            else                 return (width:pair.first->Int32,height:pair.last->Int32)
+            if (pair.last == "") return (width:pair.first->Int,height:null)
+            else                 return (width:pair.first->Int,height:pair.last->Int)
           endIf
         endContingent
       endIf
@@ -231,7 +231,7 @@ class CmdLineFilepathHandler : CmdLineHandler
   PROPERTIES
     cur_tab_base   : String
     cur_tab_arg    : String
-    cur_tab_count  : Int32
+    cur_tab_count  : Int
 
   METHODS
     method on_tab
@@ -498,7 +498,7 @@ class CmdLineCrop : CmdLineHandler [singleton]
       if (args.count == 4)
         execute( CmdCrop(args[0],args[1],args[2],args[3]) )
       elseIf (args.count == 1 and not args[0].contains('x'))
-        local n = args[0]->Int32
+        local n = args[0]->Int
         execute( CmdCrop(n,n,n,n) )
       else
         local (w,h) = parse_size_either_or( arg_string )
@@ -579,7 +579,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
             case 0
               filter = CmdFilterNormalize(0,255)
             case 2
-              filter = CmdFilterNormalize(args[0]->Int32,args[1]->Int32)
+              filter = CmdFilterNormalize(args[0]->Int,args[1]->Int)
             others
               status = "filter normalize [expected no arguments or two arguments]"
               return
@@ -605,7 +605,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
 
     method parse_copy_channels( args:String, &allow_multiple )->String
       if (allow_multiple)
-        local channels = 0
+        local channels = 0L
         forEach (ch in args)
           if (not "bgra".locate(ch))
             status = ''filter copy [illegal destination channel specification '$']''(ch)
@@ -619,7 +619,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
           return null
         endIf
       else
-        if (args->Int32(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
+        if (args->Int(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
           status = ''filter copy [illegal source channel or value specification '$']''(args)
           return null
         endIf
@@ -627,7 +627,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
 
       return args
 
-    method parse_swap_channel( arg:String )->Int32?
+    method parse_swap_channel( arg:String )->Int?
       # Returns a channel index. Each value:
       #   b -> 0
       #   g -> 1
@@ -840,7 +840,7 @@ class CmdLineLiteralBitwiseROL : CmdLineHandler [singleton]
     method execute( args:String )
       local include_alpha = args.contains('a')
       if (include_alpha) args = args.replacing("a","").trimmed
-      local n = args->Int32
+      local n = args->Int
       if (n->String == args)
         execute( CmdLiteralBitwiseROL(n,&=include_alpha) )
       endIf
@@ -855,7 +855,7 @@ class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
     method execute( args:String )
       local include_alpha = args.contains('a')
       if (include_alpha) args = args.replacing("a","").trimmed
-      local n = args->Int32
+      local n = args->Int
       if (n->String == args)
         execute( CmdLiteralBitwiseROR(n,&=include_alpha) )
       endIf
@@ -968,7 +968,7 @@ class CmdLineForceQuitAll : CmdLineHandler [singleton]
 
 endClass
 
-class CmdLineSelectIndex( index:Int32 ) : CmdLineHandler
+class CmdLineSelectIndex( index:Int ) : CmdLineHandler
   METHODS
     method execute( args:String )
       execute( CmdSelectIndex(index) )

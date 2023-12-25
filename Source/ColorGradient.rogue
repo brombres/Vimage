@@ -3,12 +3,12 @@ module Vimage
 class ColorGradient
   PROPERTIES
     colors     = Color[]
-    width      : Int32
+    width      : Int
     lerp       : ColorLerp
-    midpoints  = Int32[]
-    midpoint_i : Int32
-    color_i    : Int32
-    x          : Int32
+    midpoints  = Int[]
+    midpoint_i : Int
+    color_i    : Int
+    x          : Int
     delta      : Real
     log = true
 
@@ -22,7 +22,7 @@ class ColorGradient
         delta = width->Real / (colors.count-1)
         local x = delta
         loop (colors.count - 2)
-          midpoints.add( x->Int32 )
+          midpoints.add( x->Int )
           x += delta
         endLoop
       endIf
@@ -35,7 +35,7 @@ class ColorGradient
       midpoint_i = 0
       x = 0
 
-    method read_another->Int32?
+    method read_another->Int?
       local result = lerp.read_another.value
       ++x
       if (midpoint_i < midpoints.count and x == midpoints[midpoint_i])

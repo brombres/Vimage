@@ -2,7 +2,7 @@
 # to this folder and type "rogo" at the command line, or "rogo help" for a list
 # of supported commands.
 
-$requireRogue "2.28"
+$requireRogue "2.34"
 
 uses Utility/VersionNumber
 
@@ -576,7 +576,7 @@ class Build [singleton]
         endForEach
       endIf
 
-    method _join( value:Value )->String
+    method _join( value:Variant )->String
       local args = String[]
       args.add( forEach in value )
       return args.join( "_" )
