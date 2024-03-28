@@ -189,10 +189,11 @@ class CropState : StandardState [singleton]
       key_handlers[Keycode.K+SHIFT] = CmdCrop( 0,-1, 0, 0)
       key_handlers[Keycode.H+SHIFT] = CmdCrop(-1, 0, 0, 0)
       key_handlers[Keycode.L+SHIFT] = CmdCrop( 0, 0,-1, 0)
+      key_handlers[Keycode.T]       = CmdTrim
       key_handlers[Keycode.ESCAPE]  = CmdEscapeToImageListState
 
     method on_enter
-      status = "c (crop mode)"
+      status = "c (crop mode - h/j/k/l, H/J/K/L, t:trim)"
 
       ImageList.is_dim = true
       ImageList.request_redraw

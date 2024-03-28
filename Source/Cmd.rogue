@@ -2279,6 +2279,22 @@ class CmdToggleClipboard : Cmd [singleton]
       Vimage.using_os_clipboard = not Vimage.using_os_clipboard
 endClass
 
+class CmdTrim : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "t (trim transparent edges)"
+
+    method execute
+      if local item = ImageList.selected
+        local img = ImageList.selected.image
+        if (img.cloned_bitmap.trim)
+          img.zoom = 0
+          ImageView.mark_modified
+          ImageView.min_zoom = 0
+        endIf
+      endIf
+endClass
+
 class CmdUndo : Cmd [singleton]
   METHODS
     method update_status

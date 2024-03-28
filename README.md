@@ -53,8 +53,9 @@ Key    | Command              | Description
 -------|----------------------|----------------------------------------------------------------------
 `a`    | Apply Macro          | Applies the current command macro (recorded with `q`) to the current image.
 `A`    | Apply Macro To All   | Applies the current command macro (recorded with `q`) to the current image and all images below.
-`c`    | Crop Mode            | Enters Crop Mode. `[h,j,k,l]` crop 1 pixel off the left/bottom/top/right, respectively. `[H,J,K,L]` expands by one pixel, using the `:bg` color to fill the gap. `100j` crops 100 pixels off the bottom, etc. Tap `ESCAPE` to exit Crop Mode.
+`c`    | Crop Mode            | Enters Crop Mode. `[h,j,k,l]` crop 1 pixel off the left/bottom/top/right, respectively. `[H,J,K,L]` expands by one pixel, using the `:bg` color to fill the gap. `100j` crops 100 pixels off the bottom, etc. `t` trims fully transparent pixels from all sides. Tap `ESCAPE` to exit Crop Mode.
 `d`    | Delete/Cut           | Deletes the current image and copies it to the clipboard.
+`e`    | mErge                | Merges the current image on top of the one below it using alpha blending. Use e.g. `4e` to merge the current image and 3 images below it into a single image.
 `f`    | Flip Horizontal      | Flips (mirrors) the current image horizontally.
 `F`    | Flip Vertical        | Flips (mirrors) the current image vertically.
 `g`    | Go to First Image    | [Image List] Selects the first image in the image list.
@@ -70,7 +71,6 @@ Key    | Command              | Description
 `q`    | Record Macro         | Tap `q` to begin recording a macro, enter any commands desired, and then tap `q` again to stop recording the macro. Use `a` to replay the current macro on the currently-selected image.
 `r`    | Rotate Clockwise 90º | Rotates the current image clockwise by 90º.
 `R`    | Rotate CCW 90º       | Rotates the current image counter-clockwise by 90º.
-`t`    | Stack                | Stacks (merges) the current image on the one below it using alpha blending. Use e.g. `4t` to stack the current image and 3 images below it into a single image.
 `u`    | Undo                 | Undo the last editing command (the most recent 50 commands can be undone).
 `U`    | Redo                 | Redo the last editing command that was just undone. Can also use `CONTROL+R` to Redo.
 `y`    | Yank/Copy            | Yank a copy of the current image into the clipboard.
