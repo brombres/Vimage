@@ -41,7 +41,7 @@ class Image
       if (@bitmap) return @bitmap
 
       if (file and file.value.exists)
-        bitmap = Bitmap( file.value )
+        bitmap = Bitmap.load( file.value )
         if (not @bitmap)
           error = "Unsupported file type or corrupted file: " + file
           bitmap = Bitmap(1,1)
