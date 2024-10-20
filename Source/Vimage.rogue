@@ -9,7 +9,7 @@ $define DATE    "April 7, 2024"
 
 $requireRogue "2.34"
 
-module Vimage
+library Vimage
 
 uses Console/CommandLineParser
 uses Graphics

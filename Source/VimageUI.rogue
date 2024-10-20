@@ -1,10 +1,10 @@
-module Vimage
+library Vimage
 uses Console/ConsoleUI
 uses UI
 
 class VimageUI : ConsoleUI [singleton]
   PROPERTIES
-    image_list_scroller : UIScrollView
+    image_list_scroller : VScrollView
     repeat_count        : Int?
     command             = String()
     cmd_line_handlers   = [String:CmdLineHandler]

@@ -1,8 +1,8 @@
-module Vimage
+library Vimage
 uses Console/ANSIBitmap
 uses UI
 
-class ImageView : UIComponent [singleton]
+class ImageView : Component [singleton]
   PROPERTIES
     image            : Image
     canvas           : TextCanvas
@@ -58,16 +58,16 @@ class ImageView : UIComponent [singleton]
           canvas = image.text_canvas( new_size, display_bounds )
         endIf
 
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',bg) )
+        ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',bg) )
 
-        temporarily ConsoleUICanvas.clip = display_bounds
+        temporarily ConsoleUICanvas.clip = display_bounds->IntBox
           local sz = canvas.size
           local pos = IntBox( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
 
       else
-        ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',bg) )
+        ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',bg) )
 
       endIf
 

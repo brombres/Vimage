@@ -1,7 +1,7 @@
-module Vimage
+library Vimage
 uses UI
 
-class StatusBar : UIComponent [singleton]
+class StatusBar : Component [singleton]
   PROPERTIES
     builder = TextCanvas(Console.width,1)
 

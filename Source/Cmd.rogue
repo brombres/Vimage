@@ -1,4 +1,4 @@
-module Vimage
+library Vimage
 uses Math/Best
 
 class Cmd

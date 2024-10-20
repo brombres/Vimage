@@ -1,7 +1,7 @@
-module Vimage
+library Vimage
 uses UI
 
-class ImageList : UIList [singleton]
+class ImageList : VList [singleton]
   PROPERTIES
     selected : ImageListItem
     is_dim   : Logical
@@ -27,12 +27,6 @@ class ImageList : UIList [singleton]
         if (image.file and image.file.value.abs == file) return true
       endForEach
       return false
-
-    method dispatch( e:PointerEvent )
-      # Send input events to children in reverse order because the top layer comes last
-      if (next) next.dispatch( e )
-      if (e.is_consumed) return
-      handle( e )
 
     method find( file:File )->ImageListItem
       file .= abs
@@ -127,7 +121,7 @@ class ImageList : UIList [singleton]
         endIf
       endForEach
 
-    method select( item:UIComponent )
+    method select( item:Component )
       select( item->(as ImageListItem) )
 
     method select( item:ImageListItem ) [preferred]
@@ -189,7 +183,7 @@ class ImageList : UIList [singleton]
 
 endClass  # ImageList
 
-class ImageListItem : UIComponent
+class ImageListItem : Component
   PROPERTIES
     image : Image
 
@@ -216,7 +210,7 @@ class ImageListItem : UIComponent
     method on_draw
       localize display_bounds
       localize is_selected
-      temporarily ConsoleUICanvas.clip = display_bounds
+      temporarily ConsoleUICanvas.clip = display_bounds->IntBox
         ConsoleUICanvas.cursor = display_bounds.position
         if (is_selected) ConsoleUICanvas.style.inverse
         ConsoleUICanvas.print image.compact_name
@@ -228,7 +222,7 @@ class ImageListItem : UIComponent
       fixed_size = IntXY( ImageList.fixed_width, 1 )
 endClass
 
-class ImageListScrollView : UIScrollView
+class ImageListScrollView : VScrollView
   METHODS
     method after_draw
       local bounds = display_bounds.with_width(1) + IntXY(ImageList.fixed_width-1,0)
@@ -237,5 +231,5 @@ class ImageListScrollView : UIScrollView
     method on_draw
       ConsoleUICanvas.fill( ' ' )
       local bounds = display_bounds.with_width(1)
-      ConsoleUICanvas.fill( bounds, StyledCharacter('~',CharacterStyle.DIM) )
+      ConsoleUICanvas.fill( bounds->IntBox, StyledCharacter('~',CharacterStyle.DIM) )
 endClass

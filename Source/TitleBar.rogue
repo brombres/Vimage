@@ -1,7 +1,7 @@
-module Vimage
+library Vimage
 uses UI
 
-class TitleBar : UIComponent [singleton]
+class TitleBar : Component [singleton]
   PROPERTIES
     image : Image
     zoom  : Real
@@ -14,7 +14,7 @@ class TitleBar : UIComponent [singleton]
 
     method on_draw
       localize display_bounds
-      ConsoleUICanvas.fill( display_bounds, StyledCharacter(' ',CharacterStyle.INVERSE) )
+      ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',CharacterStyle.INVERSE) )
       if (image)
         ConsoleUICanvas.cursor = display_bounds.position
         ConsoleUICanvas.style.inverse

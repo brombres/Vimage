@@ -1,4 +1,4 @@
-module Vimage
+library Vimage
 
 class ActionApplyAll : Action
   PROPERTIES
