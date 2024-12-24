@@ -12,10 +12,10 @@ class Image
     error       : String
 
     cached_text_canvas    : TextCanvas
-    cached_bitmap_size    : IntXY
-    og_bitmap_size        : IntXY
-    cached_view_center    : IntXY
-    cached_display_bounds : IntBox
+    cached_bitmap_size    : XY
+    og_bitmap_size        : XY
+    cached_view_center    : XY
+    cached_display_bounds : Box
 
   METHODS
     method init( bitmap, name=null )
@@ -114,10 +114,10 @@ class Image
         endForEach
       endIf
 
-    method size->IntXY
+    method size->XY
       return bitmap.size
 
-    method text_canvas( bitmap_size:IntXY, display_bounds:IntBox )->TextCanvas
+    method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
       contingent
         necessary (cached_text_canvas)
         necessary (bitmap_size == cached_bitmap_size)
@@ -132,19 +132,19 @@ class Image
       cached_display_bounds = display_bounds
       cached_view_center = camera
 
-      local canvas_size = bitmap_size / IntXY(1,2)
-      if (bitmap_size.y & 1)
-        canvas_size += IntXY(0,1)
+      local canvas_size = bitmap_size / XY(1,2)
+      if (bitmap_size.y->Int & 1)
+        canvas_size += XY(0,1)
       endIf
 
-      local canvas_bounds = IntBox( (display_bounds.size/2-(canvas_size*camera)).clamped_high(IntXY.zero), canvas_size )
-      canvas_bounds .= clamped( IntBox(display_bounds.size) )
-      local bitmap_bounds = canvas_bounds * IntXY(1,2)
-      local piece_size = ((display_bounds.size * IntXY(1,2) / zoom) + IntXY(0.5,0.5))->IntXY.clamped_high( bitmap.size )
+      local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
+      canvas_bounds .= clamped( Box(display_bounds.size) )
+      local bitmap_bounds = canvas_bounds * XY(1,2)
+      local piece_size = ((display_bounds.size * XY(1,2) / zoom) + XY(0.5,0.5))->XY.clamped_high( bitmap.size )
       if ((piece_size.y * zoom)->Int & 1)
-        local new_piece_size = ((piece_size * zoom) + IntXY(0,1)) / zoom
-        local piece_bounds = IntBox( -bitmap_bounds.position/zoom, new_piece_size )
-        if local intersection = piece_bounds & IntBox(bitmap.size)
+        local new_piece_size = ((piece_size * zoom) + XY(0,1)) / zoom
+        local piece_bounds = Box( -bitmap_bounds.position/zoom, new_piece_size )
+        if local intersection = piece_bounds & Box(bitmap.size)
           if intersection == piece_bounds
             piece_size = new_piece_size
           endIf
@@ -152,10 +152,10 @@ class Image
       endIf
 
       local origin = -bitmap_bounds.position/zoom
-      origin .= clamped_low( IntXY.zero )
+      origin .= clamped_low( XY.zero )
       origin .= clamped_high( bitmap.size - piece_size )
-      local piece = Bitmap( bitmap, IntBox(origin,piece_size) )
-      local target_size = (piece_size*zoom)->IntXY.clamped_low(IntXY(1,1))
+      local piece = Bitmap( bitmap, Box(origin,piece_size) )
+      local target_size = (piece_size*zoom)->XY.clamped_low(XY(1,1))
 
       piece.resize( target_size )
 
@@ -203,11 +203,11 @@ class Image
       @{
         filepath:which{file:file.value.filepath||null},
         bitmap:Variant(@bitmap),
-        :name,
-        :zoom,
+        name,
+        zoom,
         camera:{x:camera.x,y:camera.y},
-        :error,
-        :is_modified
+        error,
+        is_modified
       }
 endClass
 

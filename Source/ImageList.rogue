@@ -146,10 +146,10 @@ class ImageList : VList [singleton]
             local i1 = -scroll_view.content_offset.y
             local i2 = i1 + scroll_view.size.y
             if (index < i1)
-              scroll_view.content_offset = IntXY(0,-index)
+              scroll_view.content_offset = XY(0,-index)
               scroll_view.request_redraw
             elseIf (index >= i2)
-              scroll_view.content_offset = IntXY(0,-(index-(scroll_view.size.y-1)))
+              scroll_view.content_offset = XY(0,-(index-(scroll_view.size.y-1)))
               scroll_view.request_redraw
             endIf
           endIf
@@ -162,7 +162,7 @@ class ImageList : VList [singleton]
       local result = ...
       @{
         selected_index:which{ selected:selected.index || -1 },
-        :is_dim
+        is_dim
       }
 
       local images = @[]
@@ -210,7 +210,7 @@ class ImageListItem : Component
     method on_draw
       localize display_bounds
       localize is_selected
-      temporarily ConsoleUICanvas.clip = display_bounds->IntBox
+      temporarily ConsoleUICanvas.clip = display_bounds->Box
         ConsoleUICanvas.cursor = display_bounds.position
         if (is_selected) ConsoleUICanvas.style.inverse
         ConsoleUICanvas.print image.compact_name
@@ -219,17 +219,17 @@ class ImageListItem : Component
       endTemporarily
 
     method on_resize
-      fixed_size = IntXY( ImageList.fixed_width, 1 )
+      fixed_size = XY( ImageList.fixed_width, 1 )
 endClass
 
 class ImageListScrollView : VScrollView
   METHODS
     method after_draw
-      local bounds = display_bounds.with_width(1) + IntXY(ImageList.fixed_width-1,0)
+      local bounds = display_bounds.with_width(1) + XY(ImageList.fixed_width-1,0)
       ConsoleUICanvas.fill( bounds, '\[2502]' )
 
     method on_draw
       ConsoleUICanvas.fill( ' ' )
       local bounds = display_bounds.with_width(1)
-      ConsoleUICanvas.fill( bounds->IntBox, StyledCharacter('~',CharacterStyle.DIM) )
+      ConsoleUICanvas.fill( bounds->Box, StyledCharacter('~',CharacterStyle.DIM) )
 endClass

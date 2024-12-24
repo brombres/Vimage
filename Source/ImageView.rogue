@@ -11,7 +11,7 @@ class ImageView : Component [singleton]
     max_zoom         : Real
     default_zoom     : Real
     is_modified      : Logical
-    visible_bounds   : IntBox
+    visible_bounds   : Box
     camera_bounds_tl : XY
     camera_bounds_br : XY
 
@@ -26,7 +26,7 @@ class ImageView : Component [singleton]
       if (image)
         if (is_modified)
           is_modified = false
-          visible_bounds = IntBox( image.bitmap.size )
+          visible_bounds = Box( image.bitmap.size )
           local new_size : XY
           if (min_zoom)
             new_size = (image.bitmap.size->XY * image.zoom)
@@ -48,7 +48,7 @@ class ImageView : Component [singleton]
             endIf
           endIf
 
-          local sz = (display_bounds.size * IntXY(1,2))->XY
+          local sz = (display_bounds.size * XY(1,2))->XY
           sz = (sz / image.zoom).clamped_high( image.size ) / image.size
           camera_bounds_tl = (sz / 2) - XY(1,2)/image.size
           camera_bounds_br = (XY(1,1) - sz/2)
@@ -58,16 +58,16 @@ class ImageView : Component [singleton]
           canvas = image.text_canvas( new_size, display_bounds )
         endIf
 
-        ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',bg) )
+        ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
 
-        temporarily ConsoleUICanvas.clip = display_bounds->IntBox
+        temporarily ConsoleUICanvas.clip = display_bounds->Box
           local sz = canvas.size
-          local pos = IntBox( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
+          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
           ConsoleUICanvas.draw( canvas, pos )
         endTemporarily
 
       else
-        ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',bg) )
+        ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
 
       endIf
 

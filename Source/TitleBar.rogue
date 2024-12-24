@@ -14,7 +14,7 @@ class TitleBar : Component [singleton]
 
     method on_draw
       localize display_bounds
-      ConsoleUICanvas.fill( display_bounds->IntBox, StyledCharacter(' ',CharacterStyle.INVERSE) )
+      ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',CharacterStyle.INVERSE) )
       if (image)
         ConsoleUICanvas.cursor = display_bounds.position
         ConsoleUICanvas.style.inverse
@@ -29,7 +29,7 @@ class TitleBar : Component [singleton]
           else
             ratio = "$:1"(zoom->Int)
           endIf
-          ConsoleUICanvas.cursor = display_bounds.top_right - IntXY(ratio.count,0)
+          ConsoleUICanvas.cursor = display_bounds.top_right - XY(ratio.count,0)
           ConsoleUICanvas.print ratio
         endIf
         ConsoleUICanvas.style.inverse_off

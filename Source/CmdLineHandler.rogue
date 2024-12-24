@@ -135,13 +135,13 @@ class CmdLineHandler
       set_status( "[Syntax error: invalid color '$']"(arg) )
       return null
 
-    method parse_ratio( arg:String )->IntXY?
+    method parse_ratio( arg:String )->XY?
       local pair = arg.split(':')
       if (pair.count == 2)
         local x = pair.first->Int
         local y = pair.last->Int
         if (x->String == pair.first and y->String == pair.last)
-          return IntXY(x,y)
+          return XY(x,y)
         else
           set_status( "$ [invalid aspect ratio '$']"(keyword,arg) )
           return null
@@ -151,13 +151,13 @@ class CmdLineHandler
         return null
       endIf
 
-    method parse_size( arg:String )->IntXY?
+    method parse_size( arg:String )->XY?
       local pair = arg.split('x')
       if (pair.count == 2)
         local x = pair.first->Int
         local y = pair.last->Int
         if (x->String == pair.first and y->String == pair.last)
-          return IntXY(x,y)
+          return XY(x,y)
         else
           set_status( "$ [invalid size '$']"(keyword,arg) )
           return null
@@ -785,9 +785,9 @@ class CmdLineJoin : CmdLineHandler [singleton]
   METHODS
     method execute( args:String )
       if (args == "h")
-        execute( CmdJoin(IntXY(2,1)) )
+        execute( CmdJoin(XY(2,1)) )
       elseIf (args == "v")
-        execute( CmdJoin(IntXY(1,2)) )
+        execute( CmdJoin(XY(1,2)) )
       else
         if local size = parse_size( args )
           execute( CmdJoin(size) )
@@ -896,13 +896,13 @@ class CmdLineNew : CmdLineHandler [singleton]
         endIf
       endIf
 
-    method default_size->IntXY
+    method default_size->XY
       if local selected = ImageList.selected
         if local image = selected.image
           return image.bitmap.size
         endIf
       endIf
-      return ImageView.size * IntXY(1,2)
+      return ImageView.size * XY(1,2)
 
     method syntax->String
       if (VimageUI.command.after_first(' ').count?) return "WxH"
