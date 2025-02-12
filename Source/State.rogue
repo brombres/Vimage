@@ -27,7 +27,10 @@ class State
 
     method on( e:KeyEvent )
       if (e.is_press)
-        if local handler = key_handlers[ (e.modifier_key_state:<<:16) | e.keycode ]
+        local modifiers : Int
+        if (e.is_shift_pressed)   modifiers |= SHIFT
+        if (e.is_control_pressed) modifiers |= CONTROL
+        if local handler = key_handlers[ e.keycode | modifiers ]
           handler.on( e )
           return
         endIf

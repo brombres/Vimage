@@ -87,8 +87,8 @@ class VimageUI : ConsoleUI [singleton]
       TitleBar.show( image )
       ImageView.show( image )
 
-    method on_update [override]
-      prior.on_update
+    method on_update( dt:Real ) [override]
+      prior.on_update( dt )
 
       if (actions)
         actions .= updated
