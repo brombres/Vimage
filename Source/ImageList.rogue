@@ -6,7 +6,7 @@ class ImageList : VList [singleton]
     selected : ImageListItem
     is_dim   : Logical
 
-    fixed_width = 21L
+    fixed_width = 21
 
   METHODS
     method init
@@ -85,6 +85,9 @@ class ImageList : VList [singleton]
       @fixed_width = (Console.width / 4 + 1).clamped( 21, 33 )
       fixed_width = fixed_width
 
+    method on_update_layout
+      fixed_height = count
+
     method remove_selected
       if (not selected) return
       local next = selected.next
@@ -140,17 +143,22 @@ class ImageList : VList [singleton]
           VimageUI.show( item.image )
           localize scroll_view
           if (scroll_view)
-            local item_bounds = item.display_bounds
-            local view_bounds = scroll_view.display_bounds
-            local index = item.index
-            local i1 = -scroll_view.content_offset.y
-            local i2 = i1 + scroll_view.size.y
-            if (index < i1)
-              scroll_view.content_offset = XY(0,-index)
-              scroll_view.request_redraw
-            elseIf (index >= i2)
-              scroll_view.content_offset = XY(0,-(index-(scroll_view.size.y-1)))
-              scroll_view.request_redraw
+            if (scroll_view.size.y > 0)
+              local item_bounds = item.display_bounds
+              local view_bounds = scroll_view.display_bounds
+              local index = item.index
+              local i1 = -scroll_view.content_offset.y
+              local i2 = i1 + scroll_view.size.y
+              if (index < i1)
+                scroll_view.content_offset = XY(0,-index)
+                scroll_view.request_redraw
+              elseIf (index >= i2)
+                scroll_view.content_offset = XY(0,-(index-(scroll_view.size.y-1)))
+                scroll_view.request_redraw
+              endIf
+            else
+              # Defer scroll view adjustment until the scroll view has a size
+              actions += ActionSelectItem( item )
             endIf
           endIf
         endIf
@@ -182,6 +190,16 @@ class ImageList : VList [singleton]
       if (state//selected_index < count) select( state//selected_index->Int )
 
 endClass  # ImageList
+
+class ActionSelectItem( item:ImageListItem ) : Action
+  METHODS
+    method on_tick
+      local scroll_view = ImageList.scroll_view
+      if (scroll_view.size.y)
+        ImageList.select( item )
+        finish
+      endIf
+endClass
 
 class ImageListItem : Component
   PROPERTIES

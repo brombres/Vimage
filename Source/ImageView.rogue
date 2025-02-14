@@ -72,8 +72,10 @@ class ImageView : Component [singleton]
       endIf
 
     method mark_modified
-      is_modified = true
-      request_redraw
+      if (not is_modified)
+        is_modified = true
+        request_redraw
+      endIf
 
     method maximum_zoom
       if (image)

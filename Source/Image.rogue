@@ -119,6 +119,7 @@ class Image
 
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
       contingent
+        necessary (not is_modified)
         necessary (cached_text_canvas)
         necessary (bitmap_size == cached_bitmap_size)
         necessary (bitmap.size == og_bitmap_size)
