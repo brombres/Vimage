@@ -621,8 +621,8 @@ endClass
 class CmdJoin( dims:XY ) : EditCmd
   METHODS
     method update_status
-      local w = dims.x
-      local h = dims.y
+      local w = dims.x->Int
+      local h = dims.y->Int
       local total = w * h
       local has_images = which{ ImageList.count:"" || " [no image selected]" }
       if (total <= 1)
@@ -642,8 +642,8 @@ class CmdJoin( dims:XY ) : EditCmd
       endIf
 
     method execute
-      local w = dims.x
-      local h = dims.y
+      local w = dims.x->Int
+      local h = dims.y->Int
       local total = w * h
 
       if (ImageList.count == 0 or total <= 1) return
@@ -2183,8 +2183,8 @@ endClass
 class CmdSplit( dims:XY ) : EditCmd
   METHODS
     method update_status
-      local tiles_wide = dims.x
-      local tiles_high = dims.y
+      local tiles_wide = dims.x->Int
+      local tiles_high = dims.y->Int
       local total = tiles_wide * tiles_high
 
       use status = StatusBar
@@ -2211,8 +2211,8 @@ class CmdSplit( dims:XY ) : EditCmd
 
 
     method execute
-      local tiles_wide = dims.x
-      local tiles_high = dims.y
+      local tiles_wide = dims.x->Int
+      local tiles_high = dims.y->Int
       local total = tiles_wide * tiles_high
 
       local image  : Image
