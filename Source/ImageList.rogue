@@ -193,7 +193,7 @@ endClass  # ImageList
 
 class ActionSelectItem( item:ImageListItem ) : Action
   METHODS
-    method on_tick
+    method on_update( dt:Real ) [override]
       local scroll_view = ImageList.scroll_view
       if (scroll_view.size.y)
         ImageList.select( item )
