@@ -1724,7 +1724,7 @@ endClass
 class CmdNew( size:XY ) : EditCmd
   METHODS
     method update_status
-      status = "new image [$x$] ($)"(size.x,size.y,Vimage.bg_color)
+      status = "new image [$x$] ($)"(size.x->Int,size.y->Int,Vimage.bg_color)
 
     method execute
       local before_index = 0L
