@@ -141,7 +141,7 @@ class Image
       local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
       canvas_bounds .= clamped( Box(display_bounds.size) )
       local bitmap_bounds = canvas_bounds * XY(1,2)
-      local piece_size = ((display_bounds.size * XY(1,2) / zoom) + XY(0.5,0.5))->XY.clamped_high( bitmap.size )
+      local piece_size = (display_bounds.size * XY(1,2) / zoom)->XY.clamped_high( bitmap.size )
       if ((piece_size.y * zoom)->Int & 1)
         local new_piece_size = ((piece_size * zoom) + XY(0,1)) / zoom
         local piece_bounds = Box( -bitmap_bounds.position/zoom, new_piece_size )
