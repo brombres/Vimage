@@ -121,6 +121,7 @@ Command   | Arguments       | Description
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:save`     | `[filepath]`      | An alias for `:w`.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
+`:trim`     | `[t|l|b|r]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.
 `:wall`     |                   | Writes (saves) all modified images.
 `:wq`       |                   | Writes (saves) and quits (closes) the current image.

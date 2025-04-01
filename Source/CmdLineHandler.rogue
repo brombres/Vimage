@@ -1023,6 +1023,29 @@ class CmdLineResize : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineTrim : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "trim"
+    syntax  = "[t|l|b|r]"
+
+  METHODS
+    method execute( args:String )
+      block args = args.to_lowercase->Character[]
+        args.discard( $ == ' ' )
+        local top = args.contains( 't' )
+        local left = args.contains( 'l' )
+        local bottom = args.contains( 'b' )
+        local right = args.contains( 'r' )
+        args.discard( "tlbr ".contains($) )
+        if (args.is_empty)
+          execute( CmdTrim(&=top,&=left,&=bottom,&=right) )
+        else
+          status = "trim [invalid selector '$'"(args.first)
+        endIf
+      endBlock
+
+endClass
+
 class CmdLineWrite : CmdLineFilepathHandler [singleton]
   PROPERTIES
     keyword = "w"

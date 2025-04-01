@@ -2279,15 +2279,25 @@ class CmdToggleClipboard : Cmd [singleton]
       Vimage.using_os_clipboard = not Vimage.using_os_clipboard
 endClass
 
-class CmdTrim : EditCmd [singleton]
+class CmdTrim( top=false:Logical, left=false:Logical, bottom=false:Logical, right=false:Logical ) : EditCmd [singleton]
   METHODS
     method update_status
-      status = "t (trim transparent edges)"
+      local st = String( "t " )
+      local dirs = String[]
+      if (top)    st.print( 't' ); dirs.add( "top" )
+      if (left)   st.print( 'l' ); dirs.add( "left" )
+      if (bottom) st.print( 'b' ); dirs.add( "bottom" )
+      if (right)  st.print( 'r' ); dirs.add( "right" )
+      st .= appending( "(trim transparent" )
+      if (dirs.count) st .= appending( dirs.conjoin )
+      st .= appending( "edge".pluralized(dirs.count) )
+      st .= appending( ')' )
+      status = st
 
     method execute
       if local item = ImageList.selected
         local img = ImageList.selected.image
-        if (img.cloned_bitmap.trim)
+        if (img.cloned_bitmap.trim(&=top,&=left,&=bottom,&=right))
           img.zoom = 0
           ImageView.mark_modified
           ImageView.min_zoom = 0
