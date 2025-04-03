@@ -423,7 +423,7 @@ endClass
 class CmdLineBG : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "bg"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|0|red|yellow|...|random]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...|random]"
 
   METHODS
     method execute( args:String )
@@ -798,7 +798,7 @@ endClass
 class CmdLineLiteralBitwiseAND : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "&"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
 
   METHODS
     method execute( args:String )
@@ -810,7 +810,7 @@ endClass
 class CmdLineLiteralBitwiseOR : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "|"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
 
   METHODS
     method execute( args:String )
@@ -822,7 +822,7 @@ endClass
 class CmdLineLiteralBitwiseXOR : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "~"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|clear|red|yellow|...]"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
 
   METHODS
     method execute( args:String )
@@ -858,6 +858,18 @@ class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
       local n = args->Int
       if (n->String == args)
         execute( CmdLiteralBitwiseROR(n,&=include_alpha) )
+      endIf
+endClass
+
+class CmdLineLiteralMultiply : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "*"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        execute( CmdLiteralMultiply(color->Color.argb) )
       endIf
 endClass
 

@@ -133,6 +133,7 @@ Command   | Arguments       | Description
 `:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
 `:>`        | `N`               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:> 8`.
 `:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.
+`:*`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Color-multiplies each pixel in the current image by the specified constant color.
 
 # Filters
 

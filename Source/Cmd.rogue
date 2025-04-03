@@ -1638,6 +1638,35 @@ class CmdLiteralBitwiseXOR( argb:Int )  : EditCmd
       endIf
 endClass
 
+class CmdLiteralMultiply( argb:Int )  : EditCmd
+  METHODS
+    method update_status
+      status = "* $ (color multiply)"(argb->String(&hex))
+
+    method execute
+      if local selected = ImageList.selected
+        local bitmap = selected.image.cloned_bitmap
+        local n = bitmap.pixels.count
+        localize argb
+        native @|RogueInt32 literal_a = (($argb >> 24) & 255);
+                |RogueInt32 literal_r = (($argb >> 16) & 255);
+                |RogueInt32 literal_g = (($argb >>  8) & 255);
+                |RogueInt32 literal_b = ( $argb        & 255);
+                |
+                |RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                |
+                |while (--$n >= 0)
+                |{
+                |  RogueInt32 argb = *(++data);
+                |  RogueInt32 a = ((literal_a * ((argb >> 24) & 255)) / 255) << 24;
+                |  RogueInt32 r = ((literal_r * ((argb >> 16) & 255)) / 255) << 16;
+                |  RogueInt32 g = ((literal_g * ((argb >>  8) & 255)) / 255) << 8;
+                |  RogueInt32 b = ((literal_b * ( argb        & 255)) / 255);
+                |  *data = (a | r | g | b);
+                |}
+      endIf
+endClass
+
 class CmdMacro : Cmd [singleton]
   METHODS
     method allowed_in_macro->Logical
