@@ -89,6 +89,7 @@ Key    | Command              | Description
 `~`    | Bitwise XOR          | Combine this image with the image below using a bitwise XOR operation.
 `<`    | Bitwise ROL          | Rotate the RGB pixel bit values left by 1 bit. Use e.g. `8<` to ROL 8 bits, etc.
 `>`    | Bitwise ROR          | Rotate the RGB pixel bit values right by 1 bit. Use e.g. `8>` to ROR 8 bits, etc.
+`*`    | Multiply             | Combine this image with the image below using a color multiply operation.
 
 # Command Line Commands
 Type `:` to begin a Command Line command. Type one of the following and then tap `ENTER` to execute or `ESCAPE` to cancel.

@@ -197,6 +197,27 @@ class CmdBitwiseAND : EditCmd [singleton]
       endIf
 endClass
 
+class CmdMultiply : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "* (multiply with underlying image)"
+
+    method execute
+      if local selected = ImageList.selected
+        if (selected is ImageList.last_child)
+          status = "* (multiply) [no underlying image]"
+          return
+        else
+          local top    = selected.image.bitmap
+          local bottom_image  = selected.next->(as ImageListItem).image
+          local bottom_bitmap = bottom_image.cloned_bitmap
+          top.blit( bottom_bitmap, XY(0,0), BlitModeMultiply )
+          ImageList.remove( selected )
+          ImageList.select( bottom_image )
+        endIf
+      endIf
+endClass
+
 class CmdBitwiseOR : EditCmd [singleton]
   METHODS
     method update_status
