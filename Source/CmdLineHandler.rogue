@@ -490,7 +490,7 @@ endClass
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
-    syntax  = "[WxH|Wx|xH|N|LEFT TOP RIGHT BOTTOM|SCALE]"
+    syntax  = "[[WxH|Wx|xH|N] [center|top|left|bottom|right|c|t|l|b|r]] |LEFT TOP RIGHT BOTTOM|SCALE]"
 
   METHODS
     method execute( arg_string:String )
@@ -500,14 +500,40 @@ class CmdLineCrop : CmdLineHandler [singleton]
       elseIf (args.count == 1 and not args[0].contains('x'))
         local n = args[0]->Int
         execute( CmdCrop(n,n,n,n) )
+      elseIf (args.count == 2 and args[0].is_number and not args[0].contains('x'))
+        local n = args[0]->Int
+        local anchor = parse_anchor( args.cloned.[remove_first].join(' ') )
+        if (not anchor) anchor = Anchor.CENTER
+        if (anchor.value == Anchor.CENTER)
+          execute( CmdCrop(n,n,n,n) )
+        else
+          local top    = 0
+          local left   = 0
+          local bottom = 0
+          local right  = 0
+          if (anchor.value.position.x == Anchor.LEFT.position.x)   left = n
+          if (anchor.value.position.x == Anchor.RIGHT.position.x)  right = n
+          if (anchor.value.position.y == Anchor.TOP.position.y)    top = n
+          if (anchor.value.position.y == Anchor.BOTTOM.position.y) bottom = n
+          execute( CmdCrop(left,top,right,bottom) )
+        endIf
       else
-        local (w,h) = parse_size_either_or( arg_string )
+        local anchor = Vimage.anchor
+        if (args.count > 1)
+          anchor = which{ parse_anchor( args.cloned.[remove_first].join(' ') ) || anchor }
+        endIf
+
+        local (w,h) = parse_size_either_or( args[0] )
         if (w or h)
-          execute( CmdCropToSize(w,h) )
+          temporarily Vimage.anchor = anchor
+            execute( CmdCropToSize(w,h) )
+          endTemporarily
         else
           local (sx,sy) = parse_scale_either_or( arg_string )
           if (sx or sy)
-            execute( CmdCropToScale(sx,sy) )
+            temporarily Vimage.anchor = anchor
+              execute( CmdCropToScale(sx,sy) )
+            endTemporarily
           else
             status = "crop [missing or invalid size specification]"
           endIf

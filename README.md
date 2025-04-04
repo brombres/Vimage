@@ -101,9 +101,9 @@ Command   | Arguments       | Description
 `:aspect-fill` | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
 `:aspect-fit`  | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[t\|transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
-`:crop`     | `WxH`             | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height.
-`:crop`     | `Wx`              | Crop/expand to width W, preserving the current height.
-`:crop`     | `xH`              | Crop/expand to height H, preserving the current width.
+`:crop`     | `WxH` `[t|l|b|r]*` | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height. An optional anchor may be specified.
+`:crop`     | `Wx` `[t|l|b|r]*` | Crop/expand to width W, preserving the current height.
+`:crop`     | `xH` `[t|l|b|r]*` | Crop/expand to height H, preserving the current width.
 `:crop`     | `N`               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
 `:crop`     | `LEFT TOP RIGHT BOTTOM` | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
 `:fill` | `COLOR`\<br>`LEFT RIGHT`<br>`TL TR BL BR`<br>`COLORS` | Fills the current image with a single color, a color gradient that uses either 2 side colors or 4 corner colors, or a horizontal color gradient that uses 3, 5, or more colors.
