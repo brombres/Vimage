@@ -974,6 +974,22 @@ class CmdLineNew : CmdLineHandler [singleton]
       return "$x$"(default_size.x,default_size.y)
 endClass
 
+class CmdLineShift : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "shift"
+    syntax = "X Y"
+
+  METHODS
+    method execute( args:String )
+      local args = args.split(' ')
+      if (args.count == 2 and args[0].is_number and args[1].is_number)
+        execute( CmdShift(args[0]->Int,args[1]->Int) )
+      else
+        status = "shift [missing or invalid X and Y shift offsets]"
+      endIf
+
+endClass
+
 class CmdLineOpen : CmdLineFilepathHandler [singleton]
   PROPERTIES
     keyword = "open"

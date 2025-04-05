@@ -2234,6 +2234,22 @@ class CmdScroll( dx:Real, dy:Real ) : Cmd
 
 endClass
 
+class CmdShift( x:Int, y:Int ) : EditCmd
+  METHODS
+    method update_status
+      if (ImageList.selected)
+        status = "shift $ $"(x,y)
+      else
+        status = "shift $ $ [no image selected]"(x,y)
+      endIf
+
+    method execute
+      if (ImageList.selected)
+        ImageList.selected.image.cloned_bitmap.crop( -x, -y, x, y, Vimage.bg_color )
+        ImageView.mark_modified
+      endIf
+endClass
+
 class CmdSplit( dims:XY ) : EditCmd
   METHODS
     method update_status
