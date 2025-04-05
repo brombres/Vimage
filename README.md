@@ -101,6 +101,7 @@ Command   | Arguments       | Description
 `:aspect-fill` | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fill the specified size, retaining the same aspect ratio while completely filling the specified dimensions. Some content may be lost.
 `:aspect-fit`  | `[WxH\|Wx\|xH]`     | Crops, expands, and/or resizes the current image to aspect-fit the specified size, retaining the same aspect ratio while fitting all content within the specified dimensions. The result may be letterboxed or pillarboxed.
 `:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[t\|transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
+`:channel` | `<operation-name> [ARGS]` | Manipulates the color channels. Refer to the [Channel Operations](#Channel-Operations) table for more information.
 `:crop`     | `WxH` `[t|l|b|r]*` | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height. An optional anchor may be specified.
 `:crop`     | `Wx` `[t|l|b|r]*` | Crop/expand to width W, preserving the current height.
 `:crop`     | `xH` `[t|l|b|r]*` | Crop/expand to height H, preserving the current width.
@@ -135,6 +136,17 @@ Command   | Arguments       | Description
 `:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.
 `:*`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Color-multiplies each pixel in the current image by the specified constant color.
 
+# Channel Operations
+
+    :channel <operation-name> [ARGS]
+
+Operation Name    | Arguments  | Description
+---------------|------------|------------
+copy           | `[a\|r\|g\|b\|XX]` `[a\|r\|g\|b]+` | Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:channel copy r gb`. See also: `:channel swap`.
+hsvtorgb       | &nbsp;     | The corollary to `:channel rgbtohsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
+rgbtohsv       | &nbsp;     | Converts the current image's RGB color components into HSV (Hue Saturation Value, also called HSB or Hue Saturation Brightness) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:channel hsvtorgb`.
+swap           | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with another. For example, `:channel swap r b` swaps the red and blue channels. See also: `:channel copy`.
+
 # Filters
 
     :filter <filter-name> [ARGS]
@@ -143,10 +155,6 @@ Filter Name    | Arguments  | Description
 ---------------|------------|------------
 brightgold     | &nbsp;     | Map max(R,G,B) to gradient [Black,Orange,Yellow,White]
 clamp          | `LOCOLOR HICOLOR` | Limits the range of each pixel's color components to the corresponding low and high byte of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
-copy           | `[a\|r\|g\|b\|XX]` `[a\|r\|g\|b]+` | Copy the specified source channel (a,r,g,b) or a constant channel value (such as `7f`) to one or more destination channels. To copy red to green and blue channels: `:filter copy r gb`. See also: `:filter swap`.
 gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
-hsvtorgb       | &nbsp;     | The corollary to `:filter rgbtohsv`, this assumes the current image contains HSV color components and converts them to RGB color components.
 normalize      | [low high] (defaults: 0 255) | Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
-rgbtohsv       | &nbsp;     | Converts the current image's RGB color components into HSV (Hue Saturation Value, also called HSB or Hue Saturation Brightness) color components. Each pixel's "red" value now indicates hue (0-255), "green" is saturation (0-255), and "blue" is brightness (0-255). These channels can be further manipulated using commands such as `:&`, `:|`, and `:clamp`. Then the image can be converted back into RGB with the command `:filter hsvtorgb`.
-swap           | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with another. For example, `:filter swap r b` swaps the red and blue channels. See also: `:filter copy`.

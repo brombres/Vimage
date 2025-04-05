@@ -558,10 +558,100 @@ class CmdLineAspectFill : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineChannel : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "channel"
+    syntax  = "[copy|hsvtorgb|rgbtohsv|swap]"
+
+  METHODS
+    method execute( arg_string:String )
+      local cmd : Cmd
+
+      local args = arg_string.split(' ')
+      local op_name = args.remove_first
+      which (op_name)
+        case "copy":
+          if (args.count == 2)
+            local a = parse_copy_channels( args.first )
+            local b = parse_copy_channels( args.last, &allow_multiple )
+            if (not a or not b) return
+            cmd = CmdChannelCopy(a,b)
+          else
+            status = "channel copy [expected <source-channel> <destination-channels>]"
+            return
+          endIf
+        case "hsvtorgb": cmd = CmdChannelHSVToRGB( args )
+        case "rgbtohsv": cmd = CmdChannelRGBToHSV( args )
+        case "swap":
+          if (args.count == 2)
+            local a = parse_swap_channel( args.first )
+            local b = parse_swap_channel( args.last )
+            if (not a or not b) return
+            cmd = CmdChannelSwap(a.value,b.value)
+          else
+            status = "channel swap [expected <source-channel> <destination-channel>]"
+            return
+          endIf
+      endWhich
+
+      if (cmd)
+        execute( cmd )
+      else
+        status = "channel [missing or invalid channel operation]"
+      endIf
+
+    method parse_copy_channels( args:String, &allow_multiple )->String
+      if (allow_multiple)
+        local channels = 0L
+        forEach (ch in args)
+          if (not "bgra".locate(ch))
+            status = ''channel copy [illegal destination channel specification '$']''(ch)
+            return null
+          endIf
+        endForEach
+      elseIf (args.count == 1)
+        if (args == "0") return args
+        if (not "bgra".locate(args) and not args[0].is_number(&base=16))
+          status = ''channel copy [illegal source channel or value specification '$']''(args[0])
+          return null
+        endIf
+      else
+        if (args->Int(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
+          status = ''channel copy [illegal source channel or value specification '$']''(args)
+          return null
+        endIf
+      endIf
+
+      return args
+
+    method parse_swap_channel( arg:String )->Int?
+      # Returns a channel index. Each value:
+      #   b -> 0
+      #   g -> 1
+      #   r -> 2
+      #   a -> 3
+      if (arg.count == 1)
+        local index = "bgra".locate( arg )
+        if (index) return index.value
+      endIf
+      status = ''channel swap [illegal channel specification '$']''(arg)
+      return null
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      which (args.first)
+        case "copy": return "source-channel:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
+        case "swap": return "source-channel:[a|r|g|b] destination-channel:[a|r|g|b]"
+        others: return @syntax
+      endWhich
+
+endClass
+
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|clamp|copy|gold|gray|hsvtorgb|normalize|rgbtohsv|swap]"
+    syntax  = "[brightgold|clamp|gold|gray|normalize]"
 
   METHODS
     method execute( arg_string:String )
@@ -583,19 +673,8 @@ class CmdLineFilter : CmdLineHandler [singleton]
           endIf
           filter = CmdFilterClamp( low.value, high.value )
         case "brightgold":   filter = CmdFilterBrightGold( args )
-        case "copy":
-          if (args.count == 2)
-            local a = parse_copy_channels( args.first )
-            local b = parse_copy_channels( args.last, &allow_multiple )
-            if (not a or not b) return
-            filter = CmdFilterCopy(a,b)
-          else
-            status = "filter copy [expected <source-channel> <destination-channels>]"
-            return
-          endIf
         case "gold":         filter = CmdFilterGold( args )
         case "gray", "grey": filter = CmdFilterGray( args )
-        case "hsvtorgb":     filter = CmdFilterHSVToRGB( args )
         case "normalize"
           which (args.count)
             case 0
@@ -606,17 +685,6 @@ class CmdLineFilter : CmdLineHandler [singleton]
               status = "filter normalize [expected no arguments or two arguments]"
               return
           endWhich
-        case "rgbtohsv":     filter = CmdFilterRGBToHSV( args )
-        case "swap":
-          if (args.count == 2)
-            local a = parse_swap_channel( args.first )
-            local b = parse_swap_channel( args.last )
-            if (not a or not b) return
-            filter = CmdFilterSwap(a.value,b.value)
-          else
-            status = "filter swap [expected <source-channel> <destination-channel>]"
-            return
-          endIf
       endWhich
 
       if (filter)
@@ -625,52 +693,13 @@ class CmdLineFilter : CmdLineHandler [singleton]
         status = "filter [missing or invalid filter name]"
       endIf
 
-    method parse_copy_channels( args:String, &allow_multiple )->String
-      if (allow_multiple)
-        local channels = 0L
-        forEach (ch in args)
-          if (not "bgra".locate(ch))
-            status = ''filter copy [illegal destination channel specification '$']''(ch)
-            return null
-          endIf
-        endForEach
-      elseIf (args.count == 1)
-        if (args == "0") return args
-        if (not "bgra".locate(args) and not args[0].is_number(&base=16))
-          status = ''filter copy [illegal source channel or value specification '$']''(args[0])
-          return null
-        endIf
-      else
-        if (args->Int(&base=16)->String(&hex).rightmost(2).to_uppercase != args.to_uppercase)
-          status = ''filter copy [illegal source channel or value specification '$']''(args)
-          return null
-        endIf
-      endIf
-
-      return args
-
-    method parse_swap_channel( arg:String )->Int?
-      # Returns a channel index. Each value:
-      #   b -> 0
-      #   g -> 1
-      #   r -> 2
-      #   a -> 3
-      if (arg.count == 1)
-        local index = "bgra".locate( arg )
-        if (index) return index.value
-      endIf
-      status = ''filter swap [illegal channel specification '$']''(arg)
-      return null
-
     method syntax( arg_string:String )->String
       if (not arg_string.count) return @syntax
       local args = arg_string.split(' ')
       which (args.first)
         case "clamp": return "<low-color> <high-color>"
-        case "copy": return "source-channel:[a|r|g|b|XX] destination-channel:[a|r|g|b]+"
         case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
         case "normalize":   return "[low high] (defaults: 0 255)"
-        case "swap": return "source-channel:[a|r|g|b] destination-channel:[a|r|g|b]"
         others: return @syntax
       endWhich
 

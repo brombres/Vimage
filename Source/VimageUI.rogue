@@ -19,6 +19,7 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineAnchor )
       register( CmdLineAspect )
       register( CmdLineBG )
+      register( CmdLineChannel )
       register( CmdLineCrop )
       register( CmdLineAspectFill )
       register( CmdLineAspectFit )

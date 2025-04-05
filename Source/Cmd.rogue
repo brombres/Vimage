@@ -968,15 +968,15 @@ class CmdFilterClamp( lo:ColorValue, hi:ColorValue ) : EditCmd
       endIf
 endClass
 
-class CmdFilterCopy( a:String, b:String ) : EditCmd
+class CmdChannelCopy( a:String, b:String ) : EditCmd
   METHODS
     method update_status
       if (not ImageList.selected)
-        status = "filter copy channel $ -> channels $ [no image selected]"(a,b)
+        status = "channel copy channel $ -> channels $ [no image selected]"(a,b)
         return
       endIf
 
-      status = "filter copy channel $ -> channels $"(a,b)
+      status = "channel copy channel $ -> channels $"(a,b)
 
     method execute
       if (not ImageList.selected)
@@ -1281,10 +1281,10 @@ class CmdFilterGray( args:String[] ) : EditCmd
 
 endClass
 
-class CmdFilterHSVToRGB( args:String[] ) : EditCmd
+class CmdChannelHSVToRGB( args:String[] ) : EditCmd
   METHODS
     method update_status
-      status = "filter rgbtohsv".appending(args.join(" "))
+      status = "channel rgbtohsv".appending(args.join(" "))
 
     method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1375,7 +1375,7 @@ class CmdFilterNormalize( lo:Int, hi:Int ) : EditCmd
       local original_range = (original_hi - original_lo) + 1
       local new_range = ((hi.clamped(0,255) - lo.clamped(0,255)) + 1).clamped_low(1)
 
-      CmdFilterRGBToHSV(null).apply
+      CmdChannelRGBToHSV(null).apply
 
       local bitmap = ImageList.selected.image.cloned_bitmap
       local n = bitmap.size.product
@@ -1388,13 +1388,13 @@ class CmdFilterNormalize( lo:Int, hi:Int ) : EditCmd
               |  *data = (ahsv & 0xFFFFFF00) | (((((v - $original_lo) * $new_range) / $original_range) + $lo) & 255);
               |}
 
-      CmdFilterHSVToRGB(null).apply
+      CmdChannelHSVToRGB(null).apply
 endClass
 
-class CmdFilterRGBToHSV( args:String[] ) : EditCmd
+class CmdChannelRGBToHSV( args:String[] ) : EditCmd
   METHODS
     method update_status
-      status = "filter rgbtohsv".appending(args.join(" "))
+      status = "channel rgbtohsv".appending(args.join(" "))
 
     method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1442,10 +1442,10 @@ class CmdFilterRGBToHSV( args:String[] ) : EditCmd
 
 endClass
 
-class CmdFilterSwap( a:Int, b:Int ) : EditCmd
+class CmdChannelSwap( a:Int, b:Int ) : EditCmd
   METHODS
     method update_status
-      status = "filter swap channels $<>$"("bgra"[a],"bgra"[b])
+      status = "channel swap channels $<>$"("bgra"[a],"bgra"[b])
 
     method execute
       if ((a or b) and ImageView.image)
