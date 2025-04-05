@@ -490,7 +490,7 @@ endClass
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "crop"
-    syntax  = "[[WxH|Wx|xH|N] [center|top|left|bottom|right|c|t|l|b|r]] |LEFT TOP RIGHT BOTTOM|SCALE]"
+    syntax  = "[[WxH|Wx|xH|N] [center|top|left|bottom|right|c|t|l|b|r]] [LEFT|TOP|RIGHT|BOTTOM|SCALE]"
 
   METHODS
     method execute( arg_string:String )
@@ -518,22 +518,18 @@ class CmdLineCrop : CmdLineHandler [singleton]
           execute( CmdCrop(left,top,right,bottom) )
         endIf
       else
-        local anchor = Vimage.anchor
+        local anchor : Anchor?
         if (args.count > 1)
-          anchor = which{ parse_anchor( args.cloned.[remove_first].join(' ') ) || anchor }
+          anchor = parse_anchor( args.cloned.[remove_first].join(' ') )
         endIf
 
         local (w,h) = parse_size_either_or( args[0] )
         if (w or h)
-          temporarily Vimage.anchor = anchor
-            execute( CmdCropToSize(w,h) )
-          endTemporarily
+          execute( CmdCropToSize(w,h,anchor) )
         else
           local (sx,sy) = parse_scale_either_or( arg_string )
           if (sx or sy)
-            temporarily Vimage.anchor = anchor
-              execute( CmdCropToScale(sx,sy) )
-            endTemporarily
+            execute( CmdCropToScale(sx,sy,anchor) )
           else
             status = "crop [missing or invalid size specification]"
           endIf

@@ -365,7 +365,7 @@ class CmdCrop( left:Int, top:Int, right:Int, bottom:Int ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdCropToSize( width:Int?, height:Int? ) : EditCmd
+class CmdCropToSize( width:Int?, height:Int?, anchor=null:Anchor? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -385,37 +385,41 @@ class CmdCropToSize( width:Int?, height:Int? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      if (width)
-        local width = this.width.value
-        if (width < 0) width = image.bitmap.width + width
-        if (height)
+      local anchor = which{ anchor || Vimage.anchor }
+      temporarily Vimage.anchor = anchor
+        if (width)
+          local width = this.width.value
+          if (width < 0) width = image.bitmap.width + width
+
+          if (height)
+            local height = this.height.value
+            if (height < 0) height = image.bitmap.height + height
+            if (image.bitmap.size == XY(width,height)) return
+
+            local bitmap = image.cloned_bitmap
+            bitmap.crop( width, height, anchor, Vimage.bg_color )
+          else
+            local new_size = XY( width, image.bitmap.height )
+            if (image.bitmap.size == new_size) return
+
+            local bitmap = image.cloned_bitmap
+            bitmap.crop( new_size.x, new_size.y, anchor, Vimage.bg_color )
+          endIf
+        elseIf (height)
           local height = this.height.value
           if (height < 0) height = image.bitmap.height + height
-          if (image.bitmap.size == XY(width,height)) return
-
-          local bitmap = image.cloned_bitmap
-          bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
-        else
-          local new_size = XY( width, image.bitmap.height )
+          local new_size = XY( image.bitmap.width, height )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap
-          bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
+          bitmap.crop( new_size.x, new_size.y, anchor, Vimage.bg_color )
         endIf
-      elseIf (height)
-        local height = this.height.value
-        if (height < 0) height = image.bitmap.height + height
-        local new_size = XY( image.bitmap.width, height )
-        if (image.bitmap.size == new_size) return
-
-        local bitmap = image.cloned_bitmap
-        bitmap.crop( new_size.x, new_size.y, Vimage.anchor, Vimage.bg_color )
-      endIf
+      endTemporarily
 
       ImageView.show( image )
 endClass
 
-class CmdCropToScale( sx:Real?, sy:Real? ) : EditCmd
+class CmdCropToScale( sx:Real?, sy:Real?, anchor=null:Anchor? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
@@ -438,7 +442,7 @@ class CmdCropToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int?
       if (sx) w = (image.bitmap.width  * sx.value)->Int
       if (sy) h = (image.bitmap.height * sy.value)->Int
-      CmdCropToSize( w, h ).execute
+      CmdCropToSize( w, h, anchor ).execute
 endClass
 
 class CmdDX : EditCmd [singleton]
