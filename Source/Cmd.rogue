@@ -1014,6 +1014,26 @@ class CmdChannelCopy( a:String, b:String ) : EditCmd
       ImageView.mark_modified
 endClass
 
+class CmdExtract( min:Int[], max:Int[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "extract color range"
+
+    method execute
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
+          local bitmap = Bitmap( current.image.bitmap.size )
+          current.image.bitmap.blit( bitmap, 0, 0, BlitModeExtract(min,max) )
+          local image = Image( bitmap )
+          ImageList.insert( image, index )
+          ImageList.select( index )
+          ImageList.request_layout
+        endIf
+      else
+        status = "extract color range [no image selected]"
+      endIf
+endClass
+
 class CmdFlipH : EditCmd [singleton]
   METHODS
     method update_status

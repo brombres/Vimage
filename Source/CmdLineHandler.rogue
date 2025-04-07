@@ -725,6 +725,61 @@ class CmdLineAspectFit : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineExtract : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "extract"
+    syntax  = "[1-4 channel thresholds e.g. 'a == 255, g <= 128, b > 64']"
+
+  METHODS
+    method execute( arg_line:String )
+      if (arg_line == "")
+        status = "extract [no channel thresholds given]"
+        return
+      endIf
+
+      local min = Dim<<Int>>(4)
+      local max = Dim<<Int>>(4).[ fill(255) ]
+      local args = arg_line.split(',')
+      forEach (arg in args)
+        contingent
+          sufficient (.apply(arg,"==",min,max))
+          sufficient (.apply(arg,"<=",min,max))
+          sufficient (.apply(arg,"<",min,max))
+          sufficient (.apply(arg,">=",min,max))
+          sufficient (.apply(arg,">",min,max))
+          sufficient (.apply(arg,"=",min,max))
+          necessary (false)
+        unsatisfied
+          status = "extract [invalid argument '$']"(arg)
+          return
+        endContingent
+      endForEach
+
+      execute( CmdExtract(min,max) )
+
+    method .apply( expression:String, op:String, min:Int[], max:Int[] )->Logical
+      expression .= trimmed
+      if local args = expression.extract_strings( "$" + op + "$" )
+        if local i = "argb".locate( args[0] )
+          if (args[1].is_integer)
+            local n = args[1]->Int
+            which (op)
+              case "==", "=": min[i] = n; max[i] = n
+              case "<=": max[i] = n
+              case "<":  max[i] = n - 1
+              case ">=": min[i] = n
+              case ">":  min[i] = n + 1
+            endWhich
+            return true
+          endIf
+        endIf
+      endIf
+
+      return false
+
+
+endClass
+
 class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"
@@ -971,7 +1026,7 @@ class CmdLineNew : CmdLineHandler [singleton]
       if (VimageUI.command.after_first(' ').count?) return "WxH"
 
       localize default_size
-      return "$x$"(default_size.x,default_size.y)
+      return "$x$"(default_size.x->Int,default_size.y->Int)
 endClass
 
 class CmdLineShift : CmdLineHandler [singleton]
