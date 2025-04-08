@@ -829,6 +829,55 @@ class CmdLineFill : CmdLineHandler [singleton]
 
 endClass
 
+class CmdLineFillAlpha : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "fillalpha"
+    syntax  = "[COLOR | LEFT RIGHT | TL TR BL BR | COLORS ]"
+
+  METHODS
+    method execute( arg_line:String )
+      if (arg_line == "")
+        execute( CmdFillAlpha(Vimage.bg_color) )
+        return
+      endIf
+
+      local args = arg_line.split(' ')
+      which (args.count)
+        case 1
+          if local c = parse_color( args[0] )
+            execute( CmdFillAlpha(c) )
+          endIf
+        case 2
+          if local a = parse_color( args[0] )
+            if local b = parse_color( args[1] )
+              execute( CmdFillAlpha2(a,b) )
+            endIf
+          endIf
+        case 4
+          if local a = parse_color( args[0] )
+            if local b = parse_color( args[1] )
+              if local c = parse_color( args[2] )
+                if local d = parse_color( args[3] )
+                  execute( CmdFillAlpha4(a,b,c,d) )
+                endIf
+              endIf
+            endIf
+          endIf
+        others
+          # 3 or 5+ colors makes a gradient from L-R
+          local colors = ColorValue[]
+          forEach (arg in args)
+            if local c = parse_color( arg )
+              colors.add( c )
+            else
+              return
+            endIf
+          endForEach
+          execute( CmdFillAlphaGradient(colors) )
+      endWhich
+
+endClass
+
 class CmdLineHardAlpha : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "ha"

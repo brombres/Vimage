@@ -1182,6 +1182,124 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
 
 endClass
 
+class CmdFillAlpha( c:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      status = "fillalpha $"(c)
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local color = c->Color.argb & 0x00FFFFFF;
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+           |  RogueInt32 existing = *(++data);
+           |  *data = (existing & 0xFF000000) | $color;
+           |}
+      endLoop
+
+endClass
+
+class CmdFillAlpha2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
+    method update_status
+      status = "fillalpha $ $"(a,b)
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local left = a->Color
+      local right = b->Color
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local mid = ColorLerp( left, right, w-1 )
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = mid.read_another.value
+        native
+          @|  RogueInt32 color = *(++data);
+           |  *data = (color & 0xFF000000) | ($argb & 0x00FFFFFF);
+           |}
+      endLoop
+
+endClass
+
+class CmdFillAlpha4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      status = "fillalpha $ $ $ $"(a,b,c,d)
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local left = ColorLerp( a, c, h-1 )
+      local right = ColorLerp( b, d, h-1 )
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        local mid = ColorLerp( Color(left.read_another.value), Color(right.read_another.value), w-1 )
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = mid.read_another.value
+        native
+          @|  RogueInt32 color = *(++data);
+           |  *data = (color & 0xFF000000) | ($argb & 0x00FFFFFF);
+           |}
+      endLoop
+
+endClass
+
+class CmdFillAlphaGradient( colors:ColorValue[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "fillalpha $"(colors)
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local w = bitmap.width
+      local h = bitmap.height
+      local gradient = ColorGradient( colors, w )
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (h)
+        gradient.reset
+        local n = w
+        native
+          @|while (--$n >= 0)
+           |{
+              local argb = gradient.read_another.value
+        native
+          @|  RogueInt32 color = *(++data);
+           |  *data = (color & 0xFF000000) | ($argb & 0x00FFFFFF);
+           |}
+      endLoop
+
+endClass
+
 
 class CmdFilterBrightGold( args:String[] ) : EditCmd
   METHODS
