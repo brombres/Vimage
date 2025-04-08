@@ -90,7 +90,7 @@ class BlitModeXOR : BitmapBlitFn [singleton]
               |  RogueInt32* dest = dest_start;
               |  while (++src < src_limit)
               |  {
-              |    *(dest++) ^= (*src & 0x00FFffFF);
+              |    *(dest++) ^= (*src & 0xffFFffFF);
               |  }
               |  src_start  += $src_width;
               |  src_limit  += $src_width;

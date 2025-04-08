@@ -1182,10 +1182,10 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
 
 endClass
 
-class CmdFillAlpha( c:ColorValue ) : EditCmd
+class CmdFillRGB( c:ColorValue ) : EditCmd
   METHODS
     method update_status
-      status = "fillalpha $"(c)
+      status = "fillrgb $"(c)
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
@@ -1209,9 +1209,9 @@ class CmdFillAlpha( c:ColorValue ) : EditCmd
 
 endClass
 
-class CmdFillAlpha2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
+class CmdFillRGB2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
     method update_status
-      status = "fillalpha $ $"(a,b)
+      status = "fillrgb $ $"(a,b)
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
@@ -1239,10 +1239,10 @@ class CmdFillAlpha2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
 
 endClass
 
-class CmdFillAlpha4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
+class CmdFillRGB4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditCmd
   METHODS
     method update_status
-      status = "fillalpha $ $ $ $"(a,b,c,d)
+      status = "fillrgb $ $ $ $"(a,b,c,d)
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
@@ -1270,10 +1270,10 @@ class CmdFillAlpha4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : 
 
 endClass
 
-class CmdFillAlphaGradient( colors:ColorValue[] ) : EditCmd
+class CmdFillRGBGradient( colors:ColorValue[] ) : EditCmd
   METHODS
     method update_status
-      status = "fillalpha $"(colors)
+      status = "fillrgb $"(colors)
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
