@@ -651,7 +651,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|clamp|gold|gray|normalize]"
+    syntax  = "[brightgold|clamp|gold|gray|hardalpha|normalize]"
 
   METHODS
     method execute( arg_string:String )
@@ -675,6 +675,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
         case "brightgold":   filter = CmdFilterBrightGold( args )
         case "gold":         filter = CmdFilterGold( args )
         case "gray", "grey": filter = CmdFilterGray( args )
+        case "hardalpha":    filter = CmdFilterHardAlpha( args )
         case "normalize"
           which (args.count)
             case 0

@@ -1419,6 +1419,25 @@ class CmdFilterGray( args:String[] ) : EditCmd
 
 endClass
 
+class CmdFilterHardAlpha( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter hardalpha".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (bitmap.width * bitmap.height)
+        local argb = native("*(++data)")->Int
+        if (argb & 0xFF_000000) argb |= 0xFF_000000
+        native @|*data = (RogueInt32)$argb;
+      endLoop
+
+endClass
+
 class CmdChannelHSVToRGB( args:String[] ) : EditCmd
   METHODS
     method update_status
