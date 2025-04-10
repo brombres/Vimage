@@ -2422,17 +2422,6 @@ class CmdSplit( dims:XY ) : EditCmd
         elseIf (tiles_wide < 1 or tiles_high < 1)
           status.print " [invalid split count]"
           return
-        else
-          local image = ImageList.selected.image
-          local bitmap = image.bitmap
-          if (bitmap.width % tiles_wide)
-            status.print " [image width must be an even multiple of $]"(tiles_wide)
-            return
-          endIf
-          if (bitmap.height % tiles_high)
-            status.print " [image height must be an even multiple of $]"(tiles_high)
-            return
-          endIf
         endIf
       endUse
 
@@ -2452,12 +2441,6 @@ class CmdSplit( dims:XY ) : EditCmd
       else
         image = ImageList.selected.image
         bitmap = image.bitmap
-        if (bitmap.width % tiles_wide)
-          return
-        endIf
-        if (bitmap.height % tiles_high)
-          return
-        endIf
       endIf
 
       local index = ImageList.selected.index
@@ -2469,13 +2452,14 @@ class CmdSplit( dims:XY ) : EditCmd
       endWhile
       local fmt = "0$"(digits)
 
-      local w = bitmap.width / tiles_wide
-      local h = bitmap.height / tiles_high
+      local w = (bitmap.width / tiles_wide->Real).ceiling->Int
+      local h = (bitmap.height / tiles_high->Real).ceiling->Int
+      local bounds = Box( bitmap.size )
 
       forEach (j in tiles_high-1 downTo 0)
         forEach (i in tiles_wide-1 downTo 0)
           local seq = j*tiles_wide + i + 1
-          local tile = Bitmap( bitmap, Box(i*w,j*h,w,h) )
+          local tile = Bitmap( bitmap, (Box(i*w,j*h,w,h) & bounds).value )
           local img : Image
           if (image.file)
             img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]

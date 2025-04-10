@@ -103,8 +103,8 @@ Command   | Arguments       | Description
 `:bg`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]`<br>`[t\|transparent\|white\|red\|...\|random]` | Sets the background color used for `:new` images and for expanded areas of an existing image.
 `:channel` | `<operation-name> [ARGS]` | Manipulates the color channels. Refer to the [Channel Operations](#Channel-Operations) table for more information.
 `:crop`     | `WxH` `[t|l|b|r]*` | Crop/expand to size WxH (e.g. `:crop 640x480`). If W and H are real numbers then they are treated as proportions - `:crop 0.5x2.0` crops half the width and expands to twice the height. An optional anchor may be specified.
-`:crop`     | `Wx` `[t|l|b|r]*` | Crop/expand to width W, preserving the current height.
-`:crop`     | `xH` `[t|l|b|r]*` | Crop/expand to height H, preserving the current width.
+`:crop`     | `Wx` `[c|t|l|b|r]*` | Crop/expand to width W, preserving the current height. Optional second arg is anchor, e.g. 'center', 't' or 'tl'. ':anchor' setting is used if anchor arg not supplied.
+`:crop`     | `xH` `[c|t|l|b|r]*` | Crop/expand to height H, preserving the current width. Optional second arg is anchor, e.g. 'center', 't' or 'tl'. ':anchor' setting is used if anchor arg not supplied.
 `:crop`     | `N`               | Crop N pixels on all sides. If N is negative then sides are expanded instead.
 `:crop`     | `LEFT TOP RIGHT BOTTOM` | Crop/expand the specified number of pixels on each side. `:crop 1 -2 0 1` crops the left and bottom by 1 pixel and expands the top by 2 pixels.
 `:extract`  | `a<255,r==0,...` | Extracts all the pixels from the current image to a new image that match the specified color component range. Operator `=` is the same as `==` and `!=` is not supported.
