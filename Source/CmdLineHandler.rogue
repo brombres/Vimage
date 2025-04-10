@@ -1057,10 +1057,10 @@ class CmdLineNew : CmdLineHandler [singleton]
     method execute( args:String )
       if (args.count == 0)
         local size = default_size
-        execute( CmdNew(size) )
+        execute( CmdNew(size,&insert=should_insert) )
       else
         if local size = parse_size( args )
-          execute( CmdNew(size) )
+          execute( CmdNew(size,&insert=should_insert) )
         endIf
       endIf
 
@@ -1072,11 +1072,23 @@ class CmdLineNew : CmdLineHandler [singleton]
       endIf
       return ImageView.size * XY(1,2)
 
+    method should_insert->Logical
+      return false
+
     method syntax->String
       if (VimageUI.command.after_first(' ').count?) return "WxH"
 
       localize default_size
       return "$x$"(default_size.x->Int,default_size.y->Int)
+endClass
+
+class CmdLineNEW : CmdLineNew [singleton]
+  PROPERTIES
+    keyword = "NEW"
+
+  METHODS
+    method should_insert->Logical
+      return true
 endClass
 
 class CmdLineShift : CmdLineHandler [singleton]

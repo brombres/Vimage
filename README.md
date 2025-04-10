@@ -115,7 +115,8 @@ Command   | Arguments       | Description
 `:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
 `:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
 `:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
-`:new`      | `WxH`             | Creates a new image of the specified pixel size.
+`:new`      | `WxH`             | Creates a new image of the specified pixel size, inserting it below the current image.
+`:NEW`      | `WxH`             | Like `:new` but inserts the result ABOVE the current image.
 `:open`     | `<filepaths>`     | Opens one or more specified images and adds them to the Image List.
 `:q`        |                 | Quits (closes) the current image. Will be unsuccessful if the image has modifications.
 `:q!`       |                 | Quits (closes) the current image, even if it has modifications.

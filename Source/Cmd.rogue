@@ -1932,10 +1932,10 @@ class CmdName( new_name:String ) : EditCmd
       endIf
 endClass
 
-class CmdNew( size:XY ) : EditCmd
+class CmdNew( size:XY, insert:Logical ) : EditCmd
   METHODS
     method update_status
-      status = "new image [$x$] ($)"(size.x->Int,size.y->Int,Vimage.bg_color)
+      status = "$ image [$x$] ($)"(which{insert:"NEW"||"new"},size.x->Int,size.y->Int,Vimage.bg_color)
 
     method execute
       local before_index = 0L
@@ -1948,6 +1948,8 @@ class CmdNew( size:XY ) : EditCmd
           file = File( cur_file.parent/"NewImage.$"(ext) )
         endIf
       endIf
+
+      if (insert and before_index > 0) --before_index
 
       file = ImageList.make_filepath_unique( file )
 
