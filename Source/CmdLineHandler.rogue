@@ -55,15 +55,10 @@ class CmdLineHandler
             set_status( "$ [missing color specification]"(keyword) )
             return null
           case 1
-            # 0 -> 0x00000000
-            # V -> 0xFFVVVVVV
+            # V -> 0xVVVVVVVV
             local v = arg->Int( &base=16 )
-            if (v == 0)
-              result = Color(0)
-            else
-              v |= v:<<:4
-              result = Color( v, v, v, default_alpha )
-            endIf
+            v |= v:<<:4
+            result = Color( v, v, v, v )
           case 2  # Vv       -> 0xFFVvVvVv
             local v = arg->Int( &base=16 )
             result = Color( v, v, v, default_alpha )
