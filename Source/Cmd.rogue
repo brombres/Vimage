@@ -2511,18 +2511,29 @@ class CmdScroll( dx:Real, dy:Real ) : Cmd
 
 endClass
 
-class CmdShift( x:Int, y:Int ) : EditCmd
+class CmdShift( x:Int, y:Int, wrap:Logical ) : EditCmd
   METHODS
     method update_status
       if (ImageList.selected)
-        status = "shift $ $"(x,y)
+        status = "shift $ $$"(x,y,which{wrap:" wrap"||""})
       else
-        status = "shift $ $ [no image selected]"(x,y)
+        status = "shift $ $$ [no image selected]"(x,y,which{wrap:" wrap"||""})
       endIf
 
     method execute
       if (ImageList.selected)
-        ImageList.selected.image.cloned_bitmap.crop( -x, -y, x, y, Vimage.bg_color )
+        if (wrap)
+          local src = ImageList.selected.image.bitmap
+          local dest = ImageList.selected.image.cloned_bitmap
+          local w = src.width
+          local h = src.height
+          src.blit( dest, x, y )
+          src.blit( dest, x-w, y )
+          src.blit( dest, x, y-h )
+          src.blit( dest, x-w, y-h )
+        else
+          ImageList.selected.image.cloned_bitmap.crop( -x, -y, x, y, Vimage.bg_color )
+        endIf
         ImageView.mark_modified
       endIf
 endClass

@@ -126,7 +126,7 @@ Command   | Arguments       | Description
 `:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:save`     | `[filepath]`      | An alias for `:w`.
-`:shift`    | `X Y`             | Shifts the image. The current ':bg' color is used for shifted-in pixels.
+`:shift`    | `X Y [wrap|w]`    | Shifts the image. The current ':bg' color is used for shifted-in pixels.
 `:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
 `:trim`     | `[t|l|b|r]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.

@@ -1138,13 +1138,20 @@ endClass
 class CmdLineShift : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "shift"
-    syntax = "X Y"
+    syntax = "X Y [wrap|w]"
 
   METHODS
     method execute( args:String )
       local args = args.split(' ')
+
+      local wrap = false
+      if (args.count > 0 and (args.last == "wrap" or args.last == "w"))
+        wrap = true
+        args.remove_last
+      endIf
+
       if (args.count == 2 and args[0].is_number and args[1].is_number)
-        execute( CmdShift(args[0]->Int,args[1]->Int) )
+        execute( CmdShift(args[0]->Int,args[1]->Int,&=wrap) )
       else
         status = "shift [missing or invalid X and Y shift offsets]"
       endIf
