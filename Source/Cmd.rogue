@@ -643,7 +643,11 @@ class CmdParseJoinV : Cmd [singleton]
       Vimage.execute( cmd )
 endClass
 
-class CmdJoin( dims:XY ) : EditCmd
+class CmdJoin( dims:XY, patch=false:Logical ) : EditCmd
+  PROPERTIES
+    cur_color : Color
+    alt_color : Color
+
   METHODS
     method update_status
       local w = dims.x->Int
@@ -653,17 +657,17 @@ class CmdJoin( dims:XY ) : EditCmd
       if (total <= 1)
         status = "join $x$ [no effect]"(w,h)
         return
-      elseIf (h == 1)
+      elseIf (h == 1 and not patch)
         if (w == 2) status = "n (join horizontal)$"(has_images)
         else        status = "$n (join horizontal)$"(w,has_images)
-      elseIf (w == 1)
+      elseIf (w == 1 and not patch)
         if (h == 2) status = "N (join vertical)$"(has_images)
         else        status = "$N (join vertical)$"(h,has_images)
       elseIf (ImageList.count == 0)
-        status = "join $x$ [no image selected]"(w,h)
+        status = "join $x$$ [no image selected]"(w,h,which{patch:" patch"||""})
         return
       else
-        status = "join $x$"(w,h)
+        status = "join $x$$"(w,h,which{patch:" patch"||""})
       endIf
 
     method execute
@@ -765,11 +769,84 @@ class CmdJoin( dims:XY ) : EditCmd
           cursor_y += dy
         endForEach
 
+        if (patch)
+          cur_color = Color.RED
+          alt_color = Color.GREEN
+          if (h == 1)
+            # Only a top size strip (font characters)
+            local top = .create_h_size_strip( list, w, h, total_w )
+            local work = Bitmap( total_w, total_h + 1 )
+            top.blit( work, 0, 0 )
+            result.blit( work, 0, 1 )
+            result = work
+          else
+            # Size strips on all sides
+            local top   = .create_h_size_strip( list, w, h, total_w, &corners )
+            swapValues( cur_color, alt_color )
+            local right = .create_v_size_strip( list, w, h, total_h )
+
+            cur_color = Color.RED
+            alt_color = Color.GREEN
+            local left   = .create_v_size_strip( list, w, h, total_h )
+            swapValues( cur_color, alt_color )
+            local bottom = .create_h_size_strip( list, w, h, total_w, &corners )
+
+            local work = Bitmap( total_w+2, total_h+2 )
+            top.blit( work, 0, 0 )
+            bottom.blit( work, 0, total_h+1 )
+            left.blit( work, 0, 1 )
+            right.blit( work, total_w+1, 1 )
+            result.blit( work, 1, 1 )
+            result = work
+          endIf
+        endIf
+
         local result_image = Image( result, file ).[ is_modified=true ]
         ImageList.insert( result_image, original_index )
         ImageList.select( result_image )
 
       endUse
+
+    method .create_h_size_strip( list:Image[], w:Int, h:Int, total_w:Int, &corners )->Bitmap
+      local strip_w = total_w
+      if (corners) strip_w += 2
+      local strip = Bitmap( strip_w, 1 )
+
+      local pixels = strip.pixels
+      local pos = 0
+      if (corners)
+        pixels[0] = cur_color
+        pos = 1
+      endIf
+
+      forEach (i in 0..<w)
+        local bitmap = list[i].bitmap
+        loop (bitmap.width)
+          pixels[pos] = cur_color
+          ++pos
+        endLoop
+        swapValues( cur_color, alt_color )
+      endForEach
+
+      if (corners) pixels[pos] = alt_color
+
+      return strip
+
+    method .create_v_size_strip( list:Image[], w:Int, h:Int, total_h:Int )->Bitmap
+      local strip = Bitmap( 1, total_h )
+      block
+        local pixels = strip.pixels
+        local pos = 0
+        forEach (j in 0..<h)
+          local bitmap = list[j*w].bitmap
+          loop (bitmap.height)
+            pixels[pos] = cur_color
+            ++pos
+          endLoop
+          swapValues( cur_color, alt_color )
+        endForEach
+      endBlock
+      return strip
 endClass
 
 class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
@@ -2539,25 +2616,39 @@ class CmdShift( x:Int, y:Int, wrap:Logical ) : EditCmd
 endClass
 
 class CmdSplit( dims:XY ) : EditCmd
+  PROPERTIES
+    patch : Logical
+
   METHODS
+    method init( patch )
+
     method update_status
-      local tiles_wide = dims.x->Int
-      local tiles_high = dims.y->Int
-      local total = tiles_wide * tiles_high
+      if (patch)
+        if (ImageList.count == 0) status = "split patches [no image selected]"
+        else                      status = "split patches"
+      else
+        local tiles_wide = dims.x->Int
+        local tiles_high = dims.y->Int
+        local total = tiles_wide * tiles_high
 
-      use status = StatusBar
-        status.print "split $x$ -> $ images"(tiles_wide,tiles_high,total)
-        if (ImageList.count == 0)
-          status.print " [no image selected]"
-          return
-        elseIf (tiles_wide < 1 or tiles_high < 1)
-          status.print " [invalid split count]"
-          return
-        endIf
-      endUse
-
+        use status = StatusBar
+          status.print "split $x$ -> $ images"(tiles_wide,tiles_high,total)
+          if (ImageList.count == 0)
+            status.print " [no image selected]"
+            return
+          elseIf (tiles_wide < 1 or tiles_high < 1)
+            status.print " [invalid split count]"
+            return
+          endIf
+        endUse
+      endIf
 
     method execute
+      if (patch)
+        .execute_split_patch
+        return
+      endIf
+
       local tiles_wide = dims.x->Int
       local tiles_high = dims.y->Int
       local total = tiles_wide * tiles_high
@@ -2574,37 +2665,118 @@ class CmdSplit( dims:XY ) : EditCmd
         bitmap = image.bitmap
       endIf
 
+      local w = (bitmap.width / tiles_wide->Real).ceiling->Int
+      local h = (bitmap.height / tiles_high->Real).ceiling->Int
+      local bounds = Box( bitmap.size )
+
+      local tiles = Bitmap[]
+      forEach (j in 0..<tiles_high)
+        forEach (i in 0..<tiles_wide)
+          tiles.add( Bitmap(bitmap, (Box(i*w,j*h,w,h) & bounds).value) )
+        endForEach
+      endForEach
+      .insert_images( tiles )
+
+    method .execute_split_patch
+      if (ImageList.count == 0) return
+      local bitmap = ImageList.selected.image.bitmap
+
+      if (bitmap.width < 1 or bitmap.height < 1) return
+      local pixels = bitmap.pixels
+
+      # Patch widths
+      local w = 1
+      local widths = [1]
+      local cur = pixels[0]
+      local bottom_i = (bitmap.height - 1) * bitmap.width
+      local bottom_matches = (pixels[0] == pixels[bottom_i])
+      forEach (i in 1..<bitmap.width)
+        local next = pixels[i]
+        if (next != cur)
+          ++w
+          cur = next
+          widths.add( 1 )
+        else
+          ++widths.last
+        endIf
+        if (pixels[bottom_i+i] != next) bottom_matches = false
+      endForEach
+
+      if (bottom_matches)
+        # Assume sizing guides on all four sides.
+        --widths.first
+        --widths.last
+
+        # Patch heights
+        local h = 1
+        local heights = [1]
+        local stride = bitmap.width
+        cur = pixels[stride]
+        local pos = stride * 2
+        loop (bitmap.height - 3)
+          local next = pixels[pos]
+          pos += stride
+          if (next != cur)
+            ++h
+            cur = next
+            heights.add( 1 )
+          else
+            ++heights.last
+          endIf
+        endLoop
+
+        local tiles = Bitmap[]
+        local y = 1
+        forEach (tile_h in heights)
+          local x = 1
+          forEach (tile_w in widths)
+            tiles.add( Bitmap(bitmap, Box(x,y,tile_w,tile_h)) )
+            x += tile_w
+          endForEach
+          y += tile_h
+        endForEach
+        .insert_images( tiles )
+
+      else
+        # Sizing guide on top only.
+        local tile_h = bitmap.height - 1
+        local tiles = Bitmap[]
+        local x = 0
+        forEach (tile_w in widths)
+          tiles.add( Bitmap(bitmap, Box(x,1,tile_w,tile_h)) )
+          x += tile_w
+        endForEach
+        .insert_images( tiles )
+      endIf
+
+    method .insert_images( tiles:Bitmap[] )
+      local original = ImageList.selected.image
       local index = ImageList.selected.index
+
       local digits = 1L
       local limit = 10L
-      while (limit < total)
+      while (limit < tiles.count)
         ++digits
         limit *= 10
       endWhile
       local fmt = "0$"(digits)
 
-      local w = (bitmap.width / tiles_wide->Real).ceiling->Int
-      local h = (bitmap.height / tiles_high->Real).ceiling->Int
-      local bounds = Box( bitmap.size )
-
-      forEach (j in tiles_high-1 downTo 0)
-        forEach (i in tiles_wide-1 downTo 0)
-          local seq = j*tiles_wide + i + 1
-          local tile = Bitmap( bitmap, (Box(i*w,j*h,w,h) & bounds).value )
-          local img : Image
-          if (image.file)
-            img = Image( tile, image.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]
-          elseIf (image.name)
-            img = Image( tile, "$-$"(image.name,seq.format(fmt)) )
-          else
-            img = Image( tile, seq.format(fmt) )
-          endIf
-          ImageList.insert( img, index )
-        endForEach
+      forEach (tile at i in tiles step -1)
+        local seq = i + 1
+        local image : Image
+        if (original.file)
+          image = Image( tile, original.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]
+        elseIf (original.name)
+          image = Image( tile, "$-$"(original.name,seq.format(fmt)) )
+        else
+          image = Image( tile, seq.format(fmt) )
+        endIf
+        ImageList.insert( image, index )
       endForEach
 
       ImageList.remove( ImageList.selected )
       ImageList.select( index )
+
 
 endClass
 

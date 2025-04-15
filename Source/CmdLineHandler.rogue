@@ -980,18 +980,22 @@ endClass
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"
-    syntax  = "[h|v|WxH]"
+    syntax  = "WxH [patch|p]"
 
   METHODS
-    method execute( args:String )
-      if (args == "h")
-        execute( CmdJoin(XY(2,1)) )
-      elseIf (args == "v")
-        execute( CmdJoin(XY(1,2)) )
-      else
-        if local size = parse_size( args )
-          execute( CmdJoin(size) )
-        endIf
+    method execute( arg_string:String )
+      local args = arg_string.split(' ')
+      local patch = false
+      if (args.contains("patch"))
+        args.remove( "patch" )
+        patch = true
+      elseIf (args.contains("p"))
+        args.remove( "p" )
+        patch = true
+      endIf
+
+      if local size = parse_size( args.join(' ') )
+        execute( CmdJoin(size,&=patch) )
       endIf
 endClass
 
@@ -1230,12 +1234,16 @@ endClass
 class CmdLineSplit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "split"
-    syntax  = "WxH"
+    syntax  = "[WxH|patch|p]"
 
   METHODS
-    method execute( args:String )
-      if local size = parse_size( args )
-        execute( CmdSplit(size) )
+    method execute( arg_string:String )
+      if (arg_string == "patch" or arg_string == "p" or arg_string == "patches")
+        execute( CmdSplit(&patch) )
+      else
+        if local size = parse_size( arg_string )
+          execute( CmdSplit(size) )
+        endIf
       endIf
 endClass
 

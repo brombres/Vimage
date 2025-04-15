@@ -114,7 +114,7 @@ Command   | Arguments       | Description
 `:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
-`:join`     | `WxH`             | Join or splice the next W\*H images together in a WxH grid. Images are aspect-fit-resized as necessary so that all grid cells are a consistent size.
+`:join`     | `WxH [patch]`     | Join or splice the next W\*H images together in a WxH grid. If 'patch' is specified, a sizing guide strip is added to the top if H==1 (font strip) or all four sides if H>1 (9-patch image).
 `:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
 `:new`      | `WxH`             | Creates a new image of the specified pixel size, inserting it below the current image.
 `:NEW`      | `WxH`             | Like `:new` but inserts the result ABOVE the current image.
@@ -127,7 +127,8 @@ Command   | Arguments       | Description
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:save`     | `[filepath]`      | An alias for `:w`.
 `:shift`    | `X Y [wrap|w]`    | Shifts the image. The current ':bg' color is used for shifted-in pixels.
-`:split`    | `[WxH]`           | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
+`:split`    | `WxH`             | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
+`:split`    | `patch`           | Auto-determines whether image has a sizing guide only on the top (font strip) or on all four sides (9-patch image) and then splits the image into its separate tiles.
 `:trim`     | `[t|l|b|r]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.
 `:wall`     |                   | Writes (saves) all modified images.
