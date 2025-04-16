@@ -723,43 +723,72 @@ class CmdJoin( dims:XY, patch=false:Logical ) : EditCmd
           list.add( Image(Bitmap(1,1).[clear(Vimage.bg_color)]) )
         endWhile
 
-        # Find largest width and largest height
         local max_width = Best<<Int>>( (a,b) => a > b )
         local max_height = Best<<Int>>( (a,b) => a > b )
-        forEach (item in list)
-          max_width.consider( item.bitmap.width )
-          max_height.consider( item.bitmap.height )
-        endForEach
-
-        local tile_w = max_width.value
-        local tile_h = max_height.value
 
         local total_w, total_h : Int
         if (w == 1)
           # Resize all images to be max width
+          max_width.consider( (forEach in list).bitmap.width )
+          local tile_w = max_width.value
+
           local cmd = CmdResizeToSize( tile_w, null )
           cmd.execute( (forEach in list) )
           total_w = tile_w
           total_h += (forEach in list).bitmap.height
         elseIf (h == 1)
           # Resize all images to be max height
+          max_height.consider( (forEach in list).bitmap.height )
+          local tile_h = max_height.value
+
           local cmd = CmdResizeToSize( null, tile_h )
           cmd.execute( (forEach in list) )
           total_w += (forEach in list).bitmap.width
           total_h = tile_h
         else
-          # Reshape all images to be max width and/or height
-          local cmd = CmdAspectFitToSize( tile_w, tile_h )
-          cmd.execute( (forEach in list) )
-          total_w = tile_w * w
-          total_h = tile_h * h
+          # Add image padding as necessary to ensure that all images
+          # on a row are the same height and that all rows are the
+          # same width.
+          forEach (j in 0..<h)
+            max_height.clear
+
+            local row_w = 0
+            forEach (i in 0..<w)
+              local bitmap = list[ j*w+i ].bitmap
+              max_height.consider( bitmap.height )
+              row_w += bitmap.width
+            endForEach
+            max_width.consider( row_w )
+            total_h += max_height.value
+
+            forEach (i in 0..<w)
+              local image = list[ j*w+i ]
+              local dh = max_height.value - image.bitmap.height
+              if (dh > 0) image.cloned_bitmap.expand( 0, 0, 0, dh )
+            endForEach
+          endForEach
+
+          total_w = max_width.value
+
+          # Ensure each row is max_width
+          forEach (j in 0..<h)
+            local row_w = 0
+            forEach (i in 0..<w)
+              row_w += list[j*w+i].bitmap.width
+            endForEach
+
+            local dw = max_width.value - row_w
+            if (dw > 0)
+              list[(j+1)*w - 1].cloned_bitmap.expand( 0, 0, dw, 0 )
+            endIf
+          endForEach
         endIf
 
         local result = Bitmap( total_w, total_h )
         local cursor_y = 0L
         forEach (j in 0..<h)
           local cursor_x = 0L
-          local dy = tile_h
+          local dy : Int
           forEach (i in 0..<w)
             local bitmap = list[ j*w+i ].bitmap
             bitmap.blit( result, cursor_x, cursor_y )
