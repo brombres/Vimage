@@ -569,6 +569,9 @@ endClass
 
 class CmdPanToBottom : Cmd [singleton]
   METHODS
+    method update_status
+      status = "G (go to bottom)"
+
     method execute
       if local item = ImageList.selected
         item.image.camera = XY( item.image.camera.x, 1.0 )
@@ -578,6 +581,9 @@ endClass
 
 class CmdPanToLeft : Cmd [singleton]
   METHODS
+    method update_status
+      status = "# (scroll to left side)"
+
     method execute
       if local item = ImageList.selected
         item.image.camera .= yv
@@ -599,6 +605,9 @@ endClass
 
 class CmdPanToRight : Cmd [singleton]
   METHODS
+    method update_status
+      status = "$ (scroll to right side)"
+
     method execute
       if local item = ImageList.selected
         item.image.camera = XY( 1.0, item.image.camera.y )
@@ -620,6 +629,9 @@ endClass
 
 class CmdPanToTop : Cmd [singleton]
   METHODS
+    method update_status
+      status = "g (go to top)"
+
     method execute
       if local item = ImageList.selected
         item.image.camera .= xv
