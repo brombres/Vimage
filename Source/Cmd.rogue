@@ -1238,27 +1238,7 @@ class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
       status = "fill $ $"(a,b)
 
     method execute( ignore_repeat_count:Int )
-      if (not ImageList.selected) return
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-      local w = bitmap.width
-      local h = bitmap.height
-      local left = a->Color
-      local right = b->Color
-
-      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-
-      loop (h)
-        local mid = ColorLerp( left, right, w-1 )
-        local n = w
-        native
-          @|while (--$n >= 0)
-           |{
-              local argb = mid.read_another.value
-        native
-          @|  *(++data) = $argb;
-           |}
-      endLoop
+      CmdFill4( a, a, b, b ).execute( &=ignore_repeat_count )
 
 endClass
 
@@ -1353,28 +1333,7 @@ class CmdFillAlpha2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
       status = "fillalpha $ $"(a,b)
 
     method execute( ignore_repeat_count:Int )
-      if (not ImageList.selected) return
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-      local w = bitmap.width
-      local h = bitmap.height
-      local left = a->Color
-      local right = b->Color
-
-      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-
-      loop (h)
-        local mid = ColorLerp( left, right, w-1 )
-        local n = w
-        native
-          @|while (--$n >= 0)
-           |{
-              local argb = mid.read_another.value
-        native
-          @|  RogueInt32 color = *(++data);
-           |  *data = (color & 0x00FFFFFF) | ($argb & 0xFF000000);
-           |}
-      endLoop
+      CmdFillAlpha4( a, a, b, b ).execute( &=ignore_repeat_count )
 
 endClass
 
@@ -1471,28 +1430,7 @@ class CmdFillRGB2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
       status = "fillrgb $ $"(a,b)
 
     method execute( ignore_repeat_count:Int )
-      if (not ImageList.selected) return
-
-      local bitmap = ImageList.selected.image.cloned_bitmap
-      local w = bitmap.width
-      local h = bitmap.height
-      local left = a->Color
-      local right = b->Color
-
-      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
-
-      loop (h)
-        local mid = ColorLerp( left, right, w-1 )
-        local n = w
-        native
-          @|while (--$n >= 0)
-           |{
-              local argb = mid.read_another.value
-        native
-          @|  RogueInt32 color = *(++data);
-           |  *data = (color & 0xFF000000) | ($argb & 0x00FFFFFF);
-           |}
-      endLoop
+      CmdFillRGB4( a, a, b, b ).execute( &=ignore_repeat_count )
 
 endClass
 

@@ -779,7 +779,7 @@ endClass
 class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"
-    syntax  = "[COLOR | LEFT RIGHT | TL TR BL BR | COLORS ]"
+    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
 
   METHODS
     method execute( arg_line:String )
@@ -828,7 +828,7 @@ endClass
 class CmdLineFillAlpha : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fillalpha"
-    syntax  = "[COLOR | LEFT RIGHT | TL TR BL BR | COLORS ]"
+    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
 
   METHODS
     method execute( arg_line:String )
@@ -877,7 +877,7 @@ endClass
 class CmdLineFillRGB : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fillrgb"
-    syntax  = "[COLOR | LEFT RIGHT | TL TR BL BR | COLORS ]"
+    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
 
   METHODS
     method execute( arg_line:String )
