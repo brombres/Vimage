@@ -701,6 +701,47 @@ class CmdLineFilter : CmdLineHandler [singleton]
 
 endClass
 
+class CmdLineGenerate : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "generate"
+    syntax  = "[perlin]"
+
+  METHODS
+    method execute( arg_string:String )
+      local cmd : Cmd
+
+      local args = arg_string.split(' ')
+      local filter_name = args.remove_first
+      which (filter_name)
+        case "perlin":
+          local freq = 8.0
+          if (args.count)
+            if (args.first.is_number)
+              freq = args.first->Real
+            else
+              status = "generate perlin <frequency> [frequency must be a number, e.g. 8.0]"
+              return
+            endIf
+          endIf
+          cmd = CmdGeneratePerlin( freq )
+      endWhich
+
+      if (cmd)
+        execute( cmd )
+      else
+        status = "generate [missing or invalid generator name]"
+      endIf
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      which (args.first)
+        case "perlin": return "[frequency] (default:8.0)"
+        others: return @syntax
+      endWhich
+
+endClass
+
 class CmdLineAspectFit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "aspect-fit"

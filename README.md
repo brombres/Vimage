@@ -113,6 +113,7 @@ Command   | Arguments       | Description
 `:fillalpha` | `COLOR`\<br>`TOP BOTTOM`<br>`TL TR BL BR`<br>`COLORS` | Similar to ':fill' except preserves rgb values and only fills alpha color.
 `:fillrgb` | `COLOR`\<br>`TOP BOTTOM`<br>`TL TR BL BR`<br>`COLORS` | Similar to ':fill' except preserves alpha values and only fills RGB color.
 `:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
+`:generate` | `<generator-name> [ARGS]` | Generates new pixel data in the current image. Refer to the [Generators](#Generators) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
 `:join`     | `WxH [patch]`     | Join or splice the next W\*H images together in a WxH grid. If 'patch' is specified, a sizing guide strip is added to the top if H==1 (font strip) or all four sides if H>1 (9-patch image).
@@ -167,3 +168,11 @@ gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
 hardalpha      | &nbsp;       | Sets pixels with nonzero alpha values to have alpha 255.
 normalize      | [low high] (defaults: 0 255) | Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
+
+# Generators
+
+    :generator <filter-name> [ARGS]
+
+Filter Name    | Arguments  | Description
+---------------|------------|------------
+perlin         | [frequency] (default: 8.0) | Generates Perlin Noise.

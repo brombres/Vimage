@@ -1,5 +1,6 @@
 library Vimage
 uses Math/Best
+uses Math/PerlinNoise
 
 class Cmd
   GLOBAL METHODS
@@ -1630,6 +1631,35 @@ class CmdFilterHardAlpha( args:String[] ) : EditCmd
         if (argb & 0xFF_000000) argb |= 0xFF_000000
         native @|*data = (RogueInt32)$argb;
       endLoop
+
+endClass
+
+class CmdGeneratePerlin( frequency=8.0:Real ) : EditCmd
+  METHODS
+    method update_status
+      local message = "generate perlin frequency:$"(frequency)
+      if (not ImageList.selected) message .= appending( "[no image selected]" )
+      status = message
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+
+      use noise = WorkList<<Real>>
+        PerlinNoise.[randomize].generate( bitmap.width, bitmap.height, frequency, noise )
+
+        native
+        @|RogueReal*  noise = $noise->as_reals - 1;
+         |RogueInt32* pixels  = $bitmap->pixels->as_int32s - 1;
+
+        loop (bitmap.width * bitmap.height)
+          native
+          @|RogueInt32 v = (RogueInt32) (*(++noise) * 128 + 128);
+           |*(++pixels) = 0xFF000000 | (v<<16) | (v<<8) | v;
+        endLoop
+
+      endUse
 
 endClass
 
