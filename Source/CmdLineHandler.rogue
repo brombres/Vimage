@@ -1065,6 +1065,18 @@ class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineLiteralAdd : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "+"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+
+  METHODS
+    method execute( args:String )
+      if local color = parse_color( args )
+        execute( CmdLiteralAdd(color->Color.argb) )
+      endIf
+endClass
+
 class CmdLineLiteralMultiply : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "*"

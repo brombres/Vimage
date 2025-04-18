@@ -84,6 +84,7 @@ Key    | Command              | Description
 `!`    | Bitwise NOT          | Inverts the RGB pixel values of the current image.
 `#`    | Jump to Left Side    | Pans the image window to make the left side of the image visible.
 `$`    | Jump to Right Side   | Pans the image window to make the right side of the image visible.
+`+`    | Add                  | Adds the pixels of this image to the image below.
 `&`    | Bitwise AND          | Combine this image with the image below using a bitwise AND operation.
 `\|`    | Bitwise OR           | Combine this image with the image below using a bitwise OR operation.
 `~`    | Bitwise XOR          | Combine this image with the image below using a bitwise XOR operation.
@@ -140,6 +141,7 @@ Command   | Arguments       | Description
 `:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
 `:>`        | `N`               | Right-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:> 8`.
 `:>`        | `N a`             | Right-rotates the ARGB bits by N pixels. Example: `:> 8 a`.
+`:+`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Adds the specified constant color to each pixel in the current image.
 `:*`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Color-multiplies each pixel in the current image by the specified constant color.
 
 # Channel Operations

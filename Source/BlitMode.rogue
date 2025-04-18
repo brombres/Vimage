@@ -23,6 +23,42 @@ class BlitModeAND : BitmapBlitFn [singleton]
               |}
 endClass
 
+class BlitModeAdd : BitmapBlitFn [singleton]
+  METHODS
+    method call( src:Bitmap, src_x1:Int, src_y1:Int, dest:Bitmap, dest_x1:Int, dest_y1:Int, blit_width:Int, blit_height:Int )
+      local src_width = src.width
+      local dest_width = dest.width
+      native @|RogueInt32* src_start  = $src->pixels->as_int32s + ($src_y1 * $src_width + $src_x1);
+              |RogueInt32* src_limit  = src_start + $blit_width;
+              |RogueInt32* dest_start = $dest->pixels->as_int32s + ($dest_y1 * $dest_width + $dest_x1);
+              |
+              |while (--$blit_height >= 0)
+              |{
+              |  RogueInt32* src  = src_start - 1;
+              |  RogueInt32* dest = dest_start;
+              |  while (++src < src_limit)
+              |  {
+              |    RogueInt32 c1 = *src;
+              |    RogueInt32 c2 = *dest;
+              |    RogueInt32 src_a = ((c1 >> 24) & 255);
+              |    RogueInt32 src_r = (((c1 >> 16) & 255) * src_a) / 255;
+              |    RogueInt32 src_g = (((c1 >>  8) & 255) * src_a) / 255;
+              |    RogueInt32 src_b = (( c1        & 255) * src_a) / 255;
+              |    RogueInt32 a = c2 & 0xFF000000;
+              |    RogueInt32 r = (src_r + ((c2 >> 16) & 255));
+              |    RogueInt32 g = (src_g + ((c2 >>  8) & 255));
+              |    RogueInt32 b = (src_b + ( c2        & 255));
+              |    if (r > 255) r = 255;
+              |    if (g > 255) g = 255;
+              |    if (b > 255) b = 255;
+              |    *(dest++) = (a | (r<<16) | (g<<8) | b);
+              |  }
+              |  src_start  += $src_width;
+              |  src_limit  += $src_width;
+              |  dest_start += $dest_width;
+              |}
+endClass
+
 class BlitModeMultiply : BitmapBlitFn [singleton]
   METHODS
     method call( src:Bitmap, src_x1:Int, src_y1:Int, dest:Bitmap, dest_x1:Int, dest_y1:Int, blit_width:Int, blit_height:Int )
