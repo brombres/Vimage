@@ -677,7 +677,7 @@ class CmdParseJoinV : Cmd [singleton]
       Vimage.execute( cmd )
 endClass
 
-class CmdJoin( dims:XY, patch=false:Logical ) : EditCmd
+class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Logical ) : EditCmd
   PROPERTIES
     cur_color : Color
     alt_color : Color
@@ -691,17 +691,25 @@ class CmdJoin( dims:XY, patch=false:Logical ) : EditCmd
       if (total <= 1)
         status = "join $x$ [no effect]"(w,h)
         return
-      elseIf (h == 1 and not patch)
+      elseIf (h == 1 and not patch and not blend)
         if (w == 2) status = "n (join horizontal)$"(has_images)
         else        status = "$n (join horizontal)$"(w,has_images)
-      elseIf (w == 1 and not patch)
+      elseIf (w == 1 and not patch and not blend)
         if (h == 2) status = "N (join vertical)$"(has_images)
         else        status = "$N (join vertical)$"(h,has_images)
-      elseIf (ImageList.count == 0)
-        status = "join $x$$ [no image selected]"(w,h,which{patch:" patch"||""})
-        return
       else
-        status = "join $x$$"(w,h,which{patch:" patch"||""})
+        local message = "join $x$"(w,h)
+        if (patch) message .= appending( "patch" )
+        if (blend)
+          message .= appending( "blend" )
+          if (blend >= 1) message .= appending( "$ pixels"(blend->Int) )
+          else            message .= appending( "$%"(blend.format(".0%")) )
+          if (blend_wrap) message .= appending( "wrap" )
+        endIf
+
+        if (ImageList.count == 0) message .= appending( "[no image selected]" )
+
+        status = message
       endIf
 
     method execute
@@ -817,6 +825,12 @@ class CmdJoin( dims:XY, patch=false:Logical ) : EditCmd
             endIf
           endForEach
         endIf
+
+        # Determine total_w and total_h
+        total_w = 0
+        total_h = 0
+        total_w += list[forEach in 0..<w].bitmap.size.x
+        total_h += list[(forEach in 0..<h)*w].bitmap.size.y
 
         local result = Bitmap( total_w, total_h )
         local cursor_y = 0L

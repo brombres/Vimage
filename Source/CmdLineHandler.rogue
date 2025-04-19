@@ -1021,12 +1021,14 @@ endClass
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "join"
-    syntax  = "WxH [patch|p]"
+    syntax  = "WxH [(b)lend [<amount>[%]] [(w)rap] | (p)atch]"
 
   METHODS
     method execute( arg_string:String )
       local args = arg_string.split(' ')
       local patch = false
+      local blend = 0.0
+      local blend_wrap = false
       if (args.contains("patch"))
         args.remove( "patch" )
         patch = true
@@ -1034,9 +1036,40 @@ class CmdLineJoin : CmdLineHandler [singleton]
         args.remove( "p" )
         patch = true
       endIf
+      if (args.contains("blend"))
+        args.remove( "blend" )
+        blend = 0.25
+      elseIf (args.contains("b"))
+        args.remove( "b" )
+        blend = 0.25
+      endIf
+      if (args.contains("wrap"))
+        args.remove( "wrap" )
+        blend_wrap = true
+      elseIf (args.contains("w"))
+        args.remove( "w" )
+        blend_wrap = true
+      endIf
+      if (blend)
+        if (patch)
+          status = "join [cannot use 'patch' and 'blend' together]"
+          return
+        endIf
+
+        if (args.count > 1)
+          local amount = args.last.before_first( '%' )
+          if (amount != args.last and amount.is_number)
+            args.remove_last
+            blend = amount->Real / 100.0
+          elseIf (amount.is_number)
+            args.remove_last
+            blend = amount->Real
+          endIf
+        endIf
+      endIf
 
       if local size = parse_size( args.join(' ') )
-        execute( CmdJoin(size,&=patch) )
+        execute( CmdJoin(size,&=patch,&=blend,&=blend_wrap) )
       endIf
 endClass
 
