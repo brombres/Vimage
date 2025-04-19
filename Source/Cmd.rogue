@@ -678,6 +678,10 @@ class CmdParseJoinV : Cmd [singleton]
 endClass
 
 class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Logical ) : EditCmd
+  DEFINITIONS
+    OPAQUE      = Color( 0xFFFFFFFF )
+    TRANSPARENT = Color( 0x00FFFFFF )
+
   PROPERTIES
     cur_color : Color
     alt_color : Color
@@ -702,8 +706,8 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
         if (patch) message .= appending( "patch" )
         if (blend)
           message .= appending( "blend" )
-          if (blend >= 1) message .= appending( "$ pixels"(blend->Int) )
-          else            message .= appending( "$%"(blend.format(".0%")) )
+          if (blend > 1.0) message .= appending( "$ pixels"(blend->Int-1) )
+          else             message .= appending( "$%"(blend.format(".0%")) )
           if (blend_wrap) message .= appending( "wrap" )
         endIf
 
@@ -826,63 +830,218 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
           endForEach
         endIf
 
-        # Determine total_w and total_h
-        total_w = 0
-        total_h = 0
-        total_w += list[forEach in 0..<w].bitmap.size.x
-        total_h += list[(forEach in 0..<h)*w].bitmap.size.y
+        local result_bitmap : Bitmap
 
-        local result = Bitmap( total_w, total_h )
-        local cursor_y = 0L
-        forEach (j in 0..<h)
-          local cursor_x = 0L
-          local dy : Int
-          forEach (i in 0..<w)
-            local bitmap = list[ j*w+i ].bitmap
-            bitmap.blit( result, cursor_x, cursor_y )
-            dy = bitmap.height
-            cursor_x += bitmap.width
-          endForEach
-          cursor_y += dy
-        endForEach
-
-        if (patch)
-          cur_color = Color.RED
-          alt_color = Color.GREEN
-          if (h == 1)
-            # Only a top size strip (font characters)
-            local top = .create_h_size_strip( list, w, h, total_w )
-            local work = Bitmap( total_w, total_h + 1 )
-            top.blit( work, 0, 0 )
-            result.blit( work, 0, 1 )
-            result = work
-          else
-            # Size strips on all sides
-            local top   = .create_h_size_strip( list, w, h, total_w, &corners )
-            swapValues( cur_color, alt_color )
-            local right = .create_v_size_strip( list, w, h, total_h )
-
-            cur_color = Color.RED
-            alt_color = Color.GREEN
-            local left   = .create_v_size_strip( list, w, h, total_h )
-            swapValues( cur_color, alt_color )
-            local bottom = .create_h_size_strip( list, w, h, total_w, &corners )
-
-            local work = Bitmap( total_w+2, total_h+2 )
-            top.blit( work, 0, 0 )
-            bottom.blit( work, 0, total_h+1 )
-            left.blit( work, 0, 1 )
-            right.blit( work, total_w+1, 1 )
-            result.blit( work, 1, 1 )
-            result = work
-          endIf
+        if (blend)
+          result_bitmap = .execute_blend_join( list, w, h )
+        else
+          result_bitmap = .execute_standard_join( list, w, h )
         endIf
 
-        local result_image = Image( result, file ).[ is_modified=true ]
+        local result_image = Image( result_bitmap, file ).[ is_modified=true ]
         ImageList.insert( result_image, original_index )
         ImageList.select( result_image )
-
       endUse
+
+    method .execute_blend_join( list:Image[], w:Int, h:Int )->Bitmap
+      local tiles = Bitmap[]
+      tiles.add( (forEach in list).cloned_bitmap )
+
+      # Blend-join horizontal tiles in each row
+      local rows = Bitmap[]
+      forEach (j in 0..<h)
+        local first_w = tiles[ j*w ].width
+        local last_w  = tiles[ (j+1)*w - 1 ].width
+        local row_bitmap : Bitmap
+        local prev_w : Int
+        forEach (i in 0..<w)
+          local cur_bitmap = tiles[ j*w + i ]
+          local cur_w = cur_bitmap.width
+          if (i == 0)
+            row_bitmap = cur_bitmap
+          else
+            row_bitmap = .blend_horizontal(
+              row_bitmap,
+              prev_w,
+              cur_bitmap,
+              cur_w,
+              blend
+            )
+          endIf
+          prev_w = cur_w
+        endForEach
+
+        if (blend_wrap and w > 1)
+          local original_w = row_bitmap.width
+          row_bitmap = .blend_horizontal(
+            row_bitmap,
+            last_w,
+            row_bitmap.cloned,
+            first_w,
+            blend
+          )
+          local overlap_w = (original_w + original_w) - row_bitmap.width
+          local overlap_bitmap = Bitmap( row_bitmap, Box(original_w-overlap_w/2,0,overlap_w/2,row_bitmap.height) )
+          overlap_bitmap.blit( row_bitmap, overlap_w/2, 0 )
+          row_bitmap.crop( overlap_w/2, 0, overlap_w/2, 0 )
+          row_bitmap.crop( row_bitmap.width/2, row_bitmap.height, Anchor.LEFT )
+        endIf
+
+        rows.add( row_bitmap )
+      endForEach
+
+      # Blend-join rows vertically
+      local first_h = rows.first.height
+      local last_h  = rows.last.height
+      local result_bitmap : Bitmap
+      local prev_h : Int
+      forEach (j in 0..<h)
+        local cur_bitmap = rows[j]
+        local cur_h = cur_bitmap.height
+        if (j == 0)
+          result_bitmap = cur_bitmap
+        else
+          result_bitmap = .blend_vertical(
+            result_bitmap,
+            prev_h,
+            cur_bitmap,
+            cur_h,
+            blend
+          )
+        endIf
+        prev_h = cur_h
+      endForEach
+
+      if (blend_wrap and h > 1)
+        local original_h = result_bitmap.height
+        result_bitmap = .blend_vertical(
+          result_bitmap,
+          last_h,
+          result_bitmap.cloned,
+          first_h,
+          blend
+        )
+        local overlap_h = (original_h + original_h) - result_bitmap.height
+        local overlap_bitmap = Bitmap( result_bitmap, Box(0,original_h-overlap_h/2,result_bitmap.width,overlap_h/2) )
+        overlap_bitmap.blit( result_bitmap, 0, overlap_h/2 )
+        result_bitmap.crop( 0, overlap_h/2, 0, overlap_h/2 )
+        result_bitmap.crop( result_bitmap.width, result_bitmap.height/2, Anchor.TOP )
+      endIf
+
+      return result_bitmap
+
+    method .blend_horizontal( left:Bitmap, left_blend_w:Int, right:Bitmap, right_blend_w:Int, blend:Real )->Bitmap
+      local min_width = left_blend_w.or_smaller( right_blend_w )
+      local overlap_w : Int
+      if (blend > 1.0) overlap_w = blend->Int - 1
+      else             overlap_w = (min_width * blend)->Int
+      local result_w = (left.width + right.width) - overlap_w
+
+      if (left_blend_w <= right_blend_w)
+        left.fill(
+          Box( XY(left.width-overlap_w,0), XY(overlap_w,left.height) ),
+          Graphics::ColorGradient( OPAQUE, TRANSPARENT, OPAQUE, TRANSPARENT ),
+          &channel_mask=0xFF000000
+        )
+        left.crop( result_w, left.height, Anchor.LEFT )
+        right.crop( result_w, right.height, Anchor.RIGHT )
+        left.blit( right, 0, 0, BitmapBlitFn.ALPHA )
+        return right
+      else
+        right.fill(
+          Box( XY(overlap_w,right.height) ),
+          Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &channel_mask=0xFF000000
+        )
+        left.crop( result_w,  left.height, Anchor.LEFT )
+        right.crop( result_w, right.height, Anchor.RIGHT )
+        right.blit( left, 0, 0, BitmapBlitFn.ALPHA )
+        return left
+      endIf
+
+    method .blend_vertical( top:Bitmap, top_blend_h:Int, bottom:Bitmap, bottom_blend_h:Int, blend:Real )->Bitmap
+      local min_height = top_blend_h.or_smaller( bottom_blend_h )
+      local overlap_h : Int
+      if (blend > 1.0) overlap_h = blend->Int - 1
+      else             overlap_h = (min_height * blend)->Int
+      local result_h = (top.height + bottom.height) - overlap_h
+
+      if (top_blend_h <= bottom_blend_h)
+        top.fill(
+        Box( XY(0,top.height-overlap_h), XY(top.width,overlap_h) ),
+          Graphics::ColorGradient( OPAQUE, OPAQUE, TRANSPARENT, TRANSPARENT ),
+          &channel_mask=0xFF000000
+        )
+        top.crop( top.width, result_h, Anchor.TOP )
+        bottom.crop( bottom.width, result_h, Anchor.BOTTOM )
+        top.blit( bottom, 0, 0, BitmapBlitFn.ALPHA )
+        return bottom
+      else
+        bottom.fill(
+          Box( XY(overlap_h,bottom.width) ),
+          Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &channel_mask=0xFF000000
+        )
+        top.crop( top.width, result_h, Anchor.TOP )
+        bottom.crop( bottom.width, result_h, Anchor.BOTTOM )
+        bottom.blit( top, 0, 0, BitmapBlitFn.ALPHA )
+        return top
+      endIf
+
+    method .execute_standard_join( list:Image[], w:Int, h:Int )->Bitmap
+      # Determine total_w and total_h
+      local total_w = 0
+      local total_h = 0
+      total_w += list[forEach in 0..<w].bitmap.width
+      total_h += list[(forEach in 0..<h)*w].bitmap.height
+
+      local result = Bitmap( total_w, total_h )
+      local cursor_y = 0L
+      forEach (j in 0..<h)
+        local cursor_x = 0L
+        local dy : Int
+        forEach (i in 0..<w)
+          local bitmap = list[ j*w+i ].bitmap
+          bitmap.blit( result, cursor_x, cursor_y )
+          dy = bitmap.height
+          cursor_x += bitmap.width
+        endForEach
+        cursor_y += dy
+      endForEach
+
+      if (patch)
+        cur_color = Color.RED
+        alt_color = Color.GREEN
+        if (h == 1)
+          # Only a top size strip (font characters)
+          local top = .create_h_size_strip( list, w, h, total_w )
+          local work = Bitmap( total_w, total_h + 1 )
+          top.blit( work, 0, 0 )
+          result.blit( work, 0, 1 )
+          result = work
+        else
+          # Size strips on all sides
+          local top   = .create_h_size_strip( list, w, h, total_w, &corners )
+          swapValues( cur_color, alt_color )
+          local right = .create_v_size_strip( list, w, h, total_h )
+
+          cur_color = Color.RED
+          alt_color = Color.GREEN
+          local left   = .create_v_size_strip( list, w, h, total_h )
+          swapValues( cur_color, alt_color )
+          local bottom = .create_h_size_strip( list, w, h, total_w, &corners )
+
+          local work = Bitmap( total_w+2, total_h+2 )
+          top.blit( work, 0, 0 )
+          bottom.blit( work, 0, total_h+1 )
+          left.blit( work, 0, 1 )
+          right.blit( work, total_w+1, 1 )
+          result.blit( work, 1, 1 )
+          result = work
+        endIf
+      endIf
+
+      return result
 
     method .create_h_size_strip( list:Image[], w:Int, h:Int, total_w:Int, &corners )->Bitmap
       local strip_w = total_w
@@ -953,13 +1112,13 @@ class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
-          local x_scale = width->Real / image.bitmap.size.x
-          local y_scale = height->Real / image.bitmap.size.y
+          local x_scale = width->Real / image.bitmap.width
+          local y_scale = height->Real / image.bitmap.height
           local scale = x_scale.or_larger( y_scale )
           bitmap.resize( bitmap.size * scale )
           bitmap.crop( width, height, Vimage.anchor, Vimage.bg_color )
         else
-          local new_size = XY( width, image.bitmap.size.y*(width->Real/image.bitmap.size.x) )
+          local new_size = XY( width, image.bitmap.size.y*(width->Real/image.bitmap.width) )
           if (image.bitmap.size == new_size) return
 
           local bitmap = image.cloned_bitmap

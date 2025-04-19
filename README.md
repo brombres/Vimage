@@ -117,6 +117,7 @@ Command   | Arguments       | Description
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
 `:join`     | `WxH [patch]`     | Join or splice the next W\*H images together in a WxH grid. If 'patch' is specified, a sizing guide strip is added to the top if H==1 (font strip) or all four sides if H>1 (9-patch image).
+`:join`     | `WxH blend [<percent>%|<pixels>] [wrap]` | Join or splice the next W\*H images together in a WxH grid. The tile seams are blended together by the specified amount (default 25%). If 'wrap' is specified then the last tile is blended into the first tile.
 `:name`     | `<filename>`      | Renames the current image but does not save the renamed image.
 `:new`      | `WxH`             | Creates a new image of the specified pixel size, inserting it below the current image.
 `:NEW`      | `WxH`             | Like `:new` but inserts the result ABOVE the current image.

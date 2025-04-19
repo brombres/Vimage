@@ -1063,7 +1063,7 @@ class CmdLineJoin : CmdLineHandler [singleton]
             blend = amount->Real / 100.0
           elseIf (amount.is_number)
             args.remove_last
-            blend = amount->Real
+            blend = amount->Int + 1
           endIf
         endIf
       endIf
