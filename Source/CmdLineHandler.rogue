@@ -646,7 +646,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[brightgold|clamp|gold|gray|hardalpha|normalize]"
+    syntax  = "[brightgold|clamp|gold|gray|hardalpha|normalize|seamless]"
 
   METHODS
     method execute( arg_string:String )
@@ -681,6 +681,23 @@ class CmdLineFilter : CmdLineHandler [singleton]
               status = "filter normalize [expected no arguments or two arguments]"
               return
           endWhich
+        case "seamless"
+          local amount = 1.0
+          local h = args.remove( "h" )
+          local v = args.remove( "v" )
+          if (args.remove("hv") or args.remove("vh"))
+            h = true
+            v = true
+          endIf
+
+          if (args.count == 1)
+            if (args.first.ends_with('%'))
+              amount = args.first->Real / 100.0
+            else
+              amount = args.first->Int + 1
+            endIf
+          endIf
+          filter = CmdFilterSeamless( &blend=amount, &=h, &=v )
       endWhich
 
       if (filter)
@@ -696,6 +713,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
         case "clamp": return "<low-color> <high-color>"
         case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
         case "normalize":   return "[low high] (defaults: 0 255)"
+        case "seamless":    return "[h|v] [<percent>% | <pixels>] (default: 100%)"
         others: return @syntax
       endWhich
 

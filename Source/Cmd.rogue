@@ -1946,6 +1946,115 @@ class CmdFilterNormalize( lo:Int, hi:Int ) : EditCmd
       CmdChannelHSVToRGB(null).apply
 endClass
 
+class CmdFilterSeamless : EditCmd
+  PROPERTIES
+    blend : Real
+    h, v  : Logical
+
+  METHODS
+    method init( blend=1.0, h=false, v=false )
+      if (not h and not v) h = true; v = true
+
+    method update_status
+      use status = StatusBar
+        status.print "filter seamless "
+        if (h) status.print "h "
+        if (v) status.print "v "
+        if (blend > 1.0) status.print "blend $ pixels"(blend->Int - 1)
+        else             status.print "blend $%"(blend.format(".0%"))
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        endIf
+      endUse
+
+    method execute
+      if (not ImageList.selected) return
+
+      local selected = ImageList.selected
+      local bitmap = selected.image.cloned_bitmap
+
+      local OPAQUE      = Color( 0xFFFFFFFF )
+      local TRANSPARENT = Color( 0x00FFFFFF )
+
+      if (h)
+        local blend_pixels : Int
+        if (blend > 1.0) blend_pixels = blend - 1
+        else             blend_pixels = bitmap.width * blend
+
+        local halves = bitmap.split( 2, 1 )
+        halves.swap( 0, 1 )
+        local w1 = halves.first.width
+        local h1 = halves.first.height
+        local blend_w1 = (blend_pixels/2).or_smaller( w1 )
+        halves.first.fill(
+          Box( blend_w1, h1 ),
+          Graphics::ColorGradient( OPAQUE, TRANSPARENT, OPAQUE, TRANSPARENT ),
+          &channel_mask=0xFF000000
+        )
+        halves.first.fill(
+          Box( blend_w1, 0, w1-blend_w1, h1 ),
+          TRANSPARENT,
+          &channel_mask=0xFF000000
+        )
+
+        local w2 = halves.last.width
+        local h2 = halves.last.height
+        local blend_w2 = (blend_pixels/2).or_smaller( w2 )
+        halves.last.fill(
+          Box( w2 - blend_w2, 0, blend_w2, h2 ),
+          Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &channel_mask=0xFF000000
+        )
+        halves.last.fill(
+          Box( 0, 0, w2-blend_w2, h2 ),
+          TRANSPARENT,
+          &channel_mask=0xFF000000
+        )
+
+        (halves.first + halves.last).blit( bitmap, 0, 0, BitmapBlitFn.ALPHA )
+      endIf
+
+      if (v)
+        local blend_pixels : Int
+        if (blend > 1.0) blend_pixels = blend - 1
+        else             blend_pixels = bitmap.height * blend
+
+        local halves = bitmap.split( 1, 2 )
+        halves.swap( 0, 1 )
+
+        local w1 = halves.first.width
+        local h1 = halves.first.height
+        local blend_h1 = (blend_pixels/2).or_smaller( h1 )
+        halves.first.fill(
+          Box( w1, blend_h1 ),
+          Graphics::ColorGradient( OPAQUE, OPAQUE, TRANSPARENT, TRANSPARENT ),
+          &channel_mask=0xFF000000
+        )
+        halves.first.fill(
+          Box( 0, blend_h1, w1, h1-blend_h1 ),
+          TRANSPARENT,
+          &channel_mask=0xFF000000
+        )
+
+        local w2 = halves.last.width
+        local h2 = halves.last.height
+        local blend_h2 = (blend_pixels/2).or_smaller( h2 )
+        halves.last.fill(
+          Box( 0, h2 - blend_h2, w2, blend_h2 ),
+          Graphics::ColorGradient( TRANSPARENT, TRANSPARENT, OPAQUE, OPAQUE ),
+          &channel_mask=0xFF000000
+        )
+        halves.last.fill(
+          Box( 0, 0, w2, h2 - blend_h2 ),
+          TRANSPARENT,
+          &channel_mask=0xFF000000
+        )
+
+        (halves.first / halves.last).blit( bitmap, 0, 0, BitmapBlitFn.ALPHA )
+      endIf
+
+endClass
+
 class CmdChannelRGBToHSV( args:String[] ) : EditCmd
   METHODS
     method update_status

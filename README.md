@@ -169,6 +169,7 @@ gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
 hardalpha      | &nbsp;       | Sets pixels with nonzero alpha values to have alpha 255.
 normalize      | [low high] (defaults: 0 255) | Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
+seamless       | `[h|v] [<percent>% | <pixels>]` | Creates a seamless tile by splitting and transposing halves, adding a translucency gradient, and merging back over the original image. Optionally specify e.g. '50%' to edge-blend just 50% of the image or e.g. '50' to edge-blend just 50 pixels. Optionally specify 'h' for horizontal only, 'v' for vertical only.
 
 # Generators
 
