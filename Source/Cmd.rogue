@@ -1753,6 +1753,103 @@ class CmdFilterGold( args:String[] ) : EditCmd
 endClass
 
 
+class CmdFilterColorMatch( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "filter colormatch"
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        elseIf (not ImageList.selected.next)
+          status.print " [no underlying image to match]"
+        endIf
+      endUse
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+      if (not ImageList.selected.next) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local bottom = ImageList.selected.next->(as ImageListItem).image.bitmap
+
+      # Grayscale conversion factors
+      local rw = (0.2990 * 65536)->Int
+      local gw = (0.5870 * 65536)->Int
+      local bw = (0.1140 * 65536)->Int
+
+      # Color factor sums per brightness value
+      local red    = Dim<<Int>>( 256 )
+      local green  = Dim<<Int>>( 256 )
+      local blue   = Dim<<Int>>( 256 )
+      local count  = Dim<<Int>>( 256 )
+      local avg_argb = Dim<<Int>>( 256 )
+
+      forEach (color in bottom.pixels)
+        local r = (color.argb:>>>:16) & 0xff
+        local g = (color.argb:>>>:8)  & 0xff
+        local b =  color.argb         & 0xff
+        local v = (r * rw) :>>: 16
+        v += (g * gw) :>>: 16
+        v += (b * bw) :>>: 16
+        red[v]   += r
+        green[v] += g
+        blue[v]  += b
+        ++count[v]
+      endForEach
+
+      # Interpolate undefined brightness values
+      if (count[0] == 0)
+        count[0] = 1
+      endIf
+
+      if (count[255] == 0)
+        local i = 254
+        while (count[i] == 0 and i > 0) --i
+
+        local n = count[i]
+        local brightest_hsv = HSV( Color(red[i]/n, green[i]/n, blue[i]/n) )
+        brightest_hsv.value = 1.0
+        local extrapolated_brightest = brightest_hsv->Color
+        red[255] = extrapolated_brightest.red_byte
+        green[255] = extrapolated_brightest.green_byte
+        blue[255] = extrapolated_brightest.blue_byte
+        count[255] = 1
+      endIf
+
+      # Compute avg color per brightness value, interpolating any missing values
+      local last_defined_i = 0
+      local last_defined_color : Color
+      forEach (n at i in count)
+        if (n)
+          local cur_color = Color( (red[i]/n)->Int, (green[i]/n)->Int, (blue[i]/n)->Int, 0 )
+          avg_argb[i] = cur_color.argb
+
+          forEach (missing_i in last_defined_i+1..<i)
+            # Fill in missing avg_argb
+            local p = (missing_i - last_defined_i)->Real / (i - last_defined_i)
+            avg_argb[missing_i] = p.lerp( last_defined_color, cur_color ).argb
+          endForEach
+
+          last_defined_i = i
+          last_defined_color = cur_color
+        endIf
+      endForEach
+
+      # For each pixel in original image, compute brightness value and assign
+      # average color from lookup table, preserving existing alpha.
+      forEach (color in writer=bitmap.pixels.rewriter)
+        local argb = color.argb
+        local r = (argb:>>>:16) & 0xff
+        local g = (argb:>>>:8)  & 0xff
+        local b =  argb         & 0xff
+        local v = (r * rw) :>>: 16
+        v += (g * gw) :>>: 16
+        v += (b * bw) :>>: 16
+        writer.write( (argb & 0xFF000000) | avg_argb[v] )
+      endForEach
+
+endClass
+
 class CmdFilterGray( args:String[] ) : EditCmd
   METHODS
     method update_status
@@ -1761,34 +1858,39 @@ class CmdFilterGray( args:String[] ) : EditCmd
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
 
-      local rw = 2990L
-      local gw = 5870L
-      local bw = 1140L
+      local rw = 0.2990
+      local gw = 0.5870
+      local bw = 0.1140
       which (args.count)
         case 3
-          local r = args[0]->Real
-          local g = args[1]->Real
-          local b = args[2]->Real
-          local sum = r + g + b
-          if (sum > 0)
-            rw = ((r / sum) * 10000)->Int
-            gw = ((g / sum) * 10000)->Int
-            bw = ((b / sum) * 10000)->Int
-          endIf
+          rw = args[0]->Real
+          gw = args[1]->Real
+          bw = args[2]->Real
       endWhich
 
       local bitmap = ImageList.selected.image.cloned_bitmap
-      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+      convert_to_grayscale( bitmap, rw, gw, bw )
 
-      loop (bitmap.width * bitmap.height)
-        local color = Color( native("*(++data)")->Int )
-        local a = ((color.argb:>>>:24) & 0xff)
-        local v = (((color.argb:>>>:16) & 0xff) * rw) / 10000
-        v += (((color.argb:>>>:8) & 0xff) * gw) / 10000
-        v += ((color.argb & 0xff) * bw) / 10000
-        local argb = (a:<<:24) | (v:<<:16) | (v:<<:8) | v
-        native @|*data = $argb;
-      endLoop
+  GLOBAL METHODS
+    method convert_to_grayscale( bitmap:Bitmap, rw=0.2990:Real, gw=0.5870:Real, bw=0.1140:Real )
+      local sum = (rw + gw + bw).clamped_low(0.01)
+      rw = (rw / sum)
+      gw = (gw / sum)
+      bw = (bw / sum)
+
+      block rw=(rw*65536)->Int, gw=(gw*65536)->Int, bw=(bw*65536)->Int
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+        loop (bitmap.width * bitmap.height)
+          local color = Color( native("*(++data)")->Int )
+          local a = ((color.argb:>>>:24) & 0xff)
+          local v = (((color.argb:>>>:16) & 0xff) * rw) :>>: 16
+          v += (((color.argb:>>>:8) & 0xff) * gw) :>>: 16
+          v += ((color.argb & 0xff) * bw) :>>: 16
+          local argb = (a:<<:24) | (v:<<:16) | (v:<<:8) | v
+          native @|*data = $argb;
+        endLoop
+      endBlock
 
 endClass
 
@@ -2096,6 +2198,14 @@ class CmdChannelRGBToHSV( args:String[] ) : EditCmd
 
     method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
+      convert_rgb_to_hsv( bitmap )
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+      apply
+
+  GLOBAL METHODS
+    method convert_rgb_to_hsv( bitmap:Bitmap )
       local n = bitmap.pixels.count
       native...
         @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
@@ -2133,10 +2243,6 @@ class CmdChannelRGBToHSV( args:String[] ) : EditCmd
          |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
          |}
 
-
-    method execute( ignore_repeat_count:Int )
-      if (not ImageList.selected) return
-      apply
 
 endClass
 

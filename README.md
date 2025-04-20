@@ -165,6 +165,7 @@ Filter Name    | Arguments  | Description
 ---------------|------------|------------
 brightgold     | &nbsp;     | Map max(R,G,B) to gradient [Black,Orange,Yellow,White]
 clamp          | `LOCOLOR HICOLOR` | Limits the range of each pixel's color components to the corresponding low and high byte of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
+colormatch     | &nbsp;       | This image is recolored to match the colors of the next image in the list. Colors are assigned based on pixel brightness values.
 gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
 hardalpha      | &nbsp;       | Sets pixels with nonzero alpha values to have alpha 255.
