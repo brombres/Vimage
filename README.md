@@ -113,7 +113,7 @@ Command   | Arguments       | Description
 `:fillalpha` | `COLOR`\<br>`TOP BOTTOM`<br>`TL TR BL BR`<br>`COLORS` | Similar to ':fill' except preserves rgb values and only fills alpha color.
 `:fillrgb` | `COLOR`\<br>`TOP BOTTOM`<br>`TL TR BL BR`<br>`COLORS` | Similar to ':fill' except preserves alpha values and only fills RGB color.
 `:filter` | `<filter-name> [ARGS]` | Applies an image filter. Refer to the [Filters](#Filters) table for more information.
-`:generate` | `<generator-name> [ARGS]` | Generates new pixel data in the current image. Refer to the [Generators](#Generators) table for more information.
+`:generate` | `<generator-name> [ARGS]` | Generate an image. Refer to the [Generators](#Generators) table for more information.
 `:ha`       |                 | Toggle "hard alpha" view on or off. When hard alpha is on, any pixel that is not completely transparent is shown as completely opaque. This helps ensure that translucent pixels are not accidentally cropped off.
 `:info`     | `range`           | Report image information. `range` reports the highest and lowest brightness values among an image's pixel RGB components, ranging from 0 to 255.
 `:join`     | `WxH [patch]`     | Join or splice the next W\*H images together in a WxH grid. If 'patch' is specified, a sizing guide strip is added to the top if H==1 (font strip) or all four sides if H>1 (9-patch image).
@@ -173,8 +173,9 @@ seamless       | `[h|v] [<percent>% | <pixels>]` | Creates a seamless tile by sp
 
 # Generators
 
-    :generator <filter-name> [ARGS]
+    :generator <generator-name> [ARGS]
 
-Filter Name    | Arguments  | Description
+Generator Name    | Arguments  | Description
 ---------------|------------|------------
-perlin         | [frequency] (default: 8.0) | Generates Perlin Noise.
+mosaic         | W1xH1 W2xH2 | Internally splits the current image into W1xH1 tiles and then creates a new image of tile size W2xH2 using randomly selected tiles. For example, `:generate mosaic 6x2 10x10` uses the current image as a source set of 12 tiles and creates a new image that is 10x10 tiles, each randomly chosen from the 6.
+perlin         | [frequency] (default: 8.0) | Generates Perlin Noise in the current image.

@@ -1807,6 +1807,32 @@ class CmdFilterHardAlpha( args:String[] ) : EditCmd
 
 endClass
 
+class CmdGenerateMosaic( source_tile_count:XY, output_tile_count:XY ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "generate mosaic "
+        status.print "source-tile-count:$x$ "(source_tile_count.x->Int,source_tile_count.y->Int)
+        status.print "output-tile-count:$x$ "(output_tile_count.x->Int,output_tile_count.y->Int)
+        if (not ImageList.selected) status.print " [no image selected]"
+      endUse
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local tiles = ImageList.selected.image.bitmap.split( source_tile_count.x, source_tile_count.y )
+      local size  = tiles.first.size
+      local result = Bitmap( output_tile_count*size )
+
+      forEach (j in 0..<size.y)
+        forEach (i in 0..<size.x)
+          tiles.random.blit( result, XY(i,j)*size )
+        endForEach
+      endForEach
+
+      ImageList.add_and_select( Image(result) )
+endClass
+
 class CmdGeneratePerlin( frequency=8.0:Real ) : EditCmd
   METHODS
     method update_status

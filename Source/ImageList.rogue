@@ -18,6 +18,17 @@ class ImageList : VList [singleton]
       add( ImageListItem(image) )
       request_layout
 
+    method add_and_select( image:Image )
+      if (selected)
+        local next_index = selected.index + 1
+        insert( image, next_index )
+        select( next_index )
+      else
+        add( image )
+        select( 0 )
+      endIf
+
+
     method after_draw
       if (is_dim) ConsoleUICanvas.style.dim_off
 
