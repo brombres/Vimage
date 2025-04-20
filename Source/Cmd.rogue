@@ -941,6 +941,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
         left.fill(
           Box( XY(left.width-overlap_w,0), XY(overlap_w,left.height) ),
           Graphics::ColorGradient( OPAQUE, TRANSPARENT, OPAQUE, TRANSPARENT ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         left.crop( result_w, left.height, Anchor.LEFT )
@@ -951,6 +952,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
         right.fill(
           Box( XY(overlap_w,right.height) ),
           Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         left.crop( result_w,  left.height, Anchor.LEFT )
@@ -970,6 +972,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
         top.fill(
         Box( XY(0,top.height-overlap_h), XY(top.width,overlap_h) ),
           Graphics::ColorGradient( OPAQUE, OPAQUE, TRANSPARENT, TRANSPARENT ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         top.crop( top.width, result_h, Anchor.TOP )
@@ -980,6 +983,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
         bottom.fill(
           Box( XY(overlap_h,bottom.width) ),
           Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         top.crop( top.width, result_h, Anchor.TOP )
@@ -2015,6 +2019,7 @@ class CmdFilterSeamless : EditCmd
         halves.first.fill(
           Box( blend_w1, h1 ),
           Graphics::ColorGradient( OPAQUE, TRANSPARENT, OPAQUE, TRANSPARENT ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         halves.first.fill(
@@ -2029,6 +2034,7 @@ class CmdFilterSeamless : EditCmd
         halves.last.fill(
           Box( w2 - blend_w2, 0, blend_w2, h2 ),
           Graphics::ColorGradient( TRANSPARENT, OPAQUE, TRANSPARENT, OPAQUE ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         halves.last.fill(
@@ -2054,6 +2060,7 @@ class CmdFilterSeamless : EditCmd
         halves.first.fill(
           Box( w1, blend_h1 ),
           Graphics::ColorGradient( OPAQUE, OPAQUE, TRANSPARENT, TRANSPARENT ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         halves.first.fill(
@@ -2068,6 +2075,7 @@ class CmdFilterSeamless : EditCmd
         halves.last.fill(
           Box( 0, h2 - blend_h2, w2, blend_h2 ),
           Graphics::ColorGradient( TRANSPARENT, TRANSPARENT, OPAQUE, OPAQUE ),
+          &fn=ColorGradientMultiplyBitmapFillFn,
           &channel_mask=0xFF000000
         )
         halves.last.fill(
