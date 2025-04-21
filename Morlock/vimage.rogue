@@ -4,7 +4,7 @@ class RogoPackage : Package
 
   METHODS
     method init
-      dependency "brombres/rogue@2.28"
+      dependency "brombres/rogue@2.37"
       scan_repo_releases
 
 endClass
