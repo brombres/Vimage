@@ -1769,35 +1769,96 @@ class CmdFilterMatchBright( args:String[] ) : EditCmd
       if (not ImageList.selected) return
       if (not ImageList.selected.next) return
 
-      local bitmap = ImageList.selected.image.cloned_bitmap
+      local bitmap = ImageList.selected.image.bitmap.cloned
       local bottom = ImageList.selected.next->(as ImageListItem).image.bitmap.cloned
+
+      # Grayscale conversion factors
+      local rw = (0.2990 * 65536)->Int
+      local gw = (0.5870 * 65536)->Int
+      local bw = (0.1140 * 65536)->Int
+
+      local avg_over_value = 0.0
+      block n = 0
+        forEach (color in bitmap.pixels)
+          if ((color.argb & 0xFF000000) >= 0x40)
+            local r = (color.argb:>>>:16) & 0xff
+            local g = (color.argb:>>>:8)  & 0xff
+            local b =  color.argb         & 0xff
+            local v = (r * rw) :>>: 16
+            v += (g * gw) :>>: 16
+            v += (b * bw) :>>: 16
+            avg_over_value += v
+            ++n
+          endIf
+        endForEach
+        avg_over_value /= n.or_larger(1)
+      endBlock
+
+      local avg_under_value = 0.0
+      block n = 0
+        forEach (color in bottom.pixels)
+          if ((color.argb & 0xFF000000) >= 0x40)
+            local r = (color.argb:>>>:16) & 0xff
+            local g = (color.argb:>>>:8)  & 0xff
+            local b =  color.argb         & 0xff
+            local v = (r * rw) :>>: 16
+            v += (g * gw) :>>: 16
+            v += (b * bw) :>>: 16
+            avg_under_value += v
+            ++n
+          endIf
+        endForEach
+        avg_under_value /= n.or_larger(1)
+      endBlock
+
+      local v_scale_gray = avg_under_value / avg_over_value.or_larger(1)
 
       CmdChannelRGBToHSV.convert_rgb_to_hsv( bitmap )
       CmdChannelRGBToHSV.convert_rgb_to_hsv( bottom )
 
-      local avg_over_value = 0.0
-      avg_over_value += (forEach in bitmap.pixels).argb & 0xFF
-      avg_over_value /= bitmap.pixels.count
+      avg_over_value = 0.0
+      block n = 0
+        forEach (color in bitmap.pixels)
+          if ((color.argb & 0xFF000000) >= 0x40)
+            avg_over_value += color.argb & 0xFF
+            ++n
+          endIf
+        endForEach
+        avg_over_value /= n.or_larger(1)
+      endBlock
 
-      local avg_under_value = 0.0
-      avg_under_value += (forEach in bottom.pixels).argb & 0xFF
-      avg_under_value /= bottom.pixels.count
+      avg_under_value = 0.0
+      block n = 0
+        forEach (color in bottom.pixels)
+          if ((color.argb & 0xFF000000) >= 0x40)
+            avg_under_value += color.argb & 0xFF
+            ++n
+          endIf
+        endForEach
+        avg_under_value /= n.or_larger(1)
+      endBlock
 
-      local dv = (avg_under_value->Int - avg_over_value->Int)
+      local v_scale_hsv = avg_under_value / avg_over_value.or_larger(1)
 
-      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+      if ((v_scale_gray >= 1.0) == (v_scale_hsv >= 1.0))
+        local v_scale = (v_scale_gray + v_scale_hsv) / 2;
 
-      loop (bitmap.width * bitmap.height)
-        native
-        @|RogueInt32 argb = *(++data);
-         |RogueInt32 v = (argb & 0xFF) + $dv;
-         |if (v > 255)    v = 255;
-         |else if (v < 0) v = 0;
-         |argb = (argb & 0xFFFFFF00) | v;
-         |*data = argb;
-      endLoop
+        native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
 
-      CmdChannelHSVToRGB.convert_hsv_to_rgb( bitmap )
+        loop (bitmap.width * bitmap.height)
+          native
+          @|RogueInt32 argb = *(++data);
+           |RogueInt32 v = (RogueInt32)((argb & 0xFF) * $v_scale);
+           |if (v > 255)    v = 255;
+           |else if (v < 0) v = 0;
+           |argb = (argb & 0xFFFFFF00) | v;
+           |*data = argb;
+        endLoop
+
+        CmdChannelHSVToRGB.convert_hsv_to_rgb( bitmap )
+        ImageList.selected.image.bitmap = bitmap
+        ImageList.selected.image.is_modified = true
+      endIf
 endClass
 
 class CmdFilterMatchColor( args:String[] ) : EditCmd
@@ -1832,16 +1893,18 @@ class CmdFilterMatchColor( args:String[] ) : EditCmd
       local avg_argb = Dim<<Int>>( 256 )
 
       forEach (color in bottom.pixels)
-        local r = (color.argb:>>>:16) & 0xff
-        local g = (color.argb:>>>:8)  & 0xff
-        local b =  color.argb         & 0xff
-        local v = (r * rw) :>>: 16
-        v += (g * gw) :>>: 16
-        v += (b * bw) :>>: 16
-        red[v]   += r
-        green[v] += g
-        blue[v]  += b
-        ++count[v]
+        if ((color.argb & 0xFF000000) >= 0x40)
+          local r = (color.argb:>>>:16) & 0xff
+          local g = (color.argb:>>>:8)  & 0xff
+          local b =  color.argb         & 0xff
+          local v = (r * rw) :>>: 16
+          v += (g * gw) :>>: 16
+          v += (b * bw) :>>: 16
+          red[v]   += r
+          green[v] += g
+          blue[v]  += b
+          ++count[v]
+        endIf
       endForEach
 
       # Interpolate undefined brightness values
