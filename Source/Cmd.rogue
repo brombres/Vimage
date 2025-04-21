@@ -1753,11 +1753,58 @@ class CmdFilterGold( args:String[] ) : EditCmd
 endClass
 
 
-class CmdFilterColorMatch( args:String[] ) : EditCmd
+class CmdFilterMatchBright( args:String[] ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
-        status.print "filter colormatch"
+        status.print "filter matchbright"
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        elseIf (not ImageList.selected.next)
+          status.print " [no underlying image to match]"
+        endIf
+      endUse
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+      if (not ImageList.selected.next) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      local bottom = ImageList.selected.next->(as ImageListItem).image.bitmap.cloned
+
+      CmdChannelRGBToHSV.convert_rgb_to_hsv( bitmap )
+      CmdChannelRGBToHSV.convert_rgb_to_hsv( bottom )
+
+      local avg_over_value = 0.0
+      avg_over_value += (forEach in bitmap.pixels).argb & 0xFF
+      avg_over_value /= bitmap.pixels.count
+
+      local avg_under_value = 0.0
+      avg_under_value += (forEach in bottom.pixels).argb & 0xFF
+      avg_under_value /= bottom.pixels.count
+
+      local dv = (avg_under_value->Int - avg_over_value->Int)
+
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (bitmap.width * bitmap.height)
+        native
+        @|RogueInt32 argb = *(++data);
+         |RogueInt32 v = (argb & 0xFF) + $dv;
+         |if (v > 255)    v = 255;
+         |else if (v < 0) v = 0;
+         |argb = (argb & 0xFFFFFF00) | v;
+         |*data = argb;
+      endLoop
+
+      CmdChannelHSVToRGB.convert_hsv_to_rgb( bitmap )
+endClass
+
+class CmdFilterMatchColor( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "filter matchcolor"
         if (not ImageList.selected)
           status.print " [no image selected]"
         elseIf (not ImageList.selected.next)
@@ -1869,10 +1916,10 @@ class CmdFilterGray( args:String[] ) : EditCmd
       endWhich
 
       local bitmap = ImageList.selected.image.cloned_bitmap
-      convert_to_grayscale( bitmap, rw, gw, bw )
+      convert_rgb_to_grayscale( bitmap, rw, gw, bw )
 
   GLOBAL METHODS
-    method convert_to_grayscale( bitmap:Bitmap, rw=0.2990:Real, gw=0.5870:Real, bw=0.1140:Real )
+    method convert_rgb_to_grayscale( bitmap:Bitmap, rw=0.2990:Real, gw=0.5870:Real, bw=0.1140:Real )
       local sum = (rw + gw + bw).clamped_low(0.01)
       rw = (rw / sum)
       gw = (gw / sum)
@@ -1975,6 +2022,14 @@ class CmdChannelHSVToRGB( args:String[] ) : EditCmd
 
     method apply
       local bitmap = ImageList.selected.image.cloned_bitmap
+      convert_hsv_to_rgb( bitmap )
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+      apply
+
+  GLOBAL METHODS
+    method convert_hsv_to_rgb( bitmap:Bitmap )
       local n = bitmap.pixels.count
       native...
         @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
@@ -2038,10 +2093,6 @@ class CmdChannelHSVToRGB( args:String[] ) : EditCmd
          |    *data = a | (v<<16) | (v<<8) | v;
          |  }
          |}
-
-    method execute( ignore_repeat_count:Int )
-      if (not ImageList.selected) return
-      apply
 
 endClass
 
@@ -2234,10 +2285,9 @@ class CmdChannelRGBToHSV( args:String[] ) : EditCmd
          |    else if (g == maxrgb) hue = 2 + ((b - r) / delta);
          |    else                  hue = 4 + ((r - g) / delta);
          |
-         |    hue *= 60;
-         |    while (hue < 0)    hue += 360;
-         |    while (hue >= 360) hue -= 360;
-         |    hue /= 360;
+         |    hue /= 6.0;
+         |    while (hue < 0)    hue += 1.0;
+         |    while (hue >= 1.0) hue -= 1.0;
          |  }
          |
          |  *data = a | (((int)(hue*255))<<16) | (((int)(saturation*255))<<8) | ((int)(value*255));
