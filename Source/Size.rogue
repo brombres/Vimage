@@ -1,0 +1,40 @@
+library Vimage
+
+class Size( x:Variant, y:Variant ) [compound]
+  GLOBAL METHODS
+    method create->Size
+      return Size( undefined, undefined )
+
+    method create( xy:XY )->Size
+      return Size( xy.x, xy.y )
+
+  METHODS
+    method to->XY
+      local result : XY
+
+      if (x == "u")
+        if (ImageList.selected?.next)
+          result.x = ImageList.selected.next->(as ImageListItem).image.bitmap.width
+        endIf
+      elseIf (x == "o")
+        if (ImageList.selected?.index)
+          result.x = ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.width
+        endIf
+      else
+        result.x = x->Int
+      endIf
+
+      if (y == "u")
+        if (ImageList.selected?.next)
+          result.y = ImageList.selected.next->(as ImageListItem).image.bitmap.height
+        endIf
+      elseIf (y == "o")
+        if (ImageList.selected?.index)
+          result.y = ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.height
+        endIf
+      else
+        result.y = y->Int
+      endIf
+
+      return result
+endClass

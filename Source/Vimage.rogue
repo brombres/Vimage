@@ -30,6 +30,7 @@ $include ImageView
 $include KeyHandler
 $include ColorGradient
 $include ColorLerp
+$include Size
 $include State
 $include StatusBar
 $include TitleBar

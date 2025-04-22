@@ -15,32 +15,6 @@ class CmdLineHandler
       Vimage.execute( cmd )
 
 
-    method evaluate_width( arg:String )->String
-      if (arg == 'u' or arg == 'U')
-        if (ImageList.selected?.next) return ImageList.selected.next->(as ImageListItem).image.bitmap.width
-        else                          return "0"
-      endIf
-
-      if (arg == 'o' or arg == 'O')
-        if (ImageList.selected?.index) return ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.width
-        else                           return "0"
-      endIf
-
-      return arg
-
-    method evaluate_height( arg:String )->String
-      if (arg == 'u' or arg == 'U')
-        if (ImageList.selected?.next) return ImageList.selected.next->(as ImageListItem).image.bitmap.height
-        else                          return "0"
-      endIf
-
-      if (arg == 'o' or arg == 'O')
-        if (ImageList.selected?.index) return ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.height
-        else                           return "0"
-      endIf
-
-      return arg
-
     method keyword->String
       return @keyword
 
@@ -173,50 +147,37 @@ class CmdLineHandler
         return null
       endIf
 
-    method parse_size( arg:String )->XY?
-      local pair = arg.split('x')
-
-      if (pair.count == 2)
-        pair[0] = evaluate_width( pair[0] )
-        pair[1] = evaluate_height( pair[1] )
-
-        local x = pair.first->Int
-        local y = pair.last->Int
-        if (x->String == pair.first and y->String == pair.last)
-          return XY(x,y)
-        else
-          set_status( "$ [invalid size '$']"(keyword,arg) )
-          return null
-        endIf
-      else
-        set_status( "$ [missing or invalid size specification]"(keyword) )
-        return null
-      endIf
-
-    method parse_size_either_or( arg:String )->(width:Int?,height:Int?)
-      if (arg.contains('.')) return (width:null,height:null) # contains a scale, not a size
+    method parse_size( arg:String, &either_or, &tile_size )->Size?
+      if (arg.contains('.')) return null # contains a scale, not a size
 
       local pair = arg.split('x')
       if (pair.count == 2)
         contingent
-          pair[0] = evaluate_width( pair[0] )
-          pair[1] = evaluate_height( pair[1] )
+          use args = WorkList<<Variant>>
+            local found_empty = false
+            forEach (value in pair)
+              if (value.is_integer)
+                args.add( value )
+              elseIf ((value.equals("o",&ignore_case) or value.equals("over",&ignore_case)) and not tile_size)
+                args.add( "o" )
+              elseIf ((value.equals("u",&ignore_case) or value.equals("under",&ignore_case)) and not tile_size)
+                args.add( "u" )
+              elseIf (value == "" and either_or)
+                if (found_empty) return null  # both can't be empty
+                args.add( undefined )
+                found_empty = true
+              else
+                escapeContingent
+              endIf
+            endForEach
 
-          necessary (pair.first != "" or pair.last != "")
-          necessary (pair.first == "" or pair.first->Int->String == pair.first)
-          necessary (pair.last == "" or pair.last->Int->String == pair.last)
-
-          if (pair.first == "")
-            return (width:null,height:pair.last->Int)
-          else
-            if (pair.last == "") return (width:pair.first->Int,height:null)
-            else                 return (width:pair.first->Int,height:pair.last->Int)
-          endIf
+            return Size( args[0], args[1] )
+          endUse
         endContingent
       endIf
 
       set_status( "$ [missing or invalid size specification '$']"(keyword,arg) )
-      return (width:null,height:null)
+      return null
 
     method parse_scale_either_or( arg:String )->(width:Real?,height:Real?)
       local pair = arg.split('x')
@@ -552,9 +513,8 @@ class CmdLineCrop : CmdLineHandler [singleton]
           anchor = parse_anchor( args.cloned.[remove_first].join(' ') )
         endIf
 
-        local (w,h) = parse_size_either_or( args[0] )
-        if (w or h)
-          execute( CmdCropToSize(w,h,anchor) )
+        if local size = parse_size( args[0], &either_or )
+          execute( CmdCropToSize(size,anchor) )
         else
           local (sx,sy) = parse_scale_either_or( arg_string )
           if (sx or sy)
@@ -574,9 +534,8 @@ class CmdLineAspectFill : CmdLineHandler [singleton]
 
   METHODS
     method execute( args:String )
-      local (w,h) = parse_size_either_or( args )
-      if (w or h)
-        execute( CmdAspectFillToSize(w,h) )
+      if local size = parse_size( args, &either_or )
+        execute( CmdAspectFillToSize(size) )
       else
         local (sx,sy) = parse_scale_either_or( args )
         if (sx or sy)
@@ -769,9 +728,9 @@ class CmdLineGenerate : CmdLineHandler [singleton]
       which (filter_name)
         case "mosaic"
           if (args.count == 2)
-            if local source_tile_count = parse_size( args[0] )
-              if local output_tile_count = parse_size( args[1] )
-                cmd = CmdGenerateMosaic( source_tile_count, output_tile_count )
+            if local source_tile_count = parse_size( args[0], &tile_size )
+              if local output_tile_count = parse_size( args[1], &tile_size )
+                cmd = CmdGenerateMosaic( source_tile_count->XY, output_tile_count->XY )
               endIf
             endIf
           endIf
@@ -816,9 +775,8 @@ class CmdLineAspectFit : CmdLineHandler [singleton]
 
   METHODS
     method execute( args:String )
-      local (w,h) = parse_size_either_or( args )
-      if (w or h)
-        execute( CmdAspectFitToSize(w,h) )
+      if local size = parse_size( args, &either_or )
+        execute( CmdAspectFitToSize(size) )
       else
         local (sx,sy) = parse_scale_either_or( args )
         if (sx or sy)
@@ -1135,8 +1093,8 @@ class CmdLineJoin : CmdLineHandler [singleton]
         endIf
       endIf
 
-      if local size = parse_size( args.join(' ') )
-        execute( CmdJoin(size,&=patch,&=blend,&=blend_wrap) )
+      if local size = parse_size( args.join(' '), &tile_size )
+        execute( CmdJoin(size->XY,&=patch,&=blend,&=blend_wrap) )
       endIf
 endClass
 
@@ -1265,13 +1223,13 @@ class CmdLineNew : CmdLineHandler [singleton]
         endIf
       endIf
 
-    method default_size->XY
+    method default_size->Size
       if local selected = ImageList.selected
         if local image = selected.image
           return image.bitmap.size
         endIf
       endIf
-      return ImageView.size * XY(1,2)
+      return Size( ImageView.size * XY(1,2) )
 
     method should_insert->Logical
       return false
@@ -1394,8 +1352,8 @@ class CmdLineSplit : CmdLineHandler [singleton]
       if (arg_string == "patch" or arg_string == "p" or arg_string == "patches")
         execute( CmdSplit(&patch) )
       else
-        if local size = parse_size( arg_string )
-          execute( CmdSplit(size) )
+        if local size = parse_size( arg_string, &tile_size )
+          execute( CmdSplit(size->XY) )
         endIf
       endIf
 endClass
@@ -1418,9 +1376,8 @@ class CmdLineResize : CmdLineHandler [singleton]
 
   METHODS
     method execute( args:String )
-      local (w,h) = parse_size_either_or( args )
-      if (w or h)
-        execute( CmdResizeToSize(w,h) )
+      if local size = parse_size( args, &either_or )
+        execute( CmdResizeToSize(size) )
       else
         local (sx,sy) = parse_scale_either_or( args )
         if (sx or sy)

@@ -387,17 +387,17 @@ class CmdCrop( left:Int, top:Int, right:Int, bottom:Int ) : EditCmd
       ImageView.show( image )
 endClass
 
-class CmdCropToSize( width:Int?, height:Int?, anchor=null:Anchor? ) : EditCmd
+class CmdCropToSize( size:Size, anchor=null:Anchor? ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
         status.print "crop "
-        if (width and height)
-          status.print "$x$"(width,height)
-        elseIf (width)
-          status.print "width $"(width)
-        elseIf (height)
-          status.print "height $"(height)
+        if (size.x and size.y)
+          status.print "$x$"(size.x,size.y)
+        elseIf (size.x)
+          status.print "width $"(size.x)
+        elseIf (size.y)
+          status.print "height $"(size.y)
         endIf
         if (not ImageList.selected) status.print " [no image selected]"
       endUse
@@ -409,12 +409,12 @@ class CmdCropToSize( width:Int?, height:Int?, anchor=null:Anchor? ) : EditCmd
     method execute( image:Image )
       local anchor = which{ anchor || Vimage.anchor }
       temporarily Vimage.anchor = anchor
-        if (width)
-          local width = this.width.value
+        if (size.x)
+          local width = size->XY.x
           if (width < 0) width = image.bitmap.width + width
 
-          if (height)
-            local height = this.height.value
+          if (size.y)
+            local height = size->XY.y
             if (height < 0) height = image.bitmap.height + height
             if (image.bitmap.size == XY(width,height)) return
 
@@ -427,8 +427,8 @@ class CmdCropToSize( width:Int?, height:Int?, anchor=null:Anchor? ) : EditCmd
             local bitmap = image.cloned_bitmap
             bitmap.crop( new_size.x, new_size.y, anchor, Vimage.bg_color )
           endIf
-        elseIf (height)
-          local height = this.height.value
+        elseIf (size.y)
+          local height = size->XY.y
           if (height < 0) height = image.bitmap.height + height
           local new_size = XY( image.bitmap.width, height )
           if (image.bitmap.size == new_size) return
@@ -464,7 +464,7 @@ class CmdCropToScale( sx:Real?, sy:Real?, anchor=null:Anchor? ) : EditCmd
       local w, h : Int?
       if (sx) w = (image.bitmap.width  * sx.value)->Int
       if (sy) h = (image.bitmap.height * sy.value)->Int
-      CmdCropToSize( w, h, anchor ).execute
+      CmdCropToSize( Size(w,h), anchor ).execute
 endClass
 
 class CmdDX : EditCmd [singleton]
@@ -778,7 +778,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
           max_width.consider( (forEach in list).bitmap.width )
           local tile_w = max_width.value
 
-          local cmd = CmdResizeToSize( tile_w, null )
+          local cmd = CmdResizeToSize( Size(tile_w,undefined) )
           cmd.execute( (forEach in list) )
           total_w = tile_w
           total_h += (forEach in list).bitmap.height
@@ -787,7 +787,7 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
           max_height.consider( (forEach in list).bitmap.height )
           local tile_h = max_height.value
 
-          local cmd = CmdResizeToSize( null, tile_h )
+          local cmd = CmdResizeToSize( Size(undefined,tile_h) )
           cmd.execute( (forEach in list) )
           total_w += (forEach in list).bitmap.width
           total_h = tile_h
@@ -1089,17 +1089,17 @@ class CmdJoin( dims:XY, patch=false:Logical, blend=0.0:Real, blend_wrap=false:Lo
       return strip
 endClass
 
-class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
+class CmdAspectFillToSize( size:Size ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
         status.print "aspect-fill (resize to fill) "
-        if (width and height)
-          status.print "$x$"(width,height)
-        elseIf (width)
-          status.print "width $"(width)
-        elseIf (height)
-          status.print "height $"(height)
+        if (size.x and size.y)
+          status.print "$x$"(size.x,size.y)
+        elseIf (size.x)
+          status.print "width $"(size.x)
+        elseIf (size.y)
+          status.print "height $"(size.y)
         endIf
         if (not ImageList.selected) status.print " [no image selected]"
       endUse
@@ -1109,10 +1109,10 @@ class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      if (width)
-        local width = this.width.value
-        if (height)
-          local height = this.height.value
+      if (size.x)
+        local width = size->XY.x
+        if (size.y)
+          local height = size->XY.y
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
@@ -1128,8 +1128,8 @@ class CmdAspectFillToSize( width:Int?, height:Int? ) : EditCmd
           local bitmap = image.cloned_bitmap
           bitmap.resize( new_size.x, new_size.y )
         endIf
-      elseIf (height)
-        local height = this.height.value
+      elseIf (size.y)
+        local height = size->XY.y
         local new_size = XY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
@@ -1163,20 +1163,20 @@ class CmdAspectFillToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int?
       if (sx) w = (image.bitmap.width  * sx.value)->Int
       if (sy) h = (image.bitmap.height * sy.value)->Int
-      CmdAspectFillToSize( w, h ).execute
+      CmdAspectFillToSize( Size(w,h) ).execute
 endClass
 
-class CmdAspectFitToSize( width:Int?, height:Int? ) : EditCmd
+class CmdAspectFitToSize( size:Size ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
         status.print "aspect-fit (resize to fit) "
-        if (width and height)
-          status.print "$x$"(width,height)
-        elseIf (width)
-          status.print "width $"(width)
-        elseIf (height)
-          status.print "height $"(height)
+        if (size.x and size.y)
+          status.print "$x$"(size.x,size.y)
+        elseIf (size.x)
+          status.print "width $"(size.x)
+        elseIf (size.y)
+          status.print "height $"(size.y)
         endIf
         if (not ImageList.selected) status.print " [no image selected]"
       endUse
@@ -1186,10 +1186,10 @@ class CmdAspectFitToSize( width:Int?, height:Int? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      if (width)
-        local width = this.width.value
-        if (height)
-          local height = this.height.value
+      if (size.x)
+        local width = size->XY.x
+        if (size.y)
+          local height = size->XY.y
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
@@ -1205,8 +1205,8 @@ class CmdAspectFitToSize( width:Int?, height:Int? ) : EditCmd
           local bitmap = image.cloned_bitmap
           bitmap.resize( new_size.x, new_size.y )
         endIf
-      elseIf (height)
-        local height = this.height.value
+      elseIf (size.y)
+        local height = size->XY.y
         local new_size = XY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
@@ -1240,7 +1240,7 @@ class CmdAspectFitToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int?
       if (sx) w = (image.bitmap.width  * sx.value)->Int
       if (sy) h = (image.bitmap.height * sy.value)->Int
-      CmdAspectFitToSize( w, h ).execute
+      CmdAspectFitToSize( Size(w,h) ).execute
 endClass
 
 class CmdFilterClamp( lo:ColorValue, hi:ColorValue ) : EditCmd
@@ -2724,10 +2724,10 @@ class CmdName( new_name:String ) : EditCmd
       endIf
 endClass
 
-class CmdNew( size:XY, insert:Logical ) : EditCmd
+class CmdNew( size:Size, insert:Logical ) : EditCmd
   METHODS
     method update_status
-      status = "$ image [$x$] ($)"(which{insert:"NEW"||"new"},size.x->Int,size.y->Int,Vimage.bg_color)
+      status = "$ image [$x$] ($)"(which{insert:"NEW"||"new"},size.x,size.y,Vimage.bg_color)
 
     method execute
       local before_index = 0L
@@ -2745,7 +2745,7 @@ class CmdNew( size:XY, insert:Logical ) : EditCmd
 
       file = ImageList.make_filepath_unique( file )
 
-      local bitmap = Bitmap( size ).[ clear(Vimage.bg_color) ]
+      local bitmap = Bitmap( size->XY ).[ clear(Vimage.bg_color) ]
       local image  = Image( bitmap, file ).[ is_modified=true ]
       local item   = ImageListItem( image )
       ImageList.insert( item, before_index )
@@ -2896,17 +2896,17 @@ class CmdMaxZoom : Cmd [singleton]
       endIf
 endClass
 
-class CmdResizeToSize( width:Int?, height:Int? ) : EditCmd
+class CmdResizeToSize( size:Size ) : EditCmd
   METHODS
     method update_status
       use status = StatusBar
         status.print "resize "
-        if (width and height)
-          status.print "$x$"(width,height)
-        elseIf (width)
-          status.print "width $"(width)
-        elseIf (height)
-          status.print "height $"(height)
+        if (size.x and size.y)
+          status.print "$x$"(size.x,size.y)
+        elseIf (size.x)
+          status.print "width $"(size.x)
+        elseIf (size.y)
+          status.print "height $"(size.y)
         endIf
         if (not ImageList.selected) status.print " [no image selected]"
       endUse
@@ -2916,10 +2916,10 @@ class CmdResizeToSize( width:Int?, height:Int? ) : EditCmd
       execute( ImageList.selected.image )
 
     method execute( image:Image )
-      if (width)
-        local width = this.width.value
-        if (height)
-          local height = this.height.value
+      if (size.x)
+        local width = size->XY.x
+        if (size.y)
+          local height = size->XY.y
           if (image.bitmap.size == XY(width,height)) return
 
           local bitmap = image.cloned_bitmap
@@ -2931,8 +2931,8 @@ class CmdResizeToSize( width:Int?, height:Int? ) : EditCmd
           local bitmap = image.cloned_bitmap
           bitmap.resize( new_size.x, new_size.y )
         endIf
-      elseIf (height)
-        local height = this.height.value
+      elseIf (size.y)
+        local height = size->XY.y
         local new_size = XY( image.bitmap.size.x*(height->Real/image.bitmap.size.y), height )
         if (image.bitmap.size == new_size) return
 
@@ -2966,7 +2966,7 @@ class CmdResizeToScale( sx:Real?, sy:Real? ) : EditCmd
       local w, h : Int?
       if (sx) w = (image.bitmap.width  * sx.value)->Int
       if (sy) h = (image.bitmap.height * sy.value)->Int
-      CmdResizeToSize( w, h ).execute
+      CmdResizeToSize( Size(w,h) ).execute
 endClass
 
 class CmdRotateCW : EditCmd [singleton]
