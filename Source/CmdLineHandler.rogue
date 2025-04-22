@@ -14,6 +14,33 @@ class CmdLineHandler
     method execute( cmd:Cmd )
       Vimage.execute( cmd )
 
+
+    method evaluate_width( arg:String )->String
+      if (arg == 'u' or arg == 'U')
+        if (ImageList.selected?.next) return ImageList.selected.next->(as ImageListItem).image.bitmap.width
+        else                          return "0"
+      endIf
+
+      if (arg == 'o' or arg == 'O')
+        if (ImageList.selected?.index) return ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.width
+        else                           return "0"
+      endIf
+
+      return arg
+
+    method evaluate_height( arg:String )->String
+      if (arg == 'u' or arg == 'U')
+        if (ImageList.selected?.next) return ImageList.selected.next->(as ImageListItem).image.bitmap.height
+        else                          return "0"
+      endIf
+
+      if (arg == 'o' or arg == 'O')
+        if (ImageList.selected?.index) return ImageList[ImageList.selected.index-1]->(as ImageListItem).image.bitmap.height
+        else                           return "0"
+      endIf
+
+      return arg
+
     method keyword->String
       return @keyword
 
@@ -148,7 +175,11 @@ class CmdLineHandler
 
     method parse_size( arg:String )->XY?
       local pair = arg.split('x')
+
       if (pair.count == 2)
+        pair[0] = evaluate_width( pair[0] )
+        pair[1] = evaluate_height( pair[1] )
+
         local x = pair.first->Int
         local y = pair.last->Int
         if (x->String == pair.first and y->String == pair.last)
@@ -168,6 +199,9 @@ class CmdLineHandler
       local pair = arg.split('x')
       if (pair.count == 2)
         contingent
+          pair[0] = evaluate_width( pair[0] )
+          pair[1] = evaluate_height( pair[1] )
+
           necessary (pair.first != "" or pair.last != "")
           necessary (pair.first == "" or pair.first->Int->String == pair.first)
           necessary (pair.last == "" or pair.last->Int->String == pair.last)
