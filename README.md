@@ -95,6 +95,8 @@ Key    | Command              | Description
 # Command Line Commands
 Type `:` to begin a Command Line command. Type one of the following and then tap `ENTER` to execute or `ESCAPE` to cancel.
 
+- For pixel-based WxH dimensions, either W or H, or both, may be `u` to match the dimension of the image *under* the current one or `o` to match the dimension of the image *over* the current one. For example, `uxo` uses the width of the under image and the height of the over image.
+
 Command   | Arguments       | Description
 ----------|-----------------|----------------------------------------------------------------------
 `:anchor`   | `[center\|top\|left\|bottom\|right]+`<br>`[c\|t\|l\|b\|r]+` | Sets the anchor used when when an image is cropped or expanded.
@@ -180,4 +182,5 @@ seamless       | `[h|v] [<percent>% | <pixels>]` | Creates a seamless tile by sp
 Generator Name    | Arguments  | Description
 ---------------|------------|------------
 mosaic         | W1xH1 W2xH2 | Internally splits the current image into W1xH1 tiles and then creates a new image of tile size W2xH2 using randomly selected tiles. For example, `:generate mosaic 6x2 10x10` uses the current image as a source set of 12 tiles and creates a new image that is 10x10 tiles, each randomly chosen from the 6.
+parts          | &nbsp;  | Extracts the various parts of this image into separate images. A part is a contiguous set of non-transparent pixels.
 perlin         | [frequency] (default: 8.0) | Generates Perlin Noise in the current image.

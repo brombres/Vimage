@@ -2049,6 +2049,90 @@ class CmdGenerateMosaic( source_tile_count:XY, output_tile_count:XY ) : EditCmd
       ImageList.add_and_select( Image(result) )
 endClass
 
+class CmdGenerateParts : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "generate parts"
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local source  = ImageList.selected.image.bitmap
+      local w = source.size.x->Int
+      local h = source.size.y->Int
+      local w_max = w - 1
+      local h_max = h - 1
+      local source_pixels = source.pixels
+      local pos = 0
+      use flood_fill_queue=WorkList<<XYZ>>, checked=WorkList<<Logical>>
+        checked.dim( w*h )
+
+        forEach (i of source_pixels)
+          if ((source_pixels[i].argb & 0xFF000000) == 0) checked[i] = true
+        endForEach
+
+        local add_index = ImageList.selected.index
+
+        forEach (j in 0..<h)
+          forEach (i in 0..<w)
+            if (not checked[pos])
+              checked[pos] = true
+              flood_fill_queue.add( XYZ(i,j,pos) )
+
+              local qi = 0
+              local min_x = i
+              local max_x = i
+              local min_y = j
+              local max_y = j
+              while (qi < flood_fill_queue.count)
+                local coord = flood_fill_queue[qi]
+                if (coord.x < min_x) min_x = coord.x
+                if (coord.x > max_x) max_x = coord.x
+                if (coord.y < min_y) min_y = coord.y
+                if (coord.y > max_y) max_y = coord.y
+                if (coord.x > 0 and not checked[coord.z-1])
+                  checked[coord.z-1] = true
+                  flood_fill_queue.add( XYZ(coord.x-1,coord.y,coord.z-1) )
+                endIf
+                if (coord.x < w_max and not checked[coord.z+1])
+                  checked[coord.z+1] = true
+                  flood_fill_queue.add( XYZ(coord.x+1,coord.y,coord.z+1) )
+                endIf
+                if (coord.y > 0 and not checked[coord.z-w])
+                  checked[coord.z-w] = true
+                  flood_fill_queue.add( XYZ(coord.x,coord.y-1,coord.z-w) )
+                endIf
+                if (coord.y < h_max and not checked[coord.z+w])
+                  checked[coord.z+w] = true
+                  flood_fill_queue.add( XYZ(coord.x,coord.y+1,coord.z+w) )
+                endIf
+                ++qi
+              endWhile
+
+              local part = Bitmap( (max_x-min_x)+1, (max_y-min_y)+1 )
+              local part_pixels = part.pixels
+              local part_w = part.width
+              forEach (pos in flood_fill_queue)
+                part_pixels[ (pos.y->Int-min_y)*part_w + (pos.x->Int-min_x) ] = source_pixels[pos.z]
+              endForEach
+
+              ++add_index
+              ImageList.insert( Image(part,"Part"), add_index )
+
+              flood_fill_queue.clear
+            endIf
+            ++pos
+          endForEach
+        endForEach
+
+        if (add_index > ImageList.selected.index)
+          ImageList.select( ImageList.selected.index + 1 )
+        endIf
+
+      endUse
+
+endClass
+
 class CmdGeneratePerlin( frequency=8.0:Real ) : EditCmd
   METHODS
     method update_status
