@@ -2072,6 +2072,7 @@ class CmdGenerateParts : EditCmd [singleton]
         endForEach
 
         local add_index = ImageList.selected.index
+        local part_index = 1
 
         forEach (j in 0..<h)
           forEach (i in 0..<w)
@@ -2117,7 +2118,8 @@ class CmdGenerateParts : EditCmd [singleton]
               endForEach
 
               ++add_index
-              ImageList.insert( Image(part,"Part"), add_index )
+              ImageList.insert( Image(part,"Part-$"(part_index)), add_index )
+              ++part_index
 
               flood_fill_queue.clear
             endIf
