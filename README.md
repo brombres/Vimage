@@ -4,7 +4,7 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.21
+Version   | 1.22
 Date      | April 22, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)

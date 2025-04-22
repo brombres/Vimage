@@ -4,7 +4,7 @@
 # Started: February 19, 2023
 #================================================================================
 
-$define VERSION "1.21"
+$define VERSION "1.22"
 $define DATE    "April 22, 2025"
 
 $requireRogue "2.34"
