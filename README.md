@@ -4,8 +4,8 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.23
-Date      | April 22, 2025
+Version   | 1.24
+Date      | April 23, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
 License   | [MIT License](LICENSE)
