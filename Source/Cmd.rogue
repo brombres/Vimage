@@ -504,6 +504,57 @@ class CmdEscapeToImageListState : Cmd [singleton]
       state = ImageListState
 endClass
 
+class CmdExtrude( left:Int, top:Int, right:Int, bottom:Int, smear=false:Logical ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        local n = which{ Vimage.repeat_count || 1 }
+
+        localize left, top, right, bottom
+        left *= n
+        top *= n
+        right *= n
+        bottom *= n
+
+        status.print( "extrude" )
+        if (left)   status.print " left $"(left)
+        if (top)    status.print " top $"(top)
+        if (right)  status.print " right $"(right)
+        if (bottom) status.print " bottom $"(bottom)
+
+        if (not ImageList.selected) status.print " [no image selected]"
+      endUse
+
+    method execute( repeat_count:Int )
+      if (not ImageList.selected) return
+      execute( ImageList.selected.image, repeat_count )
+
+    method execute( image:Image, n:Int )
+      localize left, top, right, bottom
+      left *= n
+      top *= n
+      right *= n
+      bottom *= n
+
+      local dx = right - left
+      local dy = bottom - top
+
+      if local selected = ImageList.selected
+        local original = selected.image.bitmap
+        local modified = Bitmap( original.size )
+        if (smear)
+          original.blit( modified,  0, 0, BitmapBlitFn.ALPHA )
+          original.blit( modified, dx, dy, BitmapBlitFn.ALPHA )
+        else
+          original.blit( modified, dx, dy, BitmapBlitFn.ALPHA )
+          original.blit( modified,  0, 0, BitmapBlitFn.ALPHA )
+        endIf
+
+        selected.image.update_bitmap( modified )
+      endIf
+
+endClass
+
 class CmdGoToFirstImage : Cmd [singleton]
   METHODS
     method update_status

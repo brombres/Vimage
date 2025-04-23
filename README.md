@@ -55,7 +55,7 @@ Key    | Command              | Description
 `A`    | Apply Macro To All   | Applies the current command macro (recorded with `q`) to the current image and all images below.
 `c`    | Crop Mode            | Enters Crop Mode. `[h,j,k,l]` crop 1 pixel off the left/bottom/top/right, respectively. `[H,J,K,L]` expands by one pixel, using the `:bg` color to fill the gap. `100j` crops 100 pixels off the bottom, etc. `t` trims fully transparent pixels from all sides. Tap `ESCAPE` to exit Crop Mode.
 `d`    | Delete/Cut           | Deletes the current image and copies it to the clipboard.
-`e`    | mErge                | Merges the current image on top of the one below it using alpha blending. Use e.g. `4e` to merge the current image and 3 images below it into a single image.
+`e`    | Merge                | Merges the current image on top of the one below it using alpha blending. Use e.g. `4e` to merge the current image and 3 images below it into a single image.
 `f`    | Flip Horizontal      | Flips (mirrors) the current image horizontally.
 `F`    | Flip Vertical        | Flips (mirrors) the current image vertically.
 `g`    | Go to First Image    | [Image List] Selects the first image in the image list.
@@ -73,6 +73,7 @@ Key    | Command              | Description
 `R`    | Rotate CCW 90º       | Rotates the current image counter-clockwise by 90º.
 `u`    | Undo                 | Undo the last editing command (the most recent 50 commands can be undone).
 `U`    | Redo                 | Redo the last editing command that was just undone. Can also use `CONTROL+R` to Redo.
+`x`    | Extrude Mode         | Enters Extrude Mode. `[h,j,k,l]` extrudes non-transparent pixels in the specified direction "under" the image. `[H,J,K,L]` "smears" the image in the specified direction, shifting it down without clearing the pixels it previously occupied. Tap `ESCAPE` to exit Extrude Mode.
 `y`    | Yank/Copy            | Yank a copy of the current image into the clipboard.
 `z`    | Zoom In              | Enter Zoom Mode and zoom in to the current image. Use `[i,j,k,l]` to pan around. Use `Z` to zoom out and `ESCAPE` to exit Zoom Mode.
 `Z`    | Zoom Out             | Enter Zoom Mode and zoom out of the current image. Use `[i,j,k,l]` to pan around. Use `z` to zoom in and `ESCAPE` to exit Zoom Mode.

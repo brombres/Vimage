@@ -211,5 +211,8 @@ class Image
         error,
         is_modified
       }
+
+    method update_bitmap( @bitmap )
+      is_modified = true
 endClass
 

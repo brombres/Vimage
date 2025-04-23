@@ -90,6 +90,7 @@ class StandardState : State
       key_handlers[Keycode.R+SHIFT+CONTROL] = CmdRedo
       key_handlers[Keycode.U]               = CmdUndo
       key_handlers[Keycode.U+SHIFT]         = CmdRedoU
+      key_handlers[Keycode.X]               = Cmd( ExtrudeState )
       key_handlers[Keycode.Y]               = CmdYank
       key_handlers[Keycode.Z]               = CmdZoomIn
       key_handlers[Keycode.Z+SHIFT]         = CmdZoomOut
@@ -206,6 +207,35 @@ class CropState : StandardState [singleton]
 
     method state_name->String
       return "CROP"
+endClass
+
+class ExtrudeState : StandardState [singleton]
+  METHODS
+    method init
+      prior.init
+      key_handlers[Keycode.NUMBER_3+SHIFT] = CmdPanToLeft
+      key_handlers[Keycode.NUMBER_4+SHIFT] = CmdPanToRight
+      key_handlers[Keycode.G]       = CmdPanToTop
+      key_handlers[Keycode.G+SHIFT] = CmdPanToBottom
+      key_handlers[Keycode.J]       = CmdExtrude( 0, 0, 0, 1 )
+      key_handlers[Keycode.K]       = CmdExtrude( 0, 1, 0, 0 )
+      key_handlers[Keycode.H]       = CmdExtrude( 1, 0, 0, 0 )
+      key_handlers[Keycode.L]       = CmdExtrude( 0, 0, 1, 0 )
+      key_handlers[Keycode.J+SHIFT] = CmdExtrude( 0, 0, 0, 1, &smear )
+      key_handlers[Keycode.K+SHIFT] = CmdExtrude( 0, 1, 0, 0, &smear )
+      key_handlers[Keycode.H+SHIFT] = CmdExtrude( 1, 0, 0, 0, &smear )
+      key_handlers[Keycode.L+SHIFT] = CmdExtrude( 0, 0, 1, 0, &smear )
+      key_handlers[Keycode.ESCAPE]  = CmdEscapeToImageListState
+
+    method on_enter
+      status = "x (extrude mode - h/j/k/l, H/J/K/L)"
+
+      ImageList.is_dim = true
+      ImageList.request_redraw
+      StatusBar.request_redraw
+
+    method state_name->String
+      return "EXTRUDE"
 endClass
 
 class EnterCmdLineState : State
