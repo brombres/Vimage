@@ -134,6 +134,7 @@ Command   | Arguments       | Description
 `:save`     | `[filepath]`      | An alias for `:w`.
 `:shift`    | `X Y [wrap|w]`    | Shifts the image. The current ':bg' color is used for shifted-in pixels.
 `:split`    | `WxH`             | Splits the current image into W\*H images. For example, `:split 4x2` assumes the current image is 4 tiles wide and 2 tiles high and splits the image into 8 separate tile images.
+`:split`    | `X Y`             | Splits the current image into 1, 2, or 4 tiles. Positive integers are dimensions of the leftmost or topmost piece. Real numbers less than 1.0 or integers ending with '%' specify a percentage of the original size. Negative values specify how much the size the left or top should be reduced by. By example: `:split 100 0` splits a 1024x1024 image horizontally into pieces 100 pixels and 924 pixels wide. `:split 25% -200` splits a 1024x1024 image into four pieces sizes 256x824 (top-left), 768x824 (top-right), 256x200 (bottom-left), and 768x200 (bottom-right).
 `:split`    | `patch`           | Auto-determines whether image has a sizing guide only on the top (font strip) or on all four sides (9-patch image) and then splits the image into its separate tiles.
 `:trim`     | `[t|l|b|r]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.

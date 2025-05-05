@@ -21,6 +21,12 @@ class CmdLineHandler
     method on_tab
       noAction
 
+    method adjust_percentages( args:String[] )
+      forEach (arg in writer=args.rewriter)
+        if (arg.ends_with('%')) arg = "$"(arg.unright(1)->Real / 100.0)
+        writer.write( arg )
+      endForEach
+
     method parse_anchor( args:String )->Anchor?
       if (args == "") return Vimage.anchor
 
@@ -1349,15 +1355,23 @@ endClass
 class CmdLineSplit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "split"
-    syntax  = "[WxH|patch|p]"
+    syntax  = "[WxH|X Y|patch|p]"
 
   METHODS
     method execute( arg_string:String )
       if (arg_string == "patch" or arg_string == "p" or arg_string == "patches")
         execute( CmdSplit(&patch) )
-      else
+      elseIf (arg_string.contains('x'))
         if local size = parse_size( arg_string, &tile_size )
           execute( CmdSplit(size->XY) )
+        endIf
+      else
+        local args = arg_string.split(' ')
+        adjust_percentages( args )
+        if (args.count == 2 and args[0].is_number and args[1].is_number)
+          execute( CmdSplitXY( args[0]->Real, args[1]->Real ) )
+        else
+          status = "split [missing or invalid WxH tile count or X and Y pixel offsets]"
         endIf
       endIf
 endClass

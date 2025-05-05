@@ -3511,6 +3511,133 @@ class CmdSplit( dims:XY ) : EditCmd
       ImageList.remove( ImageList.selected )
       ImageList.select( index )
 
+endClass
+
+class CmdSplitXY( pixel_width:Real, pixel_height:Real ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "split"
+        if (pixel_width)
+          status.print " width: "
+          if (pixel_width > -1.0 and pixel_width < 1.0)
+            status.print "$%"(pixel_width.format(".0%"))
+          else
+            status.print "$ pixels"(pixel_width->Int)
+          endIf
+        endIf
+
+        if (pixel_height)
+          status.print " height: "
+          if (pixel_height > -1.0 and pixel_height < 1.0)
+            status.print "$%"(pixel_height.format(".0%"))
+          else
+            status.print "$ pixels"(pixel_height->Int)
+          endIf
+        endIf
+
+        if (pixel_width == 0 and pixel_height == 0)
+          status.print " [pixel width or height must be non-zero]"
+        endIf
+
+        if (ImageList.count == 0)
+          status.print " [no image selected]"
+          return
+        endIf
+      endUse
+
+    method execute
+      if (ImageList.count == 0) return
+      if (pixel_width == 0 and pixel_height == 0) return
+
+      local bitmap = ImageList.selected.image.bitmap
+      local pieces = Bitmap[]
+
+      local w = bitmap.width
+      local h = bitmap.height
+
+      if (pixel_width)
+        if (pixel_width > -1.0 and pixel_width < 1.0) w = w * pixel_width
+        else                                          w = pixel_width
+      endIf
+
+      if (pixel_height)
+        if (pixel_height > -1.0 and pixel_height < 1.0) h = h * pixel_height
+        else                                            h = pixel_height
+      endIf
+
+      if (pixel_width)
+        local w1, w2 : Int
+        if (w > 0)
+          w1 = w
+          w2 = bitmap.width - w1
+        else
+          w2 = -w
+          w1 = bitmap.width - w2
+        endIf
+
+        if (pixel_height)
+          local h1, h2 : Int
+          if (h > 0)
+            h1 = h
+            h2 = bitmap.height - h1
+          else
+            h2 = -h
+            h1 = bitmap.height - h2
+          endIf
+
+          pieces.add( Bitmap( bitmap, Box(0, 0, w1,h1) ) )
+          pieces.add( Bitmap( bitmap, Box(w1,0, w2,h1) ) )
+          pieces.add( Bitmap( bitmap, Box(0, h1,w1,h2) ) )
+          pieces.add( Bitmap( bitmap, Box(w1,h1,w2,h2) ) )
+        else
+          pieces.add( Bitmap( bitmap, Box(0, 0, w1,h) ) )
+          pieces.add( Bitmap( bitmap, Box(w1,0, w2,h) ) )
+        endIf
+
+      elseIf (pixel_height)
+        local h1, h2 : Int
+        if (h > 0)
+          h1 = h
+          h2 = bitmap.height - h1
+        else
+          h2 = -h
+          h1 = bitmap.height - h2
+        endIf
+
+        pieces.add( Bitmap( bitmap, Box(0, 0, w,h1) ) )
+        pieces.add( Bitmap( bitmap, Box(0,h1, w,h2) ) )
+      endIf
+
+      .insert_images( pieces )
+
+    method .insert_images( images:Bitmap[] )
+      local original = ImageList.selected.image
+      local index = ImageList.selected.index
+
+      local digits = 1L
+      local limit = 10L
+      while (limit < images.count)
+        ++digits
+        limit *= 10
+      endWhile
+      local fmt = "0$"(digits)
+
+      forEach (tile at i in images step -1)
+        local seq = i + 1
+        local image : Image
+        if (original.file)
+          image = Image( tile, original.file.value.appending("-$"(seq.format(fmt))) ).[ is_modified=true ]
+        elseIf (original.name)
+          image = Image( tile, "$-$"(original.name,seq.format(fmt)) )
+        else
+          image = Image( tile, seq.format(fmt) )
+        endIf
+        ImageList.insert( image, index )
+      endForEach
+
+      ImageList.remove( ImageList.selected )
+      ImageList.select( index )
 
 endClass
 
