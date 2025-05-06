@@ -186,3 +186,4 @@ Generator Name    | Arguments  | Description
 ---------------|------------|------------
 mosaic         | W1xH1 W2xH2 | Internally splits the current image into W1xH1 tiles and then creates a new image of tile size W2xH2 using randomly selected tiles. For example, `:generate mosaic 6x2 10x10` uses the current image as a source set of 12 tiles and creates a new image that is 10x10 tiles, each randomly chosen from the 6.
 perlin         | [frequency] (default: 8.0) | Generates Perlin Noise in the current image.
+tiled          | WxH         | Creates a new image which tiles this image the specified number of times. For example, `:generate tiled 3x3`.

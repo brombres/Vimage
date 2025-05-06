@@ -723,7 +723,7 @@ endClass
 class CmdLineGenerate : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "generate"
-    syntax  = "[mosaic|perlin]"
+    syntax  = "[mosaic|perlin|tiled]"
 
   METHODS
     method execute( arg_string:String )
@@ -755,6 +755,16 @@ class CmdLineGenerate : CmdLineHandler [singleton]
             endIf
           endIf
           cmd = CmdGeneratePerlin( freq )
+
+        case "tiled"
+          if (args.count == 1)
+            if local output_tile_count = parse_size( args[0], &tile_size )
+              cmd = CmdGenerateMosaic( XY(1,1), output_tile_count->XY )
+            endIf
+          endIf
+          if (not cmd)
+            status = "generate tiled [missing or invalid arguments]"
+          endIf
       endWhich
 
       if (cmd)
@@ -769,6 +779,7 @@ class CmdLineGenerate : CmdLineHandler [singleton]
       which (args.first)
         case "mosaic": return "W1xH1 W2xH2 (current image tile size, output tile size)"
         case "perlin": return "[frequency] (default:8.0)"
+        case "tiled":  return "WxH (tiled width and height)"
         others: return @syntax
       endWhich
 
