@@ -723,7 +723,7 @@ endClass
 class CmdLineGenerate : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "generate"
-    syntax  = "[mosaic|parts|perlin]"
+    syntax  = "[mosaic|perlin]"
 
   METHODS
     method execute( arg_string:String )
@@ -743,9 +743,6 @@ class CmdLineGenerate : CmdLineHandler [singleton]
           if (not cmd)
             status = "generate mosaic [missing or invalid arguments]"
           endIf
-
-        case "parts"
-          cmd = CmdGenerateParts
 
         case "perlin"
           local freq = 8.0
@@ -771,7 +768,6 @@ class CmdLineGenerate : CmdLineHandler [singleton]
       local args = arg_string.split(' ')
       which (args.first)
         case "mosaic": return "W1xH1 W2xH2 (current image tile size, output tile size)"
-        case "parts":  return "(transparency-separated parts into separate images)"
         case "perlin": return "[frequency] (default:8.0)"
         others: return @syntax
       endWhich
@@ -1355,12 +1351,14 @@ endClass
 class CmdLineSplit : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "split"
-    syntax  = "[WxH|X Y|patch|p]"
+    syntax  = "[WxH|X Y|parts|patch/p]"
 
   METHODS
     method execute( arg_string:String )
       if (arg_string == "patch" or arg_string == "p" or arg_string == "patches")
         execute( CmdSplit(&patch) )
+      elseIf (arg_string == "parts")
+        execute( CmdSplitParts )
       elseIf (arg_string.contains('x'))
         if local size = parse_size( arg_string, &tile_size )
           execute( CmdSplit(size->XY) )

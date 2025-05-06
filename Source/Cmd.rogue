@@ -2100,10 +2100,10 @@ class CmdGenerateMosaic( source_tile_count:XY, output_tile_count:XY ) : EditCmd
       ImageList.add_and_select( Image(result) )
 endClass
 
-class CmdGenerateParts : EditCmd [singleton]
+class CmdSplitParts : EditCmd [singleton]
   METHODS
     method update_status
-      status = "generate parts"
+      status = "split parts"
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
