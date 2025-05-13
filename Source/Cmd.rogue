@@ -2122,8 +2122,10 @@ class CmdSplitParts : EditCmd [singleton]
           if ((source_pixels[i].argb & 0xFF000000) == 0) checked[i] = true
         endForEach
 
-        local add_index = ImageList.selected.index
+        local selected_index = ImageList.selected.index
+        local insertion_index = selected_index
         local part_index = 1
+        ImageList.remove( ImageList.selected )
 
         forEach (j in 0..<h)
           forEach (i in 0..<w)
@@ -2168,8 +2170,8 @@ class CmdSplitParts : EditCmd [singleton]
                 part_pixels[ (pos.y->Int-min_y)*part_w + (pos.x->Int-min_x) ] = source_pixels[pos.z]
               endForEach
 
-              ++add_index
-              ImageList.insert( Image(part,"Part-$"(part_index)), add_index )
+              ImageList.insert( Image(part,"Part-$"(part_index)), insertion_index )
+              ++insertion_index
               ++part_index
 
               flood_fill_queue.clear
@@ -2178,9 +2180,7 @@ class CmdSplitParts : EditCmd [singleton]
           endForEach
         endForEach
 
-        if (add_index > ImageList.selected.index)
-          ImageList.select( ImageList.selected.index + 1 )
-        endIf
+        ImageList.select( selected_index )
 
       endUse
 
