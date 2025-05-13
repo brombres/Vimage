@@ -4,7 +4,7 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.27
+Version   | 1.28
 Date      | May 13, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
