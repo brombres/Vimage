@@ -58,7 +58,7 @@ class Vimage [singleton]
     last_repeat_count  : Int
     last_cmd           : Cmd
     anchor             = Anchor.CENTER
-    bg_color           = ColorValue( Color.BLACK )
+    bg_color           = ColorValue( Color(0) )
     hard_alpha         : Logical
     undo_stack         = @[]
     redo_stack         = @[]
