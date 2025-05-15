@@ -4,7 +4,7 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.29
+Version   | 1.30
 Date      | May 15, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
