@@ -79,6 +79,8 @@ class StandardState : State
       key_handlers[Keycode.E]               = CmdMerge
       key_handlers[Keycode.F]               = CmdFlipH
       key_handlers[Keycode.F+SHIFT]         = CmdFlipV
+      key_handlers[Keycode.M]               = CmdApplyMask
+      key_handlers[Keycode.M+SHIFT]         = CmdGenerateMask
       key_handlers[Keycode.N]               = CmdParseJoinH
       key_handlers[Keycode.N+SHIFT]         = CmdParseJoinV
       key_handlers[Keycode.P]               = CmdPasteAfter

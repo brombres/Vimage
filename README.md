@@ -64,6 +64,8 @@ Key    | Command              | Description
 &nbsp; | Jump to Bottom       | [Zoom/Crop] Pans the image window to make the bottom side of the image visible.
 `j`,`k`| Next/Previous Image  | Selects the next or previous image in the Image List to view or edit.
 `J`,`K`| Shift List Position  | Shifts the current image up or down in the Image List, reordering the list.
+`m`    | Apply Alpha Mask     | Copies the grayscale values of the current image into the alpha channel of the underlying image.
+`M`    | Generate Alpha Mask  | Creates an alpha mask from the current image. The grayscale values of the new mask correspond to the alpha channel of the original mask.
 `n`    | Join Horizontal      | Joins (splices) the current image with the one below it, placing them side-by-side horizontally.
 `N`    | Join Vertical        | Joins (splices) the current image with the one below it, stacking them vertically.
 `p`    | Paste Above          | Pastes the clipboard image above the current image in the Image List.

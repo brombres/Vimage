@@ -555,6 +555,51 @@ class CmdExtrude( left:Int, top:Int, right:Int, bottom:Int, smear=false:Logical 
 
 endClass
 
+class CmdGenerateMask : EditCmd [singleton]
+  METHODS
+    method update_status
+      status = "M (generate alpha mask, use 'm' to apply)"
+
+    method execute
+      if local current = ImageList.selected
+        if local index = ImageList.locate( current )
+          local bitmap = Bitmap( current.image.bitmap.size )
+          current.image.bitmap.blit( bitmap, 0, 0, BlitFnGenerateMask )
+          local image = Image( bitmap )
+          ImageList.insert( image, index )
+          ImageList.select( index )
+          ImageList.request_layout
+        endIf
+      else
+        status = "M (generate alpha mask) [no image selected]"
+      endIf
+endClass
+
+class CmdApplyMask : EditCmd [singleton]
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "m (apply alpha mask, use 'M' to extract)"
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        elseIf (not ImageList.selected.next)
+          status.print " [no underlying image to apply mask to]"
+        endIf
+      endUse
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected or not ImageList.selected.next) return
+
+      local selected_index = ImageList.selected.index
+      local mask = ImageList.selected.image.bitmap
+      ImageList.remove( ImageList.selected )
+      ImageList.select( selected_index )
+      local target = ImageList.selected.image.cloned_bitmap
+
+      if (mask.size != target.size) mask .= resized( target.size )
+      mask.blit( target, 0, 0, BlitFnApplyMask )
+endClass
+
 class CmdGoToFirstImage : Cmd [singleton]
   METHODS
     method update_status
