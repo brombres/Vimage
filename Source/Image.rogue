@@ -170,8 +170,9 @@ class Image
                 |  RogueInt32 a;
                 |  if ((a=(argb & 0xFF000000)) && a != 0xFF000000)
                 |  {
-                |    RogueInt32 v = ((((argb>>16)&255) + ((argb>>8)&255) + (argb&255)) / 6) + 128;
-                |    *data = argb | 0xFF000000 | (v<<16) | v;
+                |    RogueInt32 g = ((argb>>8) & 255);
+                |    RogueInt32 v = ((((argb>>16)&255) + g + (argb&255)) / 6) + 128;
+                |    *data = (argb & 0xFFFF00FF) | 0xFF000000 | ((g & ~1) << 7) | (v<<16) | v;
                 |  }
                 |}
       endIf
