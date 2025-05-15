@@ -4,8 +4,8 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.28
-Date      | May 13, 2025
+Version   | 1.29
+Date      | May 15, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
 License   | [MIT License](LICENSE)
