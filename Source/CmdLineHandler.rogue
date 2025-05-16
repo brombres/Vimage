@@ -807,7 +807,7 @@ endClass
 class CmdLineExtract : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "extract"
-    syntax  = "[1-4 channel thresholds e.g. 'a == 255, g <= 128, b > 64']"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|e.g 'a == 255, g <= 128, b > 64']"
 
   METHODS
     method execute( arg_line:String )
@@ -818,23 +818,40 @@ class CmdLineExtract : CmdLineHandler [singleton]
 
       local min = Dim<<Int>>(4)
       local max = Dim<<Int>>(4).[ fill(255) ]
-      local args = arg_line.split(',')
-      forEach (arg in args)
-        contingent
-          sufficient (.apply(arg,"==",min,max))
-          sufficient (.apply(arg,"<=",min,max))
-          sufficient (.apply(arg,"<",min,max))
-          sufficient (.apply(arg,">=",min,max))
-          sufficient (.apply(arg,">",min,max))
-          sufficient (.apply(arg,"=",min,max))
-          necessary (false)
-        unsatisfied
-          status = "extract [invalid argument '$']"(arg)
-          return
-        endContingent
-      endForEach
+      if (arg_line.contains('=') or arg_line.contains('>') or arg_line.contains('<'))
+        local args = arg_line.split(',')
+        forEach (arg in args)
+          contingent
+            sufficient (.apply(arg,"==",min,max))
+            sufficient (.apply(arg,"<=",min,max))
+            sufficient (.apply(arg,"<",min,max))
+            sufficient (.apply(arg,">=",min,max))
+            sufficient (.apply(arg,">",min,max))
+            sufficient (.apply(arg,"=",min,max))
+            necessary (false)
+          unsatisfied
+            status = "extract [invalid argument '$']"(arg)
+            return
+          endContingent
+        endForEach
+        execute( CmdExtract(min,max) )
 
-      execute( CmdExtract(min,max) )
+      else
+        if local color_value = parse_color( arg_line )
+          local color = color_value.value
+          min[0] = color.alpha_byte
+          max[0] = color.alpha_byte
+          min[1] = color.red_byte
+          max[1] = color.red_byte
+          min[2] = color.green_byte
+          max[2] = color.green_byte
+          min[3] = color.blue_byte
+          max[3] = color.blue_byte
+          execute( CmdExtract(min,max) )
+        else
+          status = "extract [invalid argument '$']"(arg_line)
+        endIf
+      endIf
 
     method .apply( expression:String, op:String, min:Int[], max:Int[] )->Logical
       expression .= trimmed
