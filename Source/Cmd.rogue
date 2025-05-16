@@ -2609,6 +2609,106 @@ class CmdInfoRange : EditCmd [singleton]
       return (low:min_value,high:max_value)
 endClass
 
+class CmdNumericAND( optional_color=null:ColorValue? )  : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "&&"
+        if (optional_color) status.print " $"(optional_color.value->Color.argb->Int32->String(&hex))
+        status.print "(numeric-AND / component minimum)"
+      endUse
+
+    method execute
+      if local selected = ImageList.selected
+        if (optional_color)
+          local bitmap = selected.image.cloned_bitmap
+          local n = bitmap.pixels.count
+          local color = optional_color.value->Color
+          local source_a = color.alpha_byte
+          local source_r = color.red_byte
+          local source_g = color.green_byte
+          local source_b = color.blue_byte
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  RogueInt32 a = (argb >> 24) & 0xff;
+                  |  RogueInt32 r = (argb >> 16) & 0xff;
+                  |  RogueInt32 g = (argb >> 8) & 0xff;
+                  |  RogueInt32 b = argb & 0xff;
+                  |  if ($source_a < a) a = $source_a;
+                  |  if ($source_r < r) r = $source_r;
+                  |  if ($source_g < g) g = $source_g;
+                  |  if ($source_b < b) b = $source_b;
+                  |  *data = (a<<24) | (r<<16) | (g<<8) | b;
+                  |}
+        else
+          if (selected is ImageList.last_child)
+            status = "&& (numeric-AND) [no underlying image]"
+            return
+          else
+            local top = selected.image.bitmap
+            local bottom_image  = selected.next->(as ImageListItem).image
+            local bottom_bitmap = bottom_image.cloned_bitmap
+            top.blit( bottom_bitmap, XY(0,0), BlitFnMinimum )
+            ImageList.remove( selected )
+            ImageList.select( bottom_image )
+          endIf
+        endIf
+      endIf
+endClass
+
+class CmdNumericOR( optional_color=null:ColorValue? )  : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "||"
+        if (optional_color) status.print " $"(optional_color.value->Color.argb->Int32->String(&hex))
+        status.print "(numeric-OR / component maximum)"
+      endUse
+
+    method execute
+      if local selected = ImageList.selected
+        if (optional_color)
+          local bitmap = selected.image.cloned_bitmap
+          local n = bitmap.pixels.count
+          local color = optional_color.value->Color
+          local source_a = color.alpha_byte
+          local source_r = color.red_byte
+          local source_g = color.green_byte
+          local source_b = color.blue_byte
+          native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+                  |
+                  |while (--$n >= 0)
+                  |{
+                  |  RogueInt32 argb = *(++data);
+                  |  RogueInt32 a = (argb >> 24) & 0xff;
+                  |  RogueInt32 r = (argb >> 16) & 0xff;
+                  |  RogueInt32 g = (argb >> 8) & 0xff;
+                  |  RogueInt32 b = argb & 0xff;
+                  |  if ($source_a > a) a = $source_a;
+                  |  if ($source_r > r) r = $source_r;
+                  |  if ($source_g > g) g = $source_g;
+                  |  if ($source_b > b) b = $source_b;
+                  |  *data = (a<<24) | (r<<16) | (g<<8) | b;
+                  |}
+        else
+          if (selected is ImageList.last_child)
+            status = "|| (numeric-OR) [no underlying image]"
+            return
+          else
+            local top = selected.image.bitmap
+            local bottom_image  = selected.next->(as ImageListItem).image
+            local bottom_bitmap = bottom_image.cloned_bitmap
+            top.blit( bottom_bitmap, XY(0,0), BlitFnMaximum )
+            ImageList.remove( selected )
+            ImageList.select( bottom_image )
+          endIf
+        endIf
+      endIf
+endClass
+
 class CmdLiteralBitwiseAND( argb:Int )  : EditCmd
   METHODS
     method update_status

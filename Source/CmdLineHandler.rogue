@@ -1132,6 +1132,26 @@ class CmdLineJoin : CmdLineHandler [singleton]
       endIf
 endClass
 
+class CmdLineNumericAND : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "&&"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '&&' w/underlying image)"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdNumericAND( parse_color(args) ) )
+endClass
+
+class CmdLineNumericOR : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "||"
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '||' w/underlying image)"
+
+  METHODS
+    method execute( args:String )
+      execute( CmdNumericOR( parse_color(args) ) )
+endClass
+
 class CmdLineLiteralBitwiseAND : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "&"

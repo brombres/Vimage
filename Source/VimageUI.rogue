@@ -32,6 +32,8 @@ class VimageUI : ConsoleUI [singleton]
       register( CmdLineHardAlpha )
       register( CmdLineInfo )
       register( CmdLineJoin )
+      register( CmdLineNumericAND )
+      register( CmdLineNumericOR  )
       register( CmdLineLiteralBitwiseAND )
       register( CmdLineLiteralBitwiseOR  )
       register( CmdLineLiteralBitwiseROL )

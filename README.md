@@ -144,7 +144,9 @@ Command   | Arguments       | Description
 `:wall`     |                   | Writes (saves) all modified images.
 `:wq`       |                   | Writes (saves) and quits (closes) the current image.
 `:&`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-AND's each pixel in the current image with the specified constant value.
+`:&&`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB] (optional)` | Numeric-AND's each pixel in the current image with the constant value (if specified) or else with the underlying image. A Numeric AND combines two colors using a component minimum. This is especially useful for combining alpha masks through intersection.
 `:\|`       | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-OR's each pixel in the current image with the specified constant value.
+`:\|\|`     | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB] (optional)` | Numeric-OR's each pixel in the current image with the constant value (if specified) or else with the underlying image. A Numeric OR combines two colors using a component maximum. This is especially useful for combining alpha masks through union.
 `:~`        | `[V\|RGB\|ARGB\|RRGGBB\|AARRGGBB]` | Bitwise-XOR's each pixel in the current image with the specified constant value.
 `:<`        | `N`               | Left-rotates the RGB bits by N pixels. Does not affect the alpha bits. Example: `:< 8`.
 `:<`        | `N a`             | Left-rotates the ARGB bits by N pixels. Example: `:< 8 a`.
