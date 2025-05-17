@@ -2651,6 +2651,7 @@ class CmdNumericAND( optional_color=null:ColorValue? )  : EditCmd
             local top = selected.image.bitmap
             local bottom_image  = selected.next->(as ImageListItem).image
             local bottom_bitmap = bottom_image.cloned_bitmap
+            if (top.size != bottom_bitmap.size) top .= resized( bottom_bitmap.size )
             top.blit( bottom_bitmap, XY(0,0), BlitFnMinimum )
             ImageList.remove( selected )
             ImageList.select( bottom_image )
@@ -2701,6 +2702,7 @@ class CmdNumericOR( optional_color=null:ColorValue? )  : EditCmd
             local top = selected.image.bitmap
             local bottom_image  = selected.next->(as ImageListItem).image
             local bottom_bitmap = bottom_image.cloned_bitmap
+            if (top.size != bottom_bitmap.size) top .= resized( bottom_bitmap.size )
             top.blit( bottom_bitmap, XY(0,0), BlitFnMaximum )
             ImageList.remove( selected )
             ImageList.select( bottom_image )
