@@ -1426,7 +1426,6 @@ class CmdChannelCopy( a:String, b:String ) : EditCmd
           local b_shift = ("bgra".locate(dest_channel).value :<<: 3)
           forEach (color in rewriter=bitmap.pixels.rewriter)
             local a = (color.argb :>>>: a_shift) & 0xFF
-            local b = (color.argb :>>>: b_shift) & 0xFF
             local argb = color.argb & !(0xFF:<<:b_shift)
             argb |= (a :<<: b_shift)
             rewriter.write( Color(argb) )
