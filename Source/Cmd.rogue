@@ -2244,10 +2244,9 @@ class CmdSplitParts( in_place=false:Logical ) : EditCmd [singleton]
                 part = result
               endIf
 
-              ImageList.insert(
-                Image( part, fragment_file(original, part_index, &default_base_name="Part") ),
-                insertion_index
-              )
+              local image = Image( part, fragment_file(original, part_index, &default_base_name="Part") )
+              image.is_modified = true
+              ImageList.insert( image, insertion_index )
               ++insertion_index
               ++part_index
 
