@@ -10,6 +10,28 @@ class Cmd
     method create( callback:Function(e:KeyEvent) )->Cmd
       return CmdCallback( callback )
 
+    method fragment_file( original:Image, index:Int, total_count=0:Int, default_base_name="Part":String )->File
+      if (total_count == 0) total_count = index
+
+      local digits  = 1
+      local limit   = 10
+      while (limit <= total_count)
+        ++digits
+        limit *= 10
+      endWhile
+      local fmt = "0$"(digits)
+
+      local filepath : String
+      if (original.file)
+        filepath = original.file.value.appending( "-$"(index.format(fmt)) )
+      elseIf (original.name)
+        filepath = "$-$"(original.name,index.format(fmt))
+      else
+        filepath = "$-$"(default_base_name,index.format(fmt))
+      endIf
+
+      return ImageList.make_filepath_unique( File(filepath) )
+
   METHODS
     method init
 
@@ -2171,6 +2193,7 @@ class CmdSplitParts( in_place=false:Logical ) : EditCmd [singleton]
         local selected_index = ImageList.selected.index
         local insertion_index = selected_index
         local part_index = 1
+        local original = ImageList.selected.image
         ImageList.remove( ImageList.selected )
 
         forEach (j in 0..<h)
@@ -2222,7 +2245,10 @@ class CmdSplitParts( in_place=false:Logical ) : EditCmd [singleton]
                 part = result
               endIf
 
-              ImageList.insert( Image(part,"Part-$"(part_index)), insertion_index )
+              ImageList.insert(
+                Image( part, fragment_file(original, part_index, &default_base_name="Part") ),
+                insertion_index
+              )
               ++insertion_index
               ++part_index
 
