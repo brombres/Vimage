@@ -1403,16 +1403,21 @@ class CmdLineSplit : CmdLineHandler [singleton]
 
   METHODS
     method execute( arg_string:String )
+      local args = arg_string.split(' ')
+
       if (arg_string == "patch" or arg_string == "p" or arg_string == "patches")
         execute( CmdSplit(&patch) )
-      elseIf (arg_string == "parts")
-        execute( CmdSplitParts )
+      elseIf (args.count and args[0] == "parts")
+        if (args.count >= 2 and args[1] == "inplace")
+          execute( CmdSplitParts(&in_place) )
+        else
+          execute( CmdSplitParts )
+        endIf
       elseIf (arg_string.contains('x'))
         if local size = parse_size( arg_string, &tile_size )
           execute( CmdSplit(size->XY) )
         endIf
       else
-        local args = arg_string.split(' ')
         adjust_percentages( args )
         if (args.count == 2 and args[0].is_number and args[1].is_number)
           execute( CmdSplitXY( args[0]->Real, args[1]->Real ) )
@@ -1420,6 +1425,14 @@ class CmdLineSplit : CmdLineHandler [singleton]
           status = "split [missing or invalid WxH tile count or X and Y pixel offsets]"
         endIf
       endIf
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      which (args.first)
+        case "parts": return "[inplace]"
+        others: return @syntax
+      endWhich
 endClass
 
 class CmdLineRemove : CmdLineHandler [singleton]

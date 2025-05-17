@@ -2145,10 +2145,11 @@ class CmdGenerateMosaic( source_tile_count:XY, output_tile_count:XY ) : EditCmd
       ImageList.add_and_select( Image(result) )
 endClass
 
-class CmdSplitParts : EditCmd [singleton]
+class CmdSplitParts( in_place=false:Logical ) : EditCmd [singleton]
   METHODS
     method update_status
-      status = "split parts"
+      if (in_place) status = "split parts inplace"
+      else          status = "split parts"
 
     method execute( ignore_repeat_count:Int )
       if (not ImageList.selected) return
@@ -2214,6 +2215,12 @@ class CmdSplitParts : EditCmd [singleton]
               forEach (pos in flood_fill_queue)
                 part_pixels[ (pos.y->Int-min_y)*part_w + (pos.x->Int-min_x) ] = source_pixels[pos.z]
               endForEach
+
+              if (in_place)
+                local result = Bitmap( w, h )
+                part.blit( result, min_x, min_y )
+                part = result
+              endIf
 
               ImageList.insert( Image(part,"Part-$"(part_index)), insertion_index )
               ++insertion_index
