@@ -879,7 +879,7 @@ endClass
 class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"
-    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
+    syntax  = "[COLOR|TOP BOTTOM|TL TR BL BR|COLORS|corners]"
 
   METHODS
     method execute( arg_line:String )
@@ -891,8 +891,12 @@ class CmdLineFill : CmdLineHandler [singleton]
       local args = arg_line.split(' ')
       which (args.count)
         case 1
-          if local c = parse_color( args[0] )
-            execute( CmdFill(c) )
+          if (args.first == "corners")
+            execute( CmdFillCornerGradient )
+          else
+            if local c = parse_color( args[0] )
+              execute( CmdFill(c) )
+            endIf
           endIf
         case 2
           if local a = parse_color( args[0] )

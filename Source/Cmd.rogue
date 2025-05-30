@@ -1528,7 +1528,8 @@ class CmdFill( c:ColorValue ) : EditCmd
 
 endClass
 
-class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
+class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd
+  METHODS
     method update_status
       status = "fill $ $"(a,b)
 
@@ -1593,6 +1594,37 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
           @|  *(++data) = $argb;
            |}
       endLoop
+
+endClass
+
+class CmdFillCornerGradient : EditCmd [singleton]
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "fill "
+        local colors = .colors
+        if (colors.count)
+          status.print "$ $ $ $"(colors[0],colors[1],colors[2],colors[3])
+        else
+          status.print "corners [no image selected]"
+        endIf
+      endUse
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+      local colors = .colors.map<<ColorValue>>( (c) => ColorValue(c) )
+      CmdFill4( colors[0], colors[1], colors[2], colors[3] ).execute( &=ignore_repeat_count )
+
+    method .colors->Color[]
+      local result = Color[]
+      if (ImageList.selected)
+        local bitmap = ImageList.selected.image.bitmap
+        result.add( bitmap.get( 0, 0 ) )
+        result.add( bitmap.get( bitmap.width-1, 0 ) )
+        result.add( bitmap.get( 0, bitmap.height-1 ) )
+        result.add( bitmap.get( bitmap.width-1, bitmap.height-1 ) )
+      endIf
+      return result
 
 endClass
 
