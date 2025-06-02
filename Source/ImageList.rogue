@@ -97,7 +97,7 @@ class ImageList : VList [singleton]
       @fixed_width = (Console.width / 4 + 1).clamped( 21, 33 )
       fixed_width = fixed_width
 
-    method on_layout [override]
+    method on_begin_layout [override]
       fixed_height = count
 
     method remove_selected
