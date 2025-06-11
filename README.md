@@ -4,8 +4,8 @@
 
 Summary   | Current Release
 ----------|-----------------------
-Version   | 1.35
-Date      | May 30, 2025
+Version   | 1.36
+Date      | June 11, 2025
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
 License   | [MIT License](LICENSE)
