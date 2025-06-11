@@ -2153,6 +2153,64 @@ class CmdFilterGray( args:String[] ) : EditCmd
 
 endClass
 
+class CmdFilterMaxGray( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter maxgray".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      convert_max_rgb_to_grayscale( bitmap )
+
+  GLOBAL METHODS
+    method convert_max_rgb_to_grayscale( bitmap:Bitmap )
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (bitmap.width * bitmap.height)
+        local argb = native("*(++data)")->Int
+        local a = ((argb:>>>:24) & 0xff)
+        local v = ((argb:>>>:16) & 0xff)
+        local g = ((argb:>>>:8)  & 0xff)
+        local b = ( argb         & 0xff)
+        if (g > v) v = g
+        if (b > v) v = b
+        argb = (argb & 0xFF000000) | (v:<<:16) | (v:<<:8) | v
+        native @|*data = $argb;
+      endLoop
+
+endClass
+
+class CmdFilterMinGray( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter mingray".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      convert_min_rgb_to_grayscale( bitmap )
+
+  GLOBAL METHODS
+    method convert_min_rgb_to_grayscale( bitmap:Bitmap )
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      loop (bitmap.width * bitmap.height)
+        local argb = native("*(++data)")->Int
+        local a = ((argb:>>>:24) & 0xff)
+        local v = ((argb:>>>:16) & 0xff)
+        local g = ((argb:>>>:8)  & 0xff)
+        local b = ( argb         & 0xff)
+        if (g < v) v = g
+        if (b < v) v = b
+        argb = (argb & 0xFF000000) | (v:<<:16) | (v:<<:8) | v
+        native @|*data = $argb;
+      endLoop
+
+endClass
+
 class CmdFilterHardAlpha( args:String[] ) : EditCmd
   METHODS
     method update_status
@@ -2549,6 +2607,61 @@ class CmdFilterSeamless : EditCmd
       endIf
 
 endClass
+
+class CmdFilterSilver( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter silver".appending(args.join(" "))
+
+    method execute( ignore_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data  = $bitmap->pixels->as_int32s - 1;
+
+      local WHITE           = Color.WHITE
+      local BLUISH_WHITE    = Color( 0xFFE2FAFF )  # 82%
+      local LIGHT_GRAY      = Color( 0xFFDDDDDD )  # 73%
+      local MEDIUM_SKY_BLUE = Color( 0xFF97C0CD )  # 58%
+      local DARK_GRAY       = Color( 0xFF404040 )  # 25%
+      #local GUNMETAL_BLUE   = Color( 0xFF2A3644 )  # 20%
+      local BLACK           = Color.BLACK
+
+      local p1 = 0.82
+      local p2 = 0.64
+      local p3 = 0.46
+      local p4 = 0.28
+
+      loop (bitmap.width * bitmap.height)
+        local color = Color( native("*(++data)")->Int )
+
+        # Save alpha
+        local alpha = (color.argb & 0xff00_0000)
+
+        # Compute grayscale value 'v'
+        local v = (((color.argb:>>>:16) & 0xff) * 30) / 100  # 30% red
+        v += (((color.argb:>>>:8) & 0xff) * 58) / 100        # 58% green
+        v += ((color.argb & 0xff) * 11) / 100                # 11% blue
+
+        local p = v.progress( 0, 255 )
+        if (p >= p1)
+          color = p.progress(p1,1.00).lerp( BLUISH_WHITE, WHITE )
+        elseIf (p >= p2)
+          color = p.progress(p2,p1).lerp( LIGHT_GRAY, BLUISH_WHITE )
+        elseIf (p >= p3)
+          color = p.progress(p3,p2).lerp( MEDIUM_SKY_BLUE, LIGHT_GRAY )
+        elseIf (p >= p4)
+          color = p.progress(p4,p3).lerp( DARK_GRAY, MEDIUM_SKY_BLUE )
+        else
+          color = p.progress(0.00,p4).lerp( BLACK, DARK_GRAY )
+        endIf
+
+        # Write gold value back with original alpha
+        native @|*data = $alpha | ($color.argb & 0x00ffffff);
+      endLoop
+
+endClass
+
 
 class CmdChannelRGBToHSV( args:String[] ) : EditCmd
   METHODS

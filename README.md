@@ -172,15 +172,17 @@ swap           | `[a\|r\|g\|b]` `[a\|r\|g\|b]` | Swaps one color channel with an
 
 Filter Name    | Arguments  | Description
 ---------------|------------|------------
-brightgold     | &nbsp;     | Map max(R,G,B) to gradient [Black,Orange,Yellow,White]
 clamp          | `LOCOLOR HICOLOR` | Limits the range of each pixel's color components to the corresponding low and high byte of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
 matchcolor     | &nbsp;       | This image is recolored to match the colors of the underlying image in the list. Colors are assigned based on pixel brightness values.
 matchbright    | &nbsp;       | The average brightness this image is adjusted to match the average brightness of the underlying image.
-gold           | &nbsp;       | Map gray(R,G,B) to gradient [Black,Orange,Yellow,White]
+gold           | &nbsp;       | Maps gray(R,G,B) to gradient [Black,Orange,Yellow,White]. Also try ':filter mingray|maxgray' before ':filter gold'.
 gray, grey     | `[RW GW BW]` | rgb = rgb( r\*RW + g\*GW + b\*BW )<br>Weights are normalized. Default 299 587 114.
 hardalpha      | &nbsp;       | Sets pixels with nonzero alpha values to have alpha 255.
+maxgray        | &nbsp;       | Converts to grayscale where V = max(R,G,B).
+mingray        | &nbsp;       | Converts to grayscale where V = min(R,G,B).
 normalize      | [low high] (defaults: 0 255) | Normalizes brightness. The existing brightness range is remapped onto the full brightness range 0..255 or other specified range.
 seamless       | `[h|v] [<percent>% | <pixels>]` | Creates a seamless tile by splitting and transposing halves, adding a translucency gradient, and merging back over the original image. Optionally specify e.g. '50%' to edge-blend just 50% of the image or e.g. '50' to edge-blend just 50 pixels. Optionally specify 'h' for horizontal only, 'v' for vertical only.
+silver         | &nbsp;       | Maps gray(R,G,B) to a silver-blue gradient. Also try ':filter mingray|maxgray' before ':filter silver'.
 
 # Generators
 
