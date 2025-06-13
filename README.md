@@ -131,6 +131,7 @@ Command   | Arguments       | Description
 `:q!`       |                 | Quits (closes) the current image, even if it has modifications.
 `:qq`       |                 | Quits all images and ends Vimage. Will be unsuccessful if any image has modifications.
 `:qq!`      |                 | Quits all images, even if some of them have modifications.
+`:reload`   |                 | Reloads the current image from file.
 `:resize`   | `[WxH\|Wx\|xH]`     | Resizes the current image. "Wx" and "xH" variations retain the current aspect ratio while specifying a new size for one dimension.
 `:rm`       |                 | Removes (deletes) the file for the current image from the filesystem. Useful for cleaning up an image folder by deleting unwanted images.
 `:save`     | `[filepath]`      | An alias for `:w`.

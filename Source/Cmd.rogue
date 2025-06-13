@@ -3313,6 +3313,34 @@ class CmdQuitAll( force=false:Logical ) : Cmd
       VimageUI.is_running = false
 endClass
 
+class CmdReload : EditCmd [singleton]
+  METHODS
+    method update_status
+      if (ImageList.selected and ImageList.selected.image.file)
+        if (ImageList.selected.image.file.value.exists)
+          status = "reload $"(ImageList.selected.image.file)
+        else
+          status = "reload [file $ no longer exists]"(ImageList.selected.image.file)
+        endIf
+      elseIf (ImageList.selected)
+        status = "reload [no file associated with current image]"
+      else
+        status = "reload [no current image]"
+      endIf
+
+    method execute
+      if (ImageList.selected and ImageList.selected.image.file)
+        local image = ImageList.selected.image
+        local file = image.file.value
+        if (file.exists)
+          image.bitmap = null
+          image.bitmap # getter reloads
+          image.is_modified = true
+          ImageList.select( image )
+        endIf
+      endIf
+endClass
+
 class CmdRemove : EditCmd [singleton]
   METHODS
     method update_status

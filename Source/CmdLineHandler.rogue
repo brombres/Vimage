@@ -1443,6 +1443,17 @@ class CmdLineSplit : CmdLineHandler [singleton]
       endWhich
 endClass
 
+class CmdLineReload : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "reload"
+    syntax  = "(reloads this image from its file)"
+
+  METHODS
+    method execute( arg_line:String )
+      execute( CmdReload )
+
+endClass
+
 class CmdLineRemove : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "rm"
