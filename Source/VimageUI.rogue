@@ -1,6 +1,6 @@
 library Vimage
 uses Console/ConsoleUI
-uses UI
+uses GUI
 
 class VimageUI : ConsoleUI [singleton]
   PROPERTIES

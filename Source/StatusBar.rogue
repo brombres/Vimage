@@ -1,5 +1,5 @@
 library Vimage
-uses UI
+uses GUI
 
 class StatusBar : Component [singleton]
   PROPERTIES

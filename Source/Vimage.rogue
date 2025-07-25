@@ -16,7 +16,7 @@ uses Graphics
 uses Graphics/BitmapIO
 uses Control/Action
 uses Epilog
-uses UI
+uses GUI
 uses Utility/Clipboard
 
 $include Actions
