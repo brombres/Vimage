@@ -140,7 +140,7 @@ Command   | Arguments       | Description
 `:split`    | `X Y`             | Splits the current image into 1, 2, or 4 tiles. Positive integers are dimensions of the leftmost or topmost piece. Real numbers less than 1.0 or integers ending with '%' specify a percentage of the original size. Negative values specify how much the size the left or top should be reduced by. By example: `:split 100 0` splits a 1024x1024 image horizontally into pieces 100 pixels and 924 pixels wide. `:split 25% -200` splits a 1024x1024 image into four pieces sizes 256x824 (top-left), 768x824 (top-right), 256x200 (bottom-left), and 768x200 (bottom-right).
 `:split`    | `parts [inplace]` | Splits the various parts of this image into separate images. A part is a contiguous set of non-transparent pixels. If `inplace` is specified, each resulting part is in the same place as before in a blank image the same size as the original. If `inplace` is not specified, each resulting part is placed in a blank image of the minimum size to contain it.
 `:split`    | `patch`           | Auto-determines whether image has a sizing guide only on the top (font strip) or on all four sides (9-patch image) and then splits the image into its separate tiles.
-`:trim`     | `[t|l|b|r]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
+`:trim`     | `[l|t|r|b]`       | Trims fully transparent pixels from the specified sides, or all sides if none specified.
 `:w`        | `[filepath]`      | Writes (saves) the current image, optionally specifying a new filepath.
 `:wall`     |                   | Writes (saves) all modified images.
 `:wq`       |                   | Writes (saves) and quits (closes) the current image.

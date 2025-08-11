@@ -1487,7 +1487,7 @@ endClass
 class CmdLineTrim : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "trim"
-    syntax  = "[t|l|b|r]"
+    syntax  = "[l|t|r|b]"
 
   METHODS
     method execute( args:String )
@@ -1497,7 +1497,7 @@ class CmdLineTrim : CmdLineHandler [singleton]
         local left = args.contains( 'l' )
         local bottom = args.contains( 'b' )
         local right = args.contains( 'r' )
-        args.discard( "tlbr ".contains($) )
+        args.discard( "ltrb ".contains($) )
         if (args.is_empty)
           execute( CmdTrim(&=top,&=left,&=bottom,&=right) )
         else

@@ -4008,25 +4008,70 @@ endClass
 class CmdTrim( top=false:Logical, left=false:Logical, bottom=false:Logical, right=false:Logical ) : EditCmd [singleton]
   METHODS
     method update_status
-      local st = String( "t " )
+      update_status( 0, 0, 0, 0 )
+
+    method update_status( left_px=0:Int, top_px=0:Int, right_px=0:Int, bottom_px=0:Int )
+      local st = String( "trim " )
       local dirs = String[]
-      if (top)    st.print( 't' ); dirs.add( "top" )
       if (left)   st.print( 'l' ); dirs.add( "left" )
-      if (bottom) st.print( 'b' ); dirs.add( "bottom" )
+      if (top)    st.print( 't' ); dirs.add( "top" )
       if (right)  st.print( 'r' ); dirs.add( "right" )
-      st .= appending( "(trim transparent" )
-      if (dirs.count) st .= appending( dirs.conjoin )
-      st .= appending( "edge".pluralized(dirs.count) )
-      st .= appending( ')' )
+      if (bottom) st.print( 'b' ); dirs.add( "bottom" )
+      st .= appending( "(trim transparent edge pixels)" )
+      #if (dirs.count) st .= appending( "($)"(dirs.conjoin) )
+      if (left_px) st .= appending( "left:$"(left_px) )
+      if (top_px) st .= appending( "top:$"(top_px) )
+      if (right_px) st .= appending( "right:$"(right_px) )
+      if (bottom_px) st .= appending( "bottom:$"(bottom_px) )
       status = st
 
     method execute
       if local item = ImageList.selected
         local img = ImageList.selected.image
-        if (img.cloned_bitmap.trim(&=top,&=left,&=bottom,&=right))
+        local bitmap = img.cloned_bitmap
+        local size = bitmap.size
+        local top_px = 0
+        local left_px = 0
+        local bottom_px = 0
+        local right_px = 0
+        local is_modified = false
+
+        if (not (top or left or right or bottom))
+          left = true
+          top = true
+          right = true
+          bottom = true
+        endIf
+
+        if (left and bitmap.trim(&left))
+          left_px = size.x - bitmap.size.x
+          size = bitmap.size
+          is_modified = true
+        endIf
+
+        if (top and bitmap.trim(&top))
+          top_px = size.y - bitmap.size.y
+          size = bitmap.size
+          is_modified = true
+        endIf
+
+        if (right and bitmap.trim(&right))
+          right_px = size.x - bitmap.size.x
+          size = bitmap.size
+          is_modified = true
+        endIf
+
+        if (bottom and bitmap.trim(&bottom))
+          bottom_px = size.y - bitmap.size.y
+          size = bitmap.size
+          is_modified = true
+        endIf
+
+        if (is_modified)
           img.zoom = 0
           ImageView.mark_modified
           ImageView.min_zoom = 0
+          update_status( &=left_px, &=top_px, &=right_px, &=bottom_px )
         endIf
       endIf
 endClass
