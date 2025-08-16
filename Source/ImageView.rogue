@@ -1,6 +1,6 @@
 library Vimage
 uses Console/ANSIBitmap
-uses GUI
+uses UI
 
 class ImageView : Component [singleton]
   PROPERTIES

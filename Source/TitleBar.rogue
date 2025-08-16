@@ -1,5 +1,5 @@
 library Vimage
-uses GUI
+uses UI
 
 class TitleBar : Component [singleton]
   PROPERTIES
