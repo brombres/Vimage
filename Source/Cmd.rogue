@@ -609,7 +609,7 @@ class CmdApplyMask : EditCmd [singleton]
         endIf
       endUse
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected or not ImageList.selected.next) return
 
       local selected_index = ImageList.selected.index
@@ -1507,7 +1507,7 @@ class CmdFill( c:ColorValue ) : EditCmd
     method update_status
       status = "fill $"(c)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1533,8 +1533,8 @@ class CmdFill2( a:ColorValue, b:ColorValue ) : EditCmd
     method update_status
       status = "fill $ $"(a,b)
 
-    method execute( ignore_repeat_count:Int )
-      CmdFill4( a, a, b, b ).execute( &=ignore_repeat_count )
+    method execute( ignored_repeat_count:Int )
+      CmdFill4( a, a, b, b ).execute( &=ignored_repeat_count )
 
 endClass
 
@@ -1543,7 +1543,7 @@ class CmdFill4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : EditC
     method update_status
       status = "fill $ $ $ $"(a,b,c,d)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1573,7 +1573,7 @@ class CmdFillGradient( colors:ColorValue[] ) : EditCmd
     method update_status
       status = "fill $"(colors)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1610,10 +1610,10 @@ class CmdFillCornerGradient : EditCmd [singleton]
         endIf
       endUse
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
       local colors = .colors.map<<ColorValue>>( (c) => ColorValue(c) )
-      CmdFill4( colors[0], colors[1], colors[2], colors[3] ).execute( &=ignore_repeat_count )
+      CmdFill4( colors[0], colors[1], colors[2], colors[3] ).execute( &=ignored_repeat_count )
 
     method .colors->Color[]
       local result = Color[]
@@ -1633,7 +1633,7 @@ class CmdFillAlpha( c:ColorValue ) : EditCmd
     method update_status
       status = "fillalpha $"(c)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1659,8 +1659,8 @@ class CmdFillAlpha2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
     method update_status
       status = "fillalpha $ $"(a,b)
 
-    method execute( ignore_repeat_count:Int )
-      CmdFillAlpha4( a, a, b, b ).execute( &=ignore_repeat_count )
+    method execute( ignored_repeat_count:Int )
+      CmdFillAlpha4( a, a, b, b ).execute( &=ignored_repeat_count )
 
 endClass
 
@@ -1669,7 +1669,7 @@ class CmdFillAlpha4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : 
     method update_status
       status = "fillalpha $ $ $ $"(a,b,c,d)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1700,7 +1700,7 @@ class CmdFillAlphaGradient( colors:ColorValue[] ) : EditCmd
     method update_status
       status = "fillalpha $"(colors)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1730,7 +1730,7 @@ class CmdFillRGB( c:ColorValue ) : EditCmd
     method update_status
       status = "fillrgb $"(c)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1756,8 +1756,8 @@ class CmdFillRGB2( a:ColorValue, b:ColorValue ) : EditCmd METHODS
     method update_status
       status = "fillrgb $ $"(a,b)
 
-    method execute( ignore_repeat_count:Int )
-      CmdFillRGB4( a, a, b, b ).execute( &=ignore_repeat_count )
+    method execute( ignored_repeat_count:Int )
+      CmdFillRGB4( a, a, b, b ).execute( &=ignored_repeat_count )
 
 endClass
 
@@ -1766,7 +1766,7 @@ class CmdFillRGB4( a:ColorValue, b:ColorValue, c:ColorValue, d:ColorValue ) : Ed
     method update_status
       status = "fillrgb $ $ $ $"(a,b,c,d)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1797,7 +1797,7 @@ class CmdFillRGBGradient( colors:ColorValue[] ) : EditCmd
     method update_status
       status = "fillrgb $"(colors)
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1828,7 +1828,7 @@ class CmdFilterBrightGold( args:String[] ) : EditCmd
     method update_status
       status = "filter brightgold".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1867,7 +1867,7 @@ class CmdFilterGold( args:String[] ) : EditCmd
     method update_status
       status = "filter gold".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -1914,7 +1914,7 @@ class CmdFilterMatchBright( args:String[] ) : EditCmd
         endIf
       endUse
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
       if (not ImageList.selected.next) return
 
@@ -2010,6 +2010,37 @@ class CmdFilterMatchBright( args:String[] ) : EditCmd
       endIf
 endClass
 
+class CmdFilterDiff( args:String[] ) : EditCmd
+  METHODS
+    method update_status
+      use status = StatusBar
+        status.print "filter diff"
+        if (not ImageList.selected)
+          status.print " [no image selected]"
+        elseIf (not ImageList.selected.next)
+          status.print " [no underlying image to diff]"
+        elseIf (ImageList.selected.image.bitmap.size !=
+            ImageList.selected.next->(as ImageListItem).image.bitmap.size)
+          status.print " [underlying image must be the same size]"
+        endIf
+      endUse
+
+    method execute( ignored_repeat_count:Int )
+      if (not ImageList.selected) return
+      if (not ImageList.selected.next) return
+
+      local over = ImageList.selected.image.cloned_bitmap
+      local under = ImageList.selected.next->(as ImageListItem).image.bitmap
+      if (over.size != under.size) return
+
+      local over_pixels = over.pixels
+      local under_pixels = under.pixels
+      forEach (color at i in over_pixels)
+        if (color == under_pixels[i]) over_pixels[i] = Color(0)
+      endForEach
+
+endClass
+
 class CmdFilterMatchColor( args:String[] ) : EditCmd
   METHODS
     method update_status
@@ -2022,7 +2053,7 @@ class CmdFilterMatchColor( args:String[] ) : EditCmd
         endIf
       endUse
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
       if (not ImageList.selected.next) return
 
@@ -2114,7 +2145,7 @@ class CmdFilterGray( args:String[] ) : EditCmd
     method update_status
       status = "filter gray".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local rw = 0.2990
@@ -2158,7 +2189,7 @@ class CmdFilterMaxGray( args:String[] ) : EditCmd
     method update_status
       status = "filter maxgray".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -2187,7 +2218,7 @@ class CmdFilterMinGray( args:String[] ) : EditCmd
     method update_status
       status = "filter mingray".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -2216,7 +2247,7 @@ class CmdFilterHardAlpha( args:String[] ) : EditCmd
     method update_status
       status = "filter hardalpha".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -2240,7 +2271,7 @@ class CmdGenerateMosaic( source_tile_count:XY, output_tile_count:XY ) : EditCmd
         if (not ImageList.selected) status.print " [no image selected]"
       endUse
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local tiles = ImageList.selected.image.bitmap.split( source_tile_count.x, source_tile_count.y )
@@ -2262,7 +2293,7 @@ class CmdSplitParts( in_place=false:Logical ) : EditCmd [singleton]
       if (in_place) status = "split parts inplace"
       else          status = "split parts"
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local source  = ImageList.selected.image.bitmap
@@ -2359,7 +2390,7 @@ class CmdGeneratePerlin( frequency=8.0:Real ) : EditCmd
       if (not ImageList.selected) message .= appending( "[no image selected]" )
       status = message
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -2390,7 +2421,7 @@ class CmdChannelHSVToRGB( args:String[] ) : EditCmd
       local bitmap = ImageList.selected.image.cloned_bitmap
       convert_hsv_to_rgb( bitmap )
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
       apply
 
@@ -2613,7 +2644,7 @@ class CmdFilterSilver( args:String[] ) : EditCmd
     method update_status
       status = "filter silver".appending(args.join(" "))
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local bitmap = ImageList.selected.image.cloned_bitmap
@@ -2672,7 +2703,7 @@ class CmdChannelRGBToHSV( args:String[] ) : EditCmd
       local bitmap = ImageList.selected.image.cloned_bitmap
       convert_rgb_to_hsv( bitmap )
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
       apply
 
@@ -2745,7 +2776,7 @@ class CmdInfoRange : EditCmd [singleton]
     method update_status
       status = "info range"
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (not ImageList.selected) return
 
       local r = range
@@ -3087,7 +3118,7 @@ class CmdMacro : Cmd [singleton]
 
     method update_status
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (Vimage.recording_macro)
         Vimage.recording_macro = false
         status = "q (end macro) [can now (a)pply or apply to (A)ll]"
@@ -4165,7 +4196,7 @@ endClass
 
 class CmdWriteAll : Cmd [singleton]
   METHODS
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       VimageUI.actions += ActionWriteAll( this )
 endClass
 
@@ -4178,7 +4209,7 @@ class CmdYank : Cmd [singleton]
         set_status( "y [no image to copy]" )
       endIf
 
-    method execute( ignore_repeat_count:Int )
+    method execute( ignored_repeat_count:Int )
       if (ImageList.selected)
         if (Vimage.using_os_clipboard)
           Clipboard.bitmap = ImageList.selected->(as ImageListItem).image.bitmap

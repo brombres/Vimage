@@ -645,7 +645,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[clamp|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]"
+    syntax  = "[clamp|diff|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]"
 
   METHODS
     method execute( arg_string:String )
@@ -667,6 +667,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
           endIf
           filter = CmdFilterClamp( low.value, high.value )
         case "brightgold":        filter = CmdFilterBrightGold( args )
+        case "diff":              filter = CmdFilterDiff( args )
         case "gold":              filter = CmdFilterGold( args )
         case "gray", "grey":      filter = CmdFilterGray( args )
         case "hardalpha", "ha":   filter = CmdFilterHardAlpha( args )
