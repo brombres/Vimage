@@ -70,6 +70,7 @@ Key    | Command              | Description
 `N`    | Join Vertical        | Joins (splices) the current image with the one below it, stacking them vertically.
 `p`    | Paste Above          | Pastes the clipboard image above the current image in the Image List.
 `P`    | Paste Below          | Pastes the clipboard image below the current image in the Image List.
+`^P`   | Paste Replacement    | Replaces the current image with the clipboard image, keeping the original filename.
 `q`    | Record Macro         | Tap `q` to begin recording a macro, enter any commands desired, and then tap `q` again to stop recording the macro. Use `a` to replay the current macro on the currently-selected image.
 `r`    | Rotate Clockwise 90º | Rotates the current image clockwise by 90º.
 `R`    | Rotate CCW 90º       | Rotates the current image counter-clockwise by 90º.

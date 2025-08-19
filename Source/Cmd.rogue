@@ -3570,6 +3570,34 @@ class CmdPasteBefore : EditCmd [singleton]
       endIf
 endClass
 
+class CmdPasteReplacement : EditCmd [singleton]
+  METHODS
+    method init
+
+    method update_status
+      status = "^P (paste replacement)"
+
+    method execute( repeat_count:Int )
+      local bitmap : Bitmap
+      if (Vimage.using_os_clipboard)
+        bitmap = Clipboard.bitmap
+      else
+        bitmap = Vimage.clipboard
+      endIf
+
+      if (bitmap)
+        if local selected = ImageList.selected
+          selected.image.bitmap = bitmap
+          selected.image.is_modified = true
+          ImageList.select( selected.index )  # reset zoom
+        else
+          CmdPasteAfter.execute( repeat_count )
+        endIf
+      else
+        status = "^P (paste replacement) [no image on clipboard]"
+      endIf
+endClass
+
 class CmdRedo : Cmd [singleton]
   METHODS
     method update_status
