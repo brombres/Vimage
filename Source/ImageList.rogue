@@ -98,6 +98,7 @@ class ImageList : VList [singleton]
       fixed_width = fixed_width
 
     method on_begin_layout [override]
+      prior.on_begin_layout
       fixed_height = count
 
     method remove_selected
