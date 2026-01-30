@@ -5,7 +5,7 @@
 Summary   | Current Release
 ----------|-----------------------
 Version   | 1.37
-Date      | June 13, 2025
+Date      | January 30, 2026
 Platforms | Windows, macOS, Linux
 Change Log| [Change Log](ChangeLog.md)
 License   | [MIT License](LICENSE)
