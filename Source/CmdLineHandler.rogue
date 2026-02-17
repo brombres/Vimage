@@ -1533,6 +1533,9 @@ class CmdLineWrite : CmdLineFilepathHandler [singleton]
 
       local file = File( args )
       local image = ImageList.selected.image
+      if (image.file and not file.is_absolute)
+        file = image.file.value.parent / file
+      endIf
       image.file = file
 
       Vimage.execute( CmdWrite )
