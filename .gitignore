@@ -17,3 +17,6 @@ BuildLocal.rogue
 *.swo
 *.swp
 *~
+
+# Claude Code
+.claude/settings.local.json
