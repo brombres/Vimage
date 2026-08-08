@@ -645,7 +645,7 @@ endClass
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "filter"
-    syntax  = "[clamp|diff|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]"
+    syntax  = "[clamp|diff|gamma|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]"
 
   METHODS
     method execute( arg_string:String )
@@ -668,6 +668,13 @@ class CmdLineFilter : CmdLineHandler [singleton]
           filter = CmdFilterClamp( low.value, high.value )
         case "brightgold":        filter = CmdFilterBrightGold( args )
         case "diff":              filter = CmdFilterDiff( args )
+        case "gamma"
+          if (args.count == 1 and args.first.is_number)
+            filter = CmdFilterGamma( args.first->Real )
+          else
+            status = "filter gamma [a single numeric value is required]"
+            return
+          endIf
         case "gold":              filter = CmdFilterGold( args )
         case "gray", "grey":      filter = CmdFilterGray( args )
         case "hardalpha", "ha":   filter = CmdFilterHardAlpha( args )
@@ -717,6 +724,7 @@ class CmdLineFilter : CmdLineHandler [singleton]
       local args = arg_string.split(' ')
       which (args.first)
         case "clamp": return "<low-color> <high-color>"
+        case "gamma": return "<value> (n>1: applies gamma 1/n; n<0: applies gamma |n|; 0|1: no change)"
         case "gray","grey": return "[red-weight green-weight blue-weight] (defaults: 299 587 114)"
         case "normalize":   return "[low high] (defaults: 0 255)"
         case "seamless":    return "[h|v] [<percent>% | <pixels>] (default: 100%)"

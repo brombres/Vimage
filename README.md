@@ -176,6 +176,7 @@ Filter Name    | Arguments  | Description
 ---------------|------------|------------
 clamp          | `LOCOLOR HICOLOR` | Limits the range of each pixel's color components to the corresponding low and high byte of the specified ARGB values. For example, `clamp 048 FCA` limits each red component to the range 00-FF, each green component to 44..CC, and each blue component to 88..AA.
 diff           | &nbsp; | Clears every pixel that exactly matches the corresponding pixel in the underlying image, leaving only the different pixels.
+gamma          | `VALUE`    | Applies a gamma adjustment. `1.0` or `0.0` applies no adjustment. A value > 1.0 applies the gamma 1.0/VALUE — e.g. `:filter gamma 1.1` applies gamma 0.909, brightening to undo a 1.1 darken. A negative value applies its magnitude directly — e.g. `:filter gamma -1.1` applies gamma 1.1, darkening.
 matchcolor     | &nbsp;       | This image is recolored to match the colors of the underlying image in the list. Colors are assigned based on pixel brightness values.
 matchbright    | &nbsp;       | The average brightness this image is adjusted to match the average brightness of the underlying image.
 gold           | &nbsp;       | Maps gray(R,G,B) to gradient [Black,Orange,Yellow,White]. Also try ':filter mingray|maxgray' before ':filter gold'.

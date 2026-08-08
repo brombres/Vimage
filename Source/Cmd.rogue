@@ -2041,6 +2041,40 @@ class CmdFilterDiff( args:String[] ) : EditCmd
 
 endClass
 
+class CmdFilterGamma( value:Real ) : EditCmd
+  METHODS
+    method update_status
+      status = "filter gamma $"(value)
+
+    method execute( ignored_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      # value==0||1: no adjustment; value>0: apply gamma 1/value (undo a 'value' darken);
+      # value<0: apply gamma |value| directly.
+      local gamma : Real
+      if (value < 0)                        gamma = -value
+      elseIf (value == 0.0 or value == 1.0) gamma = 1.0
+      else                                  gamma = 1.0 / value
+
+      local table = Int[]( 256 )
+      forEach (i in 0..255)
+        local v = (((i / 255.0) ^ gamma) * 255.0 + 0.5)->Int
+        table.add( v.clamped(0,255) )
+      endForEach
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      native @|RogueInt32* data = $bitmap->pixels->as_int32s - 1;
+      loop (bitmap.width * bitmap.height)
+        local argb = native("*(++data)")->Int
+        local r = table[(argb:>>>:16) & 0xff]
+        local g = table[(argb:>>>:8)  & 0xff]
+        local b = table[ argb         & 0xff]
+        argb = (argb & 0xFF000000) | (r:<<:16) | (g:<<:8) | b
+        native @|*data = $argb;
+      endLoop
+
+endClass
+
 class CmdFilterMatchColor( args:String[] ) : EditCmd
   METHODS
     method update_status
