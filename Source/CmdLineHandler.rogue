@@ -889,6 +889,36 @@ class CmdLineExtract : CmdLineHandler [singleton]
 
 endClass
 
+class CmdLineEllipse : CmdLineHandler [singleton]
+  PROPERTIES
+    keyword = "ellipse"
+    syntax  = "[COLOR|CENTER-COLOR EDGE-COLOR]"
+
+  METHODS
+    method execute( arg_line:String )
+      if (arg_line == "")
+        execute( CmdEllipse(Vimage.bg_color) )
+        return
+      endIf
+
+      local args = arg_line.split(' ')
+      which (args.count)
+        case 1
+          if local c = parse_color( args[0] )
+            execute( CmdEllipse(c) )
+          endIf
+        case 2
+          if local a = parse_color( args[0] )
+            if local b = parse_color( args[1] )
+              execute( CmdEllipse2(a,b) )
+            endIf
+          endIf
+        others
+          status = "ellipse [expected 1 or 2 colors]"
+      endWhich
+
+endClass
+
 class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "fill"

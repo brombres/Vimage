@@ -1502,6 +1502,32 @@ class CmdFlipV : EditCmd [singleton]
       endIf
 endClass
 
+class CmdEllipse( c:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      status = "ellipse $"(c)
+
+    method execute( ignored_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      bitmap.fill( Ellipse(Box(bitmap.size)), c->Color, &aa )
+
+endClass
+
+class CmdEllipse2( a:ColorValue, b:ColorValue ) : EditCmd
+  METHODS
+    method update_status
+      status = "ellipse $ $"(a,b)
+
+    method execute( ignored_repeat_count:Int )
+      if (not ImageList.selected) return
+
+      local bitmap = ImageList.selected.image.cloned_bitmap
+      bitmap.fill( Ellipse(Box(bitmap.size)), a->Color, b->Color, &aa )
+
+endClass
+
 class CmdFill( c:ColorValue ) : EditCmd
   METHODS
     method update_status
