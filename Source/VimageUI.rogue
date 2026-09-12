@@ -63,7 +63,7 @@ class VimageUI : ConsoleUI [singleton]
 
       State.current.change_state( ImageListState )
 
-      image_list_scroller = ImageListScrollView( ImageList ).[ shrink_to_fit_width ]
+      image_list_scroller = ImageListScrollView( ImageList ).[ dynamic_width=ShrinkToFit ]
       local layout = (image_list_scroller + ImageView)
       layout /= TitleBar
       layout /= StatusBar

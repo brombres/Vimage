@@ -8,7 +8,7 @@ class StatusBar : Component [singleton]
   METHODS
     method init
       prior.init
-      expand_to_fill_width
+      dynamic_width = ExpandToFill
       fixed_height = 1
 
     method on_draw
