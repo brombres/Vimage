@@ -855,17 +855,17 @@ class CmdLineExtract : CmdLineHandler [singleton]
         if (shading) parts.remove( "shading" )
         if local color_value = parse_color( parts.first )
           local color = color_value.value
-          min[0] = color.alpha_byte
-          max[0] = color.alpha_byte
-          min[1] = color.red_byte
-          max[1] = color.red_byte
-          min[2] = color.green_byte
-          max[2] = color.green_byte
-          min[3] = color.blue_byte
-          max[3] = color.blue_byte
           if (shading)
             # TODO: extract translucent black and white shading of the specified color
           else
+            min[0] = color.alpha_byte
+            max[0] = color.alpha_byte
+            min[1] = color.red_byte
+            max[1] = color.red_byte
+            min[2] = color.green_byte
+            max[2] = color.green_byte
+            min[3] = color.blue_byte
+            max[3] = color.blue_byte
             execute( CmdExtract(min,max) )
           endIf
         else
