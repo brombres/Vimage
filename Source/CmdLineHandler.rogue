@@ -820,7 +820,7 @@ endClass
 class CmdLineExtract : CmdLineHandler [singleton]
   PROPERTIES
     keyword = "extract"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|e.g 'a == 255, g <= 128, b > 64']"
+    syntax  = "[COLOR|CONDITION (e.g. 'a==255, g<128')]"
 
   METHODS
     method execute( arg_line:String )
@@ -850,7 +850,10 @@ class CmdLineExtract : CmdLineHandler [singleton]
         execute( CmdExtract(min,max) )
 
       else
-        if local color_value = parse_color( arg_line )
+        local parts = arg_line.split( ' ' )
+        local shading = parts.count > 1 and parts.contains("shading")
+        if (shading) parts.remove( "shading" )
+        if local color_value = parse_color( parts.first )
           local color = color_value.value
           min[0] = color.alpha_byte
           max[0] = color.alpha_byte
@@ -860,9 +863,26 @@ class CmdLineExtract : CmdLineHandler [singleton]
           max[2] = color.green_byte
           min[3] = color.blue_byte
           max[3] = color.blue_byte
-          execute( CmdExtract(min,max) )
+          if (shading)
+            # TODO: extract translucent black and white shading of the specified color
+          else
+            execute( CmdExtract(min,max) )
+          endIf
         else
           status = "extract [invalid argument '$']"(arg_line)
+        endIf
+      endIf
+
+    method syntax( arg_string:String )->String
+      if (not arg_string.count) return @syntax
+      local args = arg_string.split(' ')
+      if (args.first.contains('=') or args.first.contains('>') or args.first.contains('<'))
+        return @syntax
+      else
+        if (args.count == 2 and "shading".contains(args[1]))
+          return "+$"("shading".after_first(args[1]))
+        else
+          return "[shading]"
         endIf
       endIf
 

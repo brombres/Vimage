@@ -373,9 +373,13 @@ class EnterCmdLineState : State
 
             if local syntax = cmd.syntax(args)
               if (syntax.count)
-                builder.print ' '
                 builder.style.dim
-                builder.print syntax
+                if (syntax.begins_with('+'))
+                  builder.print syntax.unleft(1)
+                else
+                  builder.print ' '
+                  builder.print syntax
+                endIf
                 builder.style.dim_off
               endIf
             endIf
