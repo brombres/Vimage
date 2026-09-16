@@ -18,10 +18,11 @@ class ImageView : Component [singleton]
   METHODS
     method init
 
-    method on_draw
+    method on_draw [override]
       localize display_bounds
 
       local bg = CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg( Color(0xFF444444) )
+      ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
 
       if (image)
         if (is_modified)
@@ -55,20 +56,24 @@ class ImageView : Component [singleton]
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
           TitleBar.zoom = image.zoom
-          canvas = image.text_canvas( new_size, display_bounds )
+          if (not Vimage.using_iterm2)
+            canvas = image.text_canvas( new_size, display_bounds )
+          endIf
         endIf
 
-        ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
+      endIf
 
-        temporarily ConsoleUICanvas.clip = display_bounds->Box
-          local sz = canvas.size
-          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
-          ConsoleUICanvas.draw( canvas, pos )
-        endTemporarily
-
-      else
-        ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
-
+    method on_draw_over [override]
+      if (image)
+        if (Vimage.using_iterm2)
+          # TODO: use iTerm2's bitmap-rendering capabilities to draw 'image' to the console.
+        else
+          temporarily ConsoleUICanvas.clip = display_bounds->Box
+            local sz = canvas.size
+            local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
+            ConsoleUICanvas.draw( canvas, pos )
+          endTemporarily
+        endIf
       endIf
 
     method mark_modified

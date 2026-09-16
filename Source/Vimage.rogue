@@ -66,6 +66,8 @@ class Vimage [singleton]
     macro              = Cmd[]
     recording_macro    : Logical
 
+    using_iterm2       : Logical  # TODO: proper check
+
   METHODS
     method init( args:String[] )
       local command = parse_args( args )
