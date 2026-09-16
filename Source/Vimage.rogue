@@ -66,7 +66,7 @@ class Vimage [singleton]
     macro              = Cmd[]
     recording_macro    : Logical
 
-    using_iterm2       : Logical  # TODO: proper check
+    using_iterm2       : Logical  # Draw the image view as an iTerm2 inline bitmap instead of text blocks
 
   METHODS
     method init( args:String[] )
@@ -79,6 +79,8 @@ class Vimage [singleton]
         print_usage
         System.exit 0
       endIf
+
+      using_iterm2 = (not command//options//text) and detect_iterm2
 
       local filenames = command//args.to_list<<String>>
       filenames.sort( (a,b)=>a.compare_to(b,&ignore_case) < 0 )
@@ -111,6 +113,18 @@ class Vimage [singleton]
 
       VimageUI.run
 
+    method detect_iterm2->Logical
+      # iTerm2 sets TERM_PROGRAM directly and LC_TERMINAL when connected via SSH.
+      # Inline images would need passthrough wrapping under tmux/screen, so
+      # fall back to text rendering there.
+      if (System.env["TMUX"]) return false
+      local term = System.env["TERM"]
+      if (term and (term.begins_with("screen") or term.begins_with("tmux"))) return false
+
+      if (System.env["TERM_PROGRAM"] == "iTerm.app") return true
+      if (System.env["LC_TERMINAL"] == "iTerm2") return true
+      return false
+
     method execute( cmd:Cmd, &skip_undo_save_state )
       if (cmd.is_edit)
         if (not skip_undo_save_state) save_undo
@@ -124,6 +138,7 @@ class Vimage [singleton]
       [
         #option( "--flag",     &alias="-f" )
         option( "--help",     &aliases=["-h","-?"] )
+        option( "--text",     &alias="-t" )
         #option( "--setting=", &alias="-s" )
       ].parse( args )
       return command
@@ -139,6 +154,10 @@ class Vimage [singleton]
                |OPTIONS
                |  --help, -h, -?
                |    Show this help text.
+               |
+               |  --text, -t
+               |    Display images using character block graphics even when running on
+               |    iTerm2 (which otherwise displays images as inline bitmaps).
 
     method read_and_reset_repeat_count->Int
       local result = which{ repeat_count || 1 }.clamped_low(1)

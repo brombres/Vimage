@@ -12,6 +12,9 @@ class Image
     error       : String
 
     cached_text_canvas    : TextCanvas
+    cached_inline_bitmap  : Bitmap
+    cached_inline_cell_size : XY
+    cached_px_per_half_cell : XY
     cached_bitmap_size    : XY
     og_bitmap_size        : XY
     cached_view_center    : XY
@@ -77,6 +80,7 @@ class Image
       endIf
 
       cached_text_canvas = null
+      cached_inline_bitmap = null
 
     method cloned_bitmap->Bitmap
       # Editing commands operate on copies of bitmap objects for undo chain purposes.
@@ -117,6 +121,41 @@ class Image
     method size->XY
       return bitmap.size
 
+    method inline_bitmap( bitmap_size:XY, display_bounds:Box, px_per_half_cell:XY )->(bitmap:Bitmap,cell_size:XY)
+      # Returns the visible portion of this image at the current zoom and camera
+      # position, resized for display as an iTerm2 inline bitmap, along with the
+      # size in console cells that it should occupy. 'bitmap_size' is the size of
+      # the fully-zoomed image in half-cell units (1 cell = 1x2 half-cells).
+      contingent
+        necessary (not is_modified)
+        necessary (cached_inline_bitmap)
+        necessary (bitmap_size == cached_bitmap_size)
+        necessary (bitmap.size == og_bitmap_size)
+        necessary (display_bounds == cached_display_bounds)
+        necessary (camera == cached_view_center)
+        necessary (px_per_half_cell == cached_px_per_half_cell)
+        return (cached_inline_bitmap, cached_inline_cell_size)
+      endContingent
+
+      og_bitmap_size = bitmap.size
+      cached_bitmap_size = bitmap_size
+      cached_display_bounds = display_bounds
+      cached_view_center = camera
+      cached_px_per_half_cell = px_per_half_cell
+      cached_text_canvas = null
+
+      local (piece,target_size) = _view_piece( bitmap_size, display_bounds )
+      piece.resize( (target_size * px_per_half_cell)->XY.clamped_low(XY(1,1)) )
+      if (Vimage.hard_alpha) _apply_hard_alpha( piece )
+
+      # Composite onto the same background the text-based view uses
+      local composite = Bitmap( piece.size, Color(0xFF444444) )
+      piece.blit( composite, XY.zero, BitmapBlitFn.ALPHA )
+
+      cached_inline_bitmap = composite
+      cached_inline_cell_size = XY( target_size.x, (target_size.y + 1) / 2 )
+      return (cached_inline_bitmap, cached_inline_cell_size)
+
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
       contingent
         necessary (not is_modified)
@@ -132,7 +171,19 @@ class Image
       cached_bitmap_size = bitmap_size
       cached_display_bounds = display_bounds
       cached_view_center = camera
+      cached_inline_bitmap = null
 
+      local (piece,target_size) = _view_piece( bitmap_size, display_bounds )
+      piece.resize( target_size )
+      if (Vimage.hard_alpha) _apply_hard_alpha( piece )
+
+      cached_text_canvas = piece->TextCanvas( &dither, &bg8=CharacterStyle.BG_DARK_GRAY, &bg24=Color(0xFF444444) )
+      return cached_text_canvas
+
+    method _view_piece( bitmap_size:XY, display_bounds:Box )->(piece:Bitmap,target_size:XY)
+      # Crops out the portion of the bitmap that is visible in 'display_bounds' at
+      # the current zoom & camera. Returns a copy of that portion along with the
+      # size (in half-cell units) it should be displayed at.
       local canvas_size = bitmap_size / XY(1,2)
       if (bitmap_size.y->Int & 1)
         canvas_size += XY(0,1)
@@ -158,27 +209,23 @@ class Image
       local piece = Bitmap( bitmap, Box(origin,piece_size) )
       local target_size = (piece_size*zoom)->XY.clamped_low(XY(1,1))
 
-      piece.resize( target_size )
+      return (piece, target_size)
 
-      if (Vimage.hard_alpha)
-        local n = piece.pixels.count
-        native @|RogueInt32* data  = $piece->pixels->as_int32s - 1;
-                |
-                |while (--$n >= 0)
-                |{
-                |  RogueInt32 argb = *(++data);
-                |  RogueInt32 a;
-                |  if ((a=(argb & 0xFF000000)) && a != 0xFF000000)
-                |  {
-                |    RogueInt32 g = ((argb>>8) & 255);
-                |    RogueInt32 v = ((((argb>>16)&255) + g + (argb&255)) / 6) + 128;
-                |    *data = (argb & 0xFFFF00FF) | 0xFF000000 | ((g & ~1) << 7) | (v<<16) | v;
-                |  }
-                |}
-      endIf
-
-      cached_text_canvas = piece->TextCanvas( &dither, &bg8=CharacterStyle.BG_DARK_GRAY, &bg24=Color(0xFF444444) )
-      return cached_text_canvas
+    method _apply_hard_alpha( piece:Bitmap )
+      local n = piece.pixels.count
+      native @|RogueInt32* data  = $piece->pixels->as_int32s - 1;
+              |
+              |while (--$n >= 0)
+              |{
+              |  RogueInt32 argb = *(++data);
+              |  RogueInt32 a;
+              |  if ((a=(argb & 0xFF000000)) && a != 0xFF000000)
+              |  {
+              |    RogueInt32 g = ((argb>>8) & 255);
+              |    RogueInt32 v = ((((argb>>16)&255) + g + (argb&255)) / 6) + 128;
+              |    *data = (argb & 0xFFFF00FF) | 0xFF000000 | ((g & ~1) << 7) | (v<<16) | v;
+              |  }
+              |}
 
     method to->String
       if (@bitmap)

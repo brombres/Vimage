@@ -3,9 +3,23 @@ uses Console/ANSIBitmap
 uses UI
 
 class ImageView : Component [singleton]
+  DEFINITIONS
+    # Resolution of iTerm2 inline images: pixels per console cell. iTerm2 scales
+    # the bitmap to the cell region it occupies, so this trades sharpness for
+    # bytes sent through the terminal on each redraw of the image.
+    INLINE_CELL_PX = XY(8,16)
+
   PROPERTIES
     image            : Image
     canvas           : TextCanvas
+    last_display_bounds : Box
+
+    # iTerm2 inline image support
+    inline_bitmap    : Bitmap     # Visible portion of the image, composited & sized for display
+    inline_cell_size : XY         # Cells occupied by inline_bitmap
+    inline_bounds    : Box?       # Console cell region of the currently-displayed inline image
+    inline_data      : Byte[]     # Cached iTerm2 escape sequence for inline_bitmap
+    inline_pending   : Logical    # inline_data must be (re)sent after the next canvas display
     scale_to_fit     = true
     min_zoom         : Real
     max_zoom         : Real
@@ -23,6 +37,11 @@ class ImageView : Component [singleton]
 
       local bg = CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg( Color(0xFF444444) )
       ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
+
+      if (display_bounds != last_display_bounds)
+        last_display_bounds = display_bounds
+        is_modified = true
+      endIf
 
       if (image)
         if (is_modified)
@@ -56,7 +75,15 @@ class ImageView : Component [singleton]
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
           TitleBar.zoom = image.zoom
-          if (not Vimage.using_iterm2)
+          if (Vimage.using_iterm2)
+            local (bitmap,cell_size) = image.inline_bitmap( new_size, display_bounds, INLINE_CELL_PX/XY(1,2) )
+            if (bitmap is not inline_bitmap)
+              inline_bitmap = bitmap
+              inline_cell_size = cell_size
+              inline_data = null
+              inline_pending = true
+            endIf
+          else
             canvas = image.text_canvas( new_size, display_bounds )
           endIf
         endIf
@@ -64,17 +91,146 @@ class ImageView : Component [singleton]
       endIf
 
     method on_draw_over [override]
-      if (image)
-        if (Vimage.using_iterm2)
-          # TODO: use iTerm2's bitmap-rendering capabilities to draw 'image' to the console.
-        else
-          temporarily ConsoleUICanvas.clip = display_bounds->Box
-            local sz = canvas.size
-            local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
-            ConsoleUICanvas.draw( canvas, pos )
-          endTemporarily
+      if (Vimage.using_iterm2)
+        if (image and inline_bitmap)
+          local sz = inline_cell_size
+          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
+          local new_bounds = Box( pos, sz )
+          if (inline_pending or not inline_bounds or inline_bounds.value != new_bounds)
+            # The image is new or has moved. Invalidate the cells it used to
+            # cover and the whole view so that ConsoleUICanvas.display rewrites
+            # them (erasing any stale image fragments) before the new image is
+            # drawn on top.
+            if (inline_bounds) ConsoleUICanvas.invalidate( inline_bounds.value )
+            ConsoleUICanvas.invalidate( display_bounds->Box )
+            inline_bounds = new_bounds
+            inline_pending = true
+          endIf
+        elseIf (inline_bounds)
+          # No image to display; wipe the old one
+          ConsoleUICanvas.invalidate( inline_bounds.value )
+          inline_bounds = null
+          inline_pending = false
         endIf
+      elseIf (image)
+        temporarily ConsoleUICanvas.clip = display_bounds->Box
+          local sz = canvas.size
+          local pos = Box( display_bounds.center - (sz/2), sz ).clamped( display_bounds ).top_left
+          ConsoleUICanvas.draw( canvas, pos )
+        endTemporarily
       endIf
+
+    method check_inline_overdraw
+      # Called after every component has drawn to ConsoleUICanvas but before the
+      # canvas is displayed. If any cell under the inline image is about to be
+      # rewritten (which erases that part of the image), schedule a redraw of
+      # the image.
+      if (inline_pending or not inline_bounds) return
+
+      local bounds = inline_bounds.value & Box( ConsoleUICanvas.width, ConsoleUICanvas.height )
+      if (not bounds) return
+
+      local cui = ConsoleUICanvas
+      local width = cui.width
+      forEach (j in bounds.value.y1->Int ..< bounds.value.y2->Int)
+        local index = j * width + bounds.value.x1->Int
+        loop (bounds.value.width->Int)
+          if (cui.buffer[index] != cui.displayed[index])
+            inline_pending = true
+            return
+          endIf
+          ++index
+        endLoop
+      endForEach
+
+    method draw_inline_image
+      # Called after ConsoleUICanvas has been displayed. Sends the inline image
+      # to iTerm2 if necessary. Console cursor is left at its original position.
+      if (not Vimage.using_iterm2 or not inline_pending) return
+      inline_pending = false
+      if (not inline_bitmap or not inline_bounds) return
+
+      if (not inline_data) inline_data = inline_image_data( inline_bitmap, inline_cell_size )
+
+      local pos = inline_bounds.value.position
+      Console.flush
+      Console.set_cursor( pos )
+      _write( inline_data )
+      Console.set_cursor( 0, VimageUI.bounds.y2 )
+
+    method inline_image_data( bitmap:Bitmap, cell_size:XY )->Byte[]
+      # Builds an iTerm2 Inline Image escape sequence:
+      #   ESC ] 1337 ; File = key=value ; ... : <base64 data> BEL
+      # https://iterm2.com/documentation-images.html
+      # Both width and height are given in cells and preserveAspectRatio=1 so
+      # that iTerm2 letterboxes rather than stretches if the actual cell aspect
+      # ratio differs from the 1:2 that the cell size assumes.
+      local bmp = MacOS.to_bmp_bytes( bitmap )
+
+      local header = "\e]1337;File=inline=1;preserveAspectRatio=1;size=$;width=$;height=$:" ...
+                     (bmp.count, cell_size.x->Int, cell_size.y->Int)
+
+      local base64_count = ((bmp.count + 2) / 3) * 4
+      local result = Byte[]( header.byte_count + base64_count + 1 )
+      result.add( header.to_utf8 )
+
+      local out_offset = result.count
+      result.expand_to_count( out_offset + base64_count )
+      local src_count = bmp.count
+      native @|static const char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+              |const unsigned char* src = (const unsigned char*) $bmp->as_bytes;
+              |const unsigned char* src_limit = src + $src_count;
+              |unsigned char* dest = (unsigned char*) $result->as_bytes + $out_offset;
+              |while (src + 3 <= src_limit)
+              |{
+              |  unsigned int triple = (src[0] << 16) | (src[1] << 8) | src[2];
+              |  src += 3;
+              |  *(dest++) = table[ (triple >> 18) & 63 ];
+              |  *(dest++) = table[ (triple >> 12) & 63 ];
+              |  *(dest++) = table[ (triple >> 6) & 63 ];
+              |  *(dest++) = table[ triple & 63 ];
+              |}
+              |int remaining = (int)(src_limit - src);
+              |if (remaining == 1)
+              |{
+              |  unsigned int triple = (src[0] << 16);
+              |  *(dest++) = table[ (triple >> 18) & 63 ];
+              |  *(dest++) = table[ (triple >> 12) & 63 ];
+              |  *(dest++) = '=';
+              |  *(dest++) = '=';
+              |}
+              |else if (remaining == 2)
+              |{
+              |  unsigned int triple = (src[0] << 16) | (src[1] << 8);
+              |  *(dest++) = table[ (triple >> 18) & 63 ];
+              |  *(dest++) = table[ (triple >> 12) & 63 ];
+              |  *(dest++) = table[ (triple >> 6) & 63 ];
+              |  *(dest++) = '=';
+              |}
+
+      result.add( 7 )  # BEL terminator
+      return result
+
+    method _write( bytes:Byte[] )
+      # Writes raw bytes to stdout, bypassing the Console's character buffer.
+      # Console's immediate mode leaves stdin (and therefore the shared terminal
+      # file description) non-blocking, which makes large writes busy-spin, so
+      # blocking mode is temporarily restored for the duration of the write.
+      native @|const char* src = (const char*) $bytes->as_bytes;
+              |%Ns%RogueInt remaining = $bytes->count;
+              |#if defined(%NS%ROGUE_TARGET_WINDOWS)
+              |  %Ns%Rogue_fwrite( src, remaining, STDOUT_FILENO );
+              |#else
+              |  int flags = fcntl( STDOUT_FILENO, F_GETFL );
+              |  if (flags & O_NONBLOCK) fcntl( STDOUT_FILENO, F_SETFL, flags & ~O_NONBLOCK );
+              |  while (remaining > 0)
+              |  {
+              |    ssize_t n = write( STDOUT_FILENO, src, (size_t)remaining );
+              |    if (n > 0) { src += n; remaining -= n; }
+              |    else if (n < 0 && errno != EINTR && errno != EAGAIN) break;
+              |  }
+              |  if (flags & O_NONBLOCK) fcntl( STDOUT_FILENO, F_SETFL, flags );
+              |#endif
 
     method mark_modified
       if (not is_modified)

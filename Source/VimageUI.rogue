@@ -69,6 +69,15 @@ class VimageUI : ConsoleUI [singleton]
       layout /= StatusBar
       add( layout )
 
+    method draw [override]
+      prior.draw  # draws all components and displays ConsoleUICanvas
+      ImageView.draw_inline_image
+
+    method on_end_draw [override]
+      # All components have drawn to ConsoleUICanvas; it has not been displayed yet.
+      prior.on_end_draw
+      ImageView.check_inline_overdraw
+
     method on( e:KeyEvent )
       last_input_timer.restart
       keep_active( 1.1 )
