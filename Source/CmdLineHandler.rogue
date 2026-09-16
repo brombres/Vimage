@@ -1350,7 +1350,7 @@ class CmdLineNew : CmdLineHandler [singleton]
           return image.bitmap.size
         endIf
       endIf
-      return Size( ImageView.size * XY(1,2) )
+      return Size( ImageView.size * ImageView.cell_units )
 
     method should_insert->Logical
       return false

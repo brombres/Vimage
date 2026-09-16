@@ -20,7 +20,7 @@ Building uses `rogo` (Rogue's build tool, installed via Morlock):
 
 There is no automated test suite. `Test/` contains sample PNGs for manual testing: `rogo build && Build/*/vimage Test`.
 
-`Libraries/Rogue` is a local, git-untracked copy of the Rogue toolchain/standard library that the build compiles against. The standard-library modules used (Graphics, UI, Console/ConsoleUI, Epilog, etc.) live there — look in `Libraries/Rogue/Source/Libraries/` when you need API signatures.
+The Rogue toolchain and standard library are installed via Morlock; the always-up-to-date source is at `~/Projects/Rogue`. The standard-library modules used (Graphics, UI, Console/ConsoleUI, Epilog, etc.) live in `~/Projects/Rogue/Source/Libraries/Standard/` — look there when you need API signatures.
 
 ## Architecture
 

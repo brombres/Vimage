@@ -4,10 +4,10 @@ uses UI
 
 class ImageView : Component [singleton]
   DEFINITIONS
-    # Resolution of iTerm2 inline images: pixels per console cell. iTerm2 scales
-    # the bitmap to the cell region it occupies, so this trades sharpness for
-    # bytes sent through the terminal on each redraw of the image.
-    INLINE_CELL_PX = XY(8,16)
+    # Resolution of iTerm2 inline images: bitmap pixels per console cell width.
+    # iTerm2 scales the bitmap to the cell region it occupies, so this trades
+    # sharpness for bytes sent through the terminal on each redraw of the image.
+    INLINE_CELL_WIDTH_PX = 8
 
   PROPERTIES
     image            : Image
@@ -38,6 +38,8 @@ class ImageView : Component [singleton]
       local bg = CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg( Color(0xFF444444) )
       ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
 
+      localize cell_units
+
       if (display_bounds != last_display_bounds)
         last_display_bounds = display_bounds
         is_modified = true
@@ -51,7 +53,7 @@ class ImageView : Component [singleton]
           if (min_zoom)
             new_size = (image.bitmap.size->XY * image.zoom)
           else
-            local scale = ((display_bounds.size->XY*XY(1,2)) / image.bitmap.size->XY).min
+            local scale = ((display_bounds.size->XY*cell_units) / image.bitmap.size->XY).min
             new_size = (image.bitmap.size->XY * scale)
             default_zoom = (new_size.x->Real / image.bitmap.width)
             min_zoom = default_zoom.or_smaller( 1.0 )
@@ -68,15 +70,15 @@ class ImageView : Component [singleton]
             endIf
           endIf
 
-          local sz = (display_bounds.size * XY(1,2))->XY
+          local sz = (display_bounds.size * cell_units)->XY
           sz = (sz / image.zoom).clamped_high( image.size ) / image.size
-          camera_bounds_tl = (sz / 2) - XY(1,2)/image.size
+          camera_bounds_tl = (sz / 2) - cell_units/image.size
           camera_bounds_br = (XY(1,1) - sz/2)
           image.camera .= clamped( camera_bounds_tl, camera_bounds_br )
 
           TitleBar.zoom = image.zoom
           if (Vimage.using_iterm2)
-            local (bitmap,cell_size) = image.inline_bitmap( new_size, display_bounds, INLINE_CELL_PX/XY(1,2) )
+            local (bitmap,cell_size) = image.inline_bitmap( new_size, display_bounds, cell_units, INLINE_CELL_WIDTH_PX )
             if (bitmap is not inline_bitmap)
               inline_bitmap = bitmap
               inline_cell_size = cell_size
@@ -120,6 +122,20 @@ class ImageView : Component [singleton]
         endTemporarily
       endIf
 
+    method cell_aspect->Real
+      # Height of a console character cell relative to its width. Character
+      # block graphics assume 2:1; iTerm2 inline images use the actual cell size
+      # if the terminal reported it.
+      if (Vimage.using_iterm2 and Vimage.iterm2_cell_size)
+        local size = Vimage.iterm2_cell_size.value
+        if (size.x > 0 and size.y > 0) return size.y / size.x
+      endIf
+      return 2.0
+
+    method cell_units->XY
+      # The size of one console cell in image-pixel units at 1:1 zoom.
+      return XY( 1, cell_aspect )
+
     method check_inline_overdraw
       # Called after every component has drawn to ConsoleUICanvas but before the
       # canvas is displayed. If any cell under the inline image is about to be
@@ -162,12 +178,12 @@ class ImageView : Component [singleton]
       # Builds an iTerm2 Inline Image escape sequence:
       #   ESC ] 1337 ; File = key=value ; ... : <base64 data> BEL
       # https://iterm2.com/documentation-images.html
-      # Both width and height are given in cells and preserveAspectRatio=1 so
-      # that iTerm2 letterboxes rather than stretches if the actual cell aspect
-      # ratio differs from the 1:2 that the cell size assumes.
-      local bmp = MacOS.to_bmp_bytes( bitmap )
+      # The bitmap has already been sized and padded to exactly fill its cell
+      # region (see Image.inline_bitmap), so preserveAspectRatio=0 stretches it
+      # to the region with no letterboxing.
+      local bmp = bitmap.to_png_bytes
 
-      local header = "\e]1337;File=inline=1;preserveAspectRatio=1;size=$;width=$;height=$:" ...
+      local header = "\e]1337;File=inline=1;preserveAspectRatio=0;size=$;width=$;height=$:" ...
                      (bmp.count, cell_size.x->Int, cell_size.y->Int)
 
       local base64_count = ((bmp.count + 2) / 3) * 4
@@ -258,7 +274,7 @@ class ImageView : Component [singleton]
       endIf
 
     method scroll( delta:XY )
-      delta *= XY(1,2)
+      delta *= cell_units
       if (image)
         if (image.zoom == default_zoom)
           image.camera = XY(0.5,0.5)

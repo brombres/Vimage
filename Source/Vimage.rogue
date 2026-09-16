@@ -67,6 +67,7 @@ class Vimage [singleton]
     recording_macro    : Logical
 
     using_iterm2       : Logical  # Draw the image view as an iTerm2 inline bitmap instead of text blocks
+    iterm2_cell_size   : XY?      # Terminal character cell size in pixels, if the terminal reported it
 
   METHODS
     method init( args:String[] )
@@ -81,6 +82,7 @@ class Vimage [singleton]
       endIf
 
       using_iterm2 = (not command//options//text) and detect_iterm2
+      if (using_iterm2) iterm2_cell_size = query_cell_size
 
       local filenames = command//args.to_list<<String>>
       filenames.sort( (a,b)=>a.compare_to(b,&ignore_case) < 0 )
@@ -124,6 +126,43 @@ class Vimage [singleton]
       if (System.env["TERM_PROGRAM"] == "iTerm.app") return true
       if (System.env["LC_TERMINAL"] == "iTerm2") return true
       return false
+
+    method query_cell_size->XY?
+      # Asks the terminal for its character cell size in pixels using the xterm
+      # "CSI 16 t" query. The response is "ESC [ 6 ; height ; width t". Returns
+      # null if no response arrives within a short timeout.
+      Console.immediate_mode = true  # raw, non-blocking input
+      Console.[ flush, write("\e[16t") ]
+
+      local result : XY?
+      local timeout = Timer( 0.5 )
+      while (not timeout.is_expired)
+        Console._fill_input_buffer
+        local bytes = Console._input_bytes
+        local i1 = bytes.locate( 27 )
+        if (i1)
+          local i = i1.value
+          # Look for the 't' that terminates this response
+          local i2 : Int?
+          forEach (j in i+1..<bytes.count)
+            if (bytes[j] == 't') i2 = j; escapeForEach
+          endForEach
+          if (i2)
+            local n = (i2.value - i) + 1
+            local response = String( bytes.subset(i,n), n )
+            local parts = response.after_first('[').before_last('t').split(';')
+            if (parts.count == 3 and parts[0] == "6" and parts[1]->Int > 0 and parts[2]->Int > 0)
+              result = XY( parts[2]->Int, parts[1]->Int )
+            endIf
+            bytes.discard( i, i2.value+1 )  # Remove the response from the input stream
+            escapeWhile
+          endIf
+        endIf
+        System.sleep( 0.01 )
+      endWhile
+
+      Console.immediate_mode = false
+      return result
 
     method execute( cmd:Cmd, &skip_undo_save_state )
       if (cmd.is_edit)

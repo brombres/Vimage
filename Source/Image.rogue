@@ -14,7 +14,8 @@ class Image
     cached_text_canvas    : TextCanvas
     cached_inline_bitmap  : Bitmap
     cached_inline_cell_size : XY
-    cached_px_per_half_cell : XY
+    cached_cell_units       : XY
+    cached_cell_width_px    : Int
     cached_bitmap_size    : XY
     og_bitmap_size        : XY
     cached_view_center    : XY
@@ -121,11 +122,13 @@ class Image
     method size->XY
       return bitmap.size
 
-    method inline_bitmap( bitmap_size:XY, display_bounds:Box, px_per_half_cell:XY )->(bitmap:Bitmap,cell_size:XY)
+    method inline_bitmap( bitmap_size:XY, display_bounds:Box, cell_units:XY, cell_width_px:Int )->(bitmap:Bitmap,cell_size:XY)
       # Returns the visible portion of this image at the current zoom and camera
       # position, resized for display as an iTerm2 inline bitmap, along with the
       # size in console cells that it should occupy. 'bitmap_size' is the size of
-      # the fully-zoomed image in half-cell units (1 cell = 1x2 half-cells).
+      # the fully-zoomed image in image-pixel units, where one console cell is
+      # 'cell_units' (e.g. 1x2). The result is padded so that it exactly fills
+      # the returned cell region.
       contingent
         necessary (not is_modified)
         necessary (cached_inline_bitmap)
@@ -133,7 +136,8 @@ class Image
         necessary (bitmap.size == og_bitmap_size)
         necessary (display_bounds == cached_display_bounds)
         necessary (camera == cached_view_center)
-        necessary (px_per_half_cell == cached_px_per_half_cell)
+        necessary (cell_units == cached_cell_units)
+        necessary (cell_width_px == cached_cell_width_px)
         return (cached_inline_bitmap, cached_inline_cell_size)
       endContingent
 
@@ -141,19 +145,30 @@ class Image
       cached_bitmap_size = bitmap_size
       cached_display_bounds = display_bounds
       cached_view_center = camera
-      cached_px_per_half_cell = px_per_half_cell
+      cached_cell_units = cell_units
+      cached_cell_width_px = cell_width_px
       cached_text_canvas = null
 
-      local (piece,target_size) = _view_piece( bitmap_size, display_bounds )
-      piece.resize( (target_size * px_per_half_cell)->XY.clamped_low(XY(1,1)) )
+      local (piece,target_size) = _view_piece( bitmap_size, display_bounds, cell_units )
+
+      # Cells occupied, rounding the (possibly fractional) height up
+      local cell_size = XY( target_size.x, (target_size.y / cell_units.y).ceiling ).clamped_low( XY(1,1) )
+      cell_size .= clamped_high( display_bounds.size )
+
+      # One cell is cell_width_px wide and, keeping true aspect, cell_width_px*aspect tall
+      local px_size = (cell_size * XY(cell_width_px, cell_width_px*cell_units.y))->XY.ceiling.clamped_low( XY(1,1) )
+      local piece_px_size = (target_size * cell_width_px)->XY.clamped_low(XY(1,1)).clamped_high( px_size )
+
+      piece.resize( piece_px_size )
       if (Vimage.hard_alpha) _apply_hard_alpha( piece )
 
-      # Composite onto the same background the text-based view uses
-      local composite = Bitmap( piece.size, Color(0xFF444444) )
+      # Composite onto the same background the text-based view uses, padded
+      # to fill the full cell region.
+      local composite = Bitmap( px_size, Color(0xFF444444) )
       piece.blit( composite, XY.zero, BitmapBlitFn.ALPHA )
 
       cached_inline_bitmap = composite
-      cached_inline_cell_size = XY( target_size.x, (target_size.y + 1) / 2 )
+      cached_inline_cell_size = cell_size
       return (cached_inline_bitmap, cached_inline_cell_size)
 
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
@@ -173,27 +188,28 @@ class Image
       cached_view_center = camera
       cached_inline_bitmap = null
 
-      local (piece,target_size) = _view_piece( bitmap_size, display_bounds )
+      local (piece,target_size) = _view_piece( bitmap_size, display_bounds, XY(1,2) )
       piece.resize( target_size )
       if (Vimage.hard_alpha) _apply_hard_alpha( piece )
 
       cached_text_canvas = piece->TextCanvas( &dither, &bg8=CharacterStyle.BG_DARK_GRAY, &bg24=Color(0xFF444444) )
       return cached_text_canvas
 
-    method _view_piece( bitmap_size:XY, display_bounds:Box )->(piece:Bitmap,target_size:XY)
+    method _view_piece( bitmap_size:XY, display_bounds:Box, cell_units:XY )->(piece:Bitmap,target_size:XY)
       # Crops out the portion of the bitmap that is visible in 'display_bounds' at
       # the current zoom & camera. Returns a copy of that portion along with the
-      # size (in half-cell units) it should be displayed at.
-      local canvas_size = bitmap_size / XY(1,2)
-      if (bitmap_size.y->Int & 1)
+      # size (in image-pixel units, where one console cell is 'cell_units') it
+      # should be displayed at.
+      local canvas_size = bitmap_size / cell_units
+      if (cell_units.y == 2 and bitmap_size.y->Int & 1)
         canvas_size += XY(0,1)
       endIf
 
       local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
       canvas_bounds .= clamped( Box(display_bounds.size) )
-      local bitmap_bounds = canvas_bounds * XY(1,2)
-      local piece_size = (display_bounds.size * XY(1,2) / zoom)->XY.clamped_high( bitmap.size )
-      if ((piece_size.y * zoom)->Int & 1)
+      local bitmap_bounds = canvas_bounds * cell_units
+      local piece_size = (display_bounds.size * cell_units / zoom)->XY.clamped_high( bitmap.size )
+      if (cell_units.y == 2 and (piece_size.y * zoom)->Int & 1)
         local new_piece_size = ((piece_size * zoom) + XY(0,1)) / zoom
         local piece_bounds = Box( -bitmap_bounds.position/zoom, new_piece_size )
         if local intersection = piece_bounds & Box(bitmap.size)
