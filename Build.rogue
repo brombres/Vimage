@@ -50,7 +50,7 @@ endRoutine
 
 routine rogo_run
   # Runs this project.
-  execute "$ ." (exe_file.esc)
+  execute "$ TestImages" (exe_file.esc)
 endRoutine
 
 routine rogo_debug
