@@ -208,7 +208,12 @@ class Image
       local canvas_bounds = Box( (display_bounds.size/2-(canvas_size*camera)).clamped_high(XY.zero), canvas_size )
       canvas_bounds .= clamped( Box(display_bounds.size) )
       local bitmap_bounds = canvas_bounds * cell_units
-      local piece_size = (display_bounds.size * cell_units / zoom)->XY.clamped_high( bitmap.size )
+      # Whole image pixels that fit in the display. Snap to an integer before
+      # flooring: when the zoom is a scale-to-fit ratio such as 98/57, the
+      # division can produce 56.9999... which would otherwise lose the last
+      # row or column when the crop bounds are truncated to Int.
+      local piece_size = (display_bounds.size * cell_units / zoom)->XY
+      piece_size = (piece_size + XY(0.0001,0.0001)).floor.clamped_high( bitmap.size )
       if (cell_units.y == 2 and (piece_size.y * zoom)->Int & 1)
         local new_piece_size = ((piece_size * zoom) + XY(0,1)) / zoom
         local piece_bounds = Box( -bitmap_bounds.position/zoom, new_piece_size )
