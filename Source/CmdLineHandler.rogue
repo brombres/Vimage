@@ -336,8 +336,8 @@ endClass
 
 class CmdLineAnchor : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "anchor"
-    syntax = "[center|top|bottom|left|right|c|t|b|l|r]+"
+    keyword = "anchor" ![override]
+    syntax = "[center|top|bottom|left|right|c|t|b|l|r]+" ![override]
 
   METHODS
     method execute( args:String )
@@ -364,7 +364,7 @@ endClass
 
 class CmdLineAspect : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "aspect"
+    keyword = "aspect" ![override]
 
   METHODS
     method execute( args:String )
@@ -418,8 +418,8 @@ endClass
 
 class CmdLineBG : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "bg"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...|random]"
+    keyword = "bg" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...|random]" ![override]
 
   METHODS
     method execute( args:String )
@@ -485,8 +485,8 @@ endClass
 
 class CmdLineCrop : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "crop"
-    syntax  = "[[WxH|Wx|xH|N] [center|top|left|bottom|right|c|t|l|b|r]] [LEFT|TOP|RIGHT|BOTTOM|SCALE]"
+    keyword = "crop" ![override]
+    syntax  = "[[WxH|Wx|xH|N] [center|top|left|bottom|right|c|t|l|b|r]] [LEFT|TOP|RIGHT|BOTTOM|SCALE]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -535,8 +535,8 @@ endClass
 
 class CmdLineAspectFill : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "aspect-fill"
-    syntax  = "[WxH|Wx|xH|SCALE]"
+    keyword = "aspect-fill" ![override]
+    syntax  = "[WxH|Wx|xH|SCALE]" ![override]
 
   METHODS
     method execute( args:String )
@@ -554,8 +554,8 @@ endClass
 
 class CmdLineChannel : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "channel"
-    syntax  = "[copy|hsvtorgb|rgbtohsv|swap]"
+    keyword = "channel" ![override]
+    syntax  = "[copy|hsvtorgb|rgbtohsv|swap]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -644,8 +644,8 @@ endClass
 
 class CmdLineFilter : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "filter"
-    syntax  = "[clamp|diff|gamma|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]"
+    keyword = "filter" ![override]
+    syntax  = "[clamp|diff|gamma|gold|gray|(ha)rdalpha|matchbright|matchcolor|[max/min]gray|normalize|seamless|silver]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -735,8 +735,8 @@ endClass
 
 class CmdLineGenerate : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "generate"
-    syntax  = "[mosaic|perlin|tiled]"
+    keyword = "generate" ![override]
+    syntax  = "[mosaic|perlin|tiled]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -800,8 +800,8 @@ endClass
 
 class CmdLineAspectFit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "aspect-fit"
-    syntax  = "[WxH|Wx|xH|SCALE]"
+    keyword = "aspect-fit" ![override]
+    syntax  = "[WxH|Wx|xH|SCALE]" ![override]
 
   METHODS
     method execute( args:String )
@@ -819,8 +819,8 @@ endClass
 
 class CmdLineExtract : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "extract"
-    syntax  = "[COLOR|CONDITION (e.g. 'a==255, g<128')]"
+    keyword = "extract" ![override]
+    syntax  = "[COLOR|CONDITION (e.g. 'a==255, g<128')]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -911,8 +911,8 @@ endClass
 
 class CmdLineEllipse : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "ellipse"
-    syntax  = "[COLOR|CENTER-COLOR EDGE-COLOR]"
+    keyword = "ellipse" ![override]
+    syntax  = "[COLOR|CENTER-COLOR EDGE-COLOR]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -941,8 +941,8 @@ endClass
 
 class CmdLineFill : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "fill"
-    syntax  = "[COLOR|TOP BOTTOM|TL TR BL BR|COLORS|corners]"
+    keyword = "fill" ![override]
+    syntax  = "[COLOR|TOP BOTTOM|TL TR BL BR|COLORS|corners]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -994,8 +994,8 @@ endClass
 
 class CmdLineFillAlpha : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "fillalpha"
-    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
+    keyword = "fillalpha" ![override]
+    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -1043,8 +1043,8 @@ endClass
 
 class CmdLineFillRGB : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "fillrgb"
-    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]"
+    keyword = "fillrgb" ![override]
+    syntax  = "[COLOR | TOP BOTTOM | TL TR BL BR | COLORS ]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -1092,7 +1092,7 @@ endClass
 
 class CmdLineHardAlpha : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "ha"
+    keyword = "ha" ![override]
 
   METHODS
     method execute( args:String )
@@ -1114,8 +1114,8 @@ endClass
 
 class CmdLineInfo : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "info"
-    syntax  = "[range]"
+    keyword = "info" ![override]
+    syntax  = "[range]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -1146,8 +1146,8 @@ endClass
 
 class CmdLineJoin : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "join"
-    syntax  = "WxH [(b)lend [<amount>[%]] [(w)rap] | (p)atch]"
+    keyword = "join" ![override]
+    syntax  = "WxH [(b)lend [<amount>[%]] [(w)rap] | (p)atch]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -1201,8 +1201,8 @@ endClass
 
 class CmdLineNumericAND : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "&&"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '&&' w/underlying image)"
+    keyword = "&&" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '&&' w/underlying image)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1211,8 +1211,8 @@ endClass
 
 class CmdLineNumericOR : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "||"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '||' w/underlying image)"
+    keyword = "||" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB] (if no arg then '||' w/underlying image)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1221,8 +1221,8 @@ endClass
 
 class CmdLineLiteralBitwiseAND : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "&"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+    keyword = "&" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1233,8 +1233,8 @@ endClass
 
 class CmdLineLiteralBitwiseOR : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "|"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+    keyword = "|" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1245,8 +1245,8 @@ endClass
 
 class CmdLineLiteralBitwiseXOR : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "~"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+    keyword = "~" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1257,8 +1257,8 @@ endClass
 
 class CmdLineLiteralBitwiseROL : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "<"
-    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)"
+    keyword = "<" ![override]
+    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1272,8 +1272,8 @@ endClass
 
 class CmdLineLiteralBitwiseROR : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = ">"
-    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)"
+    keyword = ">" ![override]
+    syntax  = "BIT-COUNT [a] (include 'a' to include alpha channel)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1287,8 +1287,8 @@ endClass
 
 class CmdLineLiteralAdd : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "+"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+    keyword = "+" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1299,8 +1299,8 @@ endClass
 
 class CmdLineLiteralMultiply : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "*"
-    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]"
+    keyword = "*" ![override]
+    syntax  = "[V|RGB|ARGB|RRGGBB|AARRGGBB|transparent|t|0|red|yellow|...]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1311,8 +1311,8 @@ endClass
 
 class CmdLineName : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "name"
-    syntax  = "New image name"
+    keyword = "name" ![override]
+    syntax  = "New image name" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -1331,7 +1331,7 @@ endClass
 
 class CmdLineNew : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "new"
+    keyword = "new" ![override]
 
   METHODS
     method execute( args:String )
@@ -1364,7 +1364,7 @@ endClass
 
 class CmdLineNEW : CmdLineNew [singleton]
   PROPERTIES
-    keyword = "NEW"
+    keyword = "NEW" ![override]
 
   METHODS
     method should_insert->Logical
@@ -1373,8 +1373,8 @@ endClass
 
 class CmdLineShift : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "shift"
-    syntax = "X Y [wrap|w]"
+    keyword = "shift" ![override]
+    syntax = "X Y [wrap|w]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1396,8 +1396,8 @@ endClass
 
 class CmdLineOpen : CmdLineFilepathHandler [singleton]
   PROPERTIES
-    keyword = "open"
-    syntax  = "[filepath|wildcard/**/*.filepath]"
+    keyword = "open" ![override]
+    syntax  = "[filepath|wildcard/**/*.filepath]" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -1409,8 +1409,8 @@ endClass
 
 class CmdLineQuit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword   = "q"
-    syntax    = "(quit)"
+    keyword   = "q" ![override]
+    syntax    = "(quit)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1420,8 +1420,8 @@ endClass
 
 class CmdLineForceQuit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "q!"
-    syntax  = "(force-quit)"
+    keyword = "q!" ![override]
+    syntax  = "(force-quit)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1431,8 +1431,8 @@ endClass
 
 class CmdLineQuitAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "qq"
-    syntax  = "(quit all)"
+    keyword = "qq" ![override]
+    syntax  = "(quit all)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1442,8 +1442,8 @@ endClass
 
 class CmdLineForceQuitAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "qq!"
-    syntax  = "(force-quit all)"
+    keyword = "qq!" ![override]
+    syntax  = "(force-quit all)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1465,8 +1465,8 @@ endClass
 
 class CmdLineSplit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "split"
-    syntax  = "[WxH|X Y|parts|patch/p]"
+    keyword = "split" ![override]
+    syntax  = "[WxH|X Y|parts|patch/p]" ![override]
 
   METHODS
     method execute( arg_string:String )
@@ -1504,8 +1504,8 @@ endClass
 
 class CmdLineReload : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "reload"
-    syntax  = "(reloads this image from its file)"
+    keyword = "reload" ![override]
+    syntax  = "(reloads this image from its file)" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -1515,8 +1515,8 @@ endClass
 
 class CmdLineRemove : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "rm"
-    syntax  = "(permanently deletes this image file from its folder)"
+    keyword = "rm" ![override]
+    syntax  = "(permanently deletes this image file from its folder)" ![override]
 
   METHODS
     method execute( arg_line:String )
@@ -1526,8 +1526,8 @@ endClass
 
 class CmdLineResize : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "resize"
-    syntax  = "[WxH|Wx|xH|SCALE]"
+    keyword = "resize" ![override]
+    syntax  = "[WxH|Wx|xH|SCALE]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1545,8 +1545,8 @@ endClass
 
 class CmdLineTrim : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "trim"
-    syntax  = "[l|t|r|b]"
+    keyword = "trim" ![override]
+    syntax  = "[l|t|r|b]" ![override]
 
   METHODS
     method execute( args:String )
@@ -1568,7 +1568,7 @@ endClass
 
 class CmdLineWrite : CmdLineFilepathHandler [singleton]
   PROPERTIES
-    keyword = "w"
+    keyword = "w" ![override]
 
   METHODS
     method execute( args:String )
@@ -1610,7 +1610,7 @@ endClass
 
 class CmdLineSave : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "save"
+    keyword = "save" ![override]
 
   METHODS
     method execute( args:String )
@@ -1649,8 +1649,8 @@ endClass
 
 class CmdLineWriteAll : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "wall"
-    syntax  = "(write all; save all modified images)"
+    keyword = "wall" ![override]
+    syntax  = "(write all; save all modified images)" ![override]
 
   METHODS
     method execute( args:String )
@@ -1659,7 +1659,7 @@ endClass
 
 class CmdLineWriteQuit : CmdLineHandler [singleton]
   PROPERTIES
-    keyword = "wq"
+    keyword = "wq" ![override]
 
   METHODS
     method execute( args:String )

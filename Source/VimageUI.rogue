@@ -9,7 +9,7 @@ class VimageUI : ConsoleUI [singleton]
     command             = String()
     cmd_line_handlers   = [String:CmdLineHandler]
     last_input_timer    = Timer()
-    actions             : Action
+    actions             : Action ![override]
 
   METHODS
     method init
