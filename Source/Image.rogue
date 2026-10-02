@@ -256,7 +256,11 @@ class Image
         endIf
       endIf
 
-      local origin = -bitmap_bounds.position/zoom
+      # Snap the crop origin to whole pixels for the same reason as above: when
+      # the camera is clamped to the bottom/right edge, the origin can come out
+      # as e.g. 3.9999..., which the integer blit used to crop would truncate
+      # to 3, pushing the last row or column of the image out of the crop.
+      local origin = (-bitmap_bounds.position/zoom + XY(0.0001,0.0001)).floor
       origin .= clamped_low( XY.zero )
       origin .= clamped_high( bitmap.size - piece_size )
       local piece = Bitmap( bitmap, Box(origin,piece_size) )
