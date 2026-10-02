@@ -162,14 +162,46 @@ class Image
       piece.resize( piece_px_size )
       if (Vimage.hard_alpha) _apply_hard_alpha( piece )
 
-      # Composite onto the same background the text-based view uses, padded
-      # to fill the full cell region.
+      # Composite onto the same background the text-based view uses: the
+      # in-bounds image area gets the transparency checkerboard that
+      # Bitmap->TextCanvas draws, and the remainder of the cell region is
+      # padded with the view's gray background.
       local composite = Bitmap( px_size, Color(0xFF444444) )
+      _fill_checkerboard( composite, Box(piece_px_size), cell_width_px )
       piece.blit( composite, XY.zero, BitmapBlitFn.ALPHA )
 
       cached_inline_bitmap = composite
       cached_inline_cell_size = cell_size
       return (cached_inline_bitmap, cached_inline_cell_size)
+
+    method _fill_checkerboard( bitmap:Bitmap, bounds:Box, cell_width_px:Int )
+      # Fills 'bounds' with the same transparency checkerboard that
+      # Bitmap->TextCanvas produces. In the text view each square is two
+      # cells wide and one cell (two half-cell pixel rows) tall, and the rows
+      # of squares are offset vertically by half a cell. One half-cell is
+      # 'cell_width_px' screen pixels in each dimension.
+      local evens = Bitmap.transparent_checkerboard_evens
+      local odds  = Bitmap.transparent_checkerboard_odds
+      local square = cell_width_px * 2
+      local x_limit = (bounds.x2)->Int
+      local y_limit = (bounds.y2)->Int
+
+      local row = 0
+      local y = -cell_width_px
+      while (y < y_limit)
+        local col = 0
+        local x = 0
+        while (x < x_limit)
+          local color = which{ ((col & 1) xor (row & 1)):evens || odds }
+          if local square_bounds = Box(x,y,square,square) & bounds
+            bitmap.fill( square_bounds, color )
+          endIf
+          x += square
+          ++col
+        endWhile
+        y += square
+        ++row
+      endWhile
 
     method text_canvas( bitmap_size:XY, display_bounds:Box )->TextCanvas
       contingent
