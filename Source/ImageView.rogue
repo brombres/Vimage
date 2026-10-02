@@ -29,14 +29,15 @@ class ImageView : Component [singleton]
     camera_bounds_tl : XY
     camera_bounds_br : XY
 
+    default_bg = StyledCharacter( ' ', CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg(Color(0xFF444444)) )
+
   METHODS
     method init
 
     method on_draw [override]
       localize display_bounds
 
-      local bg = CharacterStyle( CharacterStyle.BG_DARK_GRAY ).bg( Color(0xFF444444) )
-      ConsoleUICanvas.fill( display_bounds->Box, StyledCharacter(' ',bg) )
+      ConsoleUICanvas.fill( display_bounds->Box, default_bg )
 
       localize cell_units
 
@@ -100,14 +101,14 @@ class ImageView : Component [singleton]
           local new_bounds = Box( pos, sz )
           if (inline_pending or not inline_bounds or inline_bounds.value != new_bounds)
             # The image is new or has moved. Invalidate the cells it used to
-            # cover and the whole view so that ConsoleUICanvas.display rewrites
-            # them (erasing any stale image fragments) before the new image is
-            # drawn on top.
-            if (inline_bounds) ConsoleUICanvas.invalidate( inline_bounds.value )
-            ConsoleUICanvas.invalidate( display_bounds->Box )
+            # cover before the new image is drawn on top.
+            if local old_bounds = inline_bounds
+              ConsoleUICanvas.invalidate( old_bounds )
+            endIf
             inline_bounds = new_bounds
             inline_pending = true
           endIf
+          ConsoleUICanvas.[ omit(inline_bounds.value) ]
         elseIf (inline_bounds)
           # No image to display; wipe the old one
           ConsoleUICanvas.invalidate( inline_bounds.value )
