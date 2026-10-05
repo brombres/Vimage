@@ -67,6 +67,7 @@ class Vimage [singleton]
     recording_macro    : Logical
 
     using_iterm2       : Logical  # Draw the image view as an iTerm2 inline bitmap instead of text blocks
+    default_folder     : File?    # I/O folder when no image is selected: folder of the first command line arg
     iterm2_cell_size   : XY?      # Terminal character cell size in pixels, if the terminal reported it
 
   METHODS
@@ -85,6 +86,10 @@ class Vimage [singleton]
       if (using_iterm2) iterm2_cell_size = query_cell_size
 
       local filenames = command//args.to_list<<String>>
+      if (filenames.count)
+        local first = File( filenames.first )
+        default_folder = which{ first.is_folder:first || first.parent }
+      endIf
       filenames.sort( (a,b)=>a.compare_to(b,&ignore_case) < 0 )
 
       forEach (filepath in filenames)
@@ -114,6 +119,16 @@ class Vimage [singleton]
       endIf
 
       VimageUI.run
+
+    method current_folder->File?
+      # The folder that relative filepaths resolve against: the selected image's
+      # folder if it has one, else the folder of the first command line arg.
+      if (ImageList.selected)
+        if local file = ImageList.selected.image.file
+          return file.parent
+        endIf
+      endIf
+      return default_folder
 
     method detect_iterm2->Logical
       # iTerm2 sets TERM_PROGRAM directly and LC_TERMINAL when connected via SSH.

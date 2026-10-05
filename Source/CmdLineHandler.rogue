@@ -231,12 +231,7 @@ class CmdLineFilepathHandler : CmdLineHandler
 
   METHODS
     method on_tab
-      local img_file : File?
-      if (ImageList.selected)
-        if local image_file = ImageList.selected.image.file
-          img_file = image_file
-        endIf
-      endIf
+      local io_folder = Vimage.current_folder
 
       local args = Scanner( VimageUI.command ).scan_args
       if (args.count >= 2)
@@ -253,7 +248,7 @@ class CmdLineFilepathHandler : CmdLineHandler
 
         if (not cur_tab_base)
           if (arg.contains(".."))
-            if (img_file) arg = img_file.value.folder / arg
+            if (io_folder) arg = io_folder.value.filepath / arg
             arg = File(arg).filepath
           endIf
           cur_tab_base = arg
@@ -262,8 +257,8 @@ class CmdLineFilepathHandler : CmdLineHandler
 
         local listing = File(cur_tab_base.with_suffix("*")).listing(&ignore_hidden)
         if (listing.count == 0)
-          if (img_file)
-            cur_tab_base = img_file.value.parent / cur_tab_base
+          if (io_folder)
+            cur_tab_base = io_folder.value.filepath / cur_tab_base
             listing = File(cur_tab_base.with_suffix("*")).listing(&ignore_hidden)
           endIf
         endIf
@@ -274,12 +269,12 @@ class CmdLineFilepathHandler : CmdLineHandler
           if (listing.count == 1 and file.is_folder)
             cur_tab_base = file.filepath + "/"
             local result_file = File(cur_tab_base)
-            if (img_file) result_file .= relative_to( img_file.value.parent )
+            if (io_folder) result_file .= relative_to( io_folder.value )
             cur_tab_arg = result_file.filepath
             args.add( result_file.esc )
           else
             local result_file = File(file.filepath)
-            if (img_file) result_file .= relative_to( img_file.value.parent )
+            if (io_folder) result_file .= relative_to( io_folder.value )
             cur_tab_arg = result_file.filepath
             args.add( result_file.esc )
           endIf
@@ -292,17 +287,15 @@ class CmdLineFilepathHandler : CmdLineHandler
       else
         local folder = File(".")
 
-        if (ImageList.selected)
-          if local cur_file = ImageList.selected.image.file
-            folder = cur_file.parent
-            local abs_cwd = File(".").abs
-            if (folder.filepath == abs_cwd)
-              folder = File("*")
-            else
-              abs_cwd += "/"
-              if (folder.filepath.begins_with(abs_cwd))
-                folder = File( folder.filepath.after_first(abs_cwd) )
-              endIf
+        if (io_folder)
+          folder = io_folder.value
+          local abs_cwd = File(".").abs
+          if (folder.filepath == abs_cwd)
+            folder = File("*")
+          else
+            abs_cwd += "/"
+            if (folder.filepath.begins_with(abs_cwd))
+              folder = File( folder.filepath.after_first(abs_cwd) )
             endIf
           endIf
         endIf
@@ -318,7 +311,7 @@ class CmdLineFilepathHandler : CmdLineHandler
           cur_tab_count %= folder.listing.count
 
           local result_file = File(listing[cur_tab_count])
-          if (img_file) result_file .= relative_to( img_file.value.parent )
+          if (io_folder) result_file .= relative_to( io_folder.value )
           cur_tab_arg = result_file.filepath
           args.add( result_file.esc )
 
@@ -1591,8 +1584,10 @@ class CmdLineWrite : CmdLineFilepathHandler [singleton]
 
       local file = File( args )
       local image = ImageList.selected.image
-      if (image.file and not file.is_absolute)
-        file = image.file.value.parent / file
+      if (not file.is_absolute)
+        if local folder = Vimage.current_folder
+          file = folder / file
+        endIf
       endIf
       image.file = file
 

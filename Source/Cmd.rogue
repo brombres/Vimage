@@ -3339,6 +3339,9 @@ class CmdName( new_name:String ) : EditCmd
           image.file = File(new_name)
         else
           if (not String.exists(File(new_name).extension)) new_name = File(new_name).with_extension("png").filepath
+          if local folder = Vimage.current_folder
+            new_name = folder.filepath / new_name
+          endIf
           image.file = File( new_name )
         endIf
         image.name = image.file.value.filepath
@@ -3354,14 +3357,17 @@ class CmdNew( size:Size, insert:Logical ) : EditCmd
 
     method execute
       local before_index = 0L
-      local file = File( "NewImage.png" )
+      local ext = "png"
       if (ImageList.selected)
         before_index = ImageList.selected.index + 1
         if local cur_file = ImageList.selected.image.file
-          local ext = cur_file.extension
-          if (not String.exists(ext)) ext = "png"
-          file = File( cur_file.parent/"NewImage.$"(ext) )
+          if (String.exists(cur_file.extension)) ext = cur_file.extension
         endIf
+      endIf
+
+      local file = File( "NewImage.$"(ext) )
+      if local folder = Vimage.current_folder
+        file = folder / file
       endIf
 
       if (insert and before_index > 0) --before_index
@@ -3390,10 +3396,8 @@ class CmdOpen( args:String[] ) : EditCmd
         local listing = File(arg).listing
 
         if (not listing.count)
-          if (ImageList.selected)
-            if local selected_file = ImageList.selected.image.file
-              listing = (selected_file.parent/arg).listing
-            endIf
+          if local folder = Vimage.current_folder
+            listing = (folder/arg).listing
           endIf
         endIf
 
