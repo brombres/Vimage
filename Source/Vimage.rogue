@@ -28,6 +28,7 @@ $include Image
 $include ImageList
 $include ImageView
 $include KeyHandler
+$include PlutoSVG
 $include ColorGradient
 $include ColorLerp
 $include Size
@@ -101,6 +102,7 @@ class Vimage [singleton]
           files.add( "*.jpg" )
           files.add( "*.jpeg" )
           files.add( "*.png" )
+          files.add( "*.svg" )
           files.add( "*.tif" )
           files.add( "*.tiff" )
           files.add( "*.webp" )

@@ -15,7 +15,7 @@ Author    | Brom Bresenham
 # About
 Vimage is a console-based image manipulator with a Vim-style user interface.
 
-Vimage uses character block graphics to display and edit JPEGs, PNGs, and BMPs in 24-bit truecolor where possible. Windows and Linux consoles support truecolor out of the box. "Terminal" built in to macOS only supports an 8-bit color display but iTerm2 on macOS supports truecolor.
+Vimage uses character block graphics to display and edit JPEGs, PNGs, and BMPs in 24-bit truecolor where possible. SVG files can also be opened and inspected (they are rasterized at their intrinsic size on load); edited SVGs must be saved as PNG or JPEG. Windows and Linux consoles support truecolor out of the box. "Terminal" built in to macOS only supports an 8-bit color display but iTerm2 on macOS supports truecolor.
 
 When running on iTerm2, Vimage displays the current image as a full-resolution inline bitmap on top of the console UI instead of using character block graphics. Launch with `--text` to use character block graphics on iTerm2 as well. Inline bitmaps are not used under tmux or screen.
 

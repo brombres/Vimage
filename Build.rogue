@@ -131,9 +131,29 @@ routine deps( &update )
       throw Error( "CMake is required to build PlutoSVG. Install it (e.g. 'brew install cmake') and run 'rogo deps' again." )
     endIf
     println "Building PlutoSVG"
-    execute "cmake -S $ -B $ -DCMAKE_BUILD_TYPE=Release -DPLUTOSVG_BUILD_EXAMPLES=OFF -DPLUTOVG_BUILD_EXAMPLES=OFF" (folder.esc,build_folder.esc)
+    local cmake_args = "-DCMAKE_BUILD_TYPE=Release -DPLUTOSVG_BUILD_EXAMPLES=OFF -DPLUTOVG_BUILD_EXAMPLES=OFF"
+    if (System.is_macos)
+      # Match the deployment target 'cc' uses by default; otherwise CMake targets
+      # the SDK version and ld warns about it on every link.
+      if local target = cc_default_macos_target
+        cmake_args .= appending( "-DCMAKE_OSX_DEPLOYMENT_TARGET=$"(target) )
+      endIf
+    endIf
+    execute "cmake -S $ -B $ $" (folder.esc,build_folder.esc,cmake_args)
     execute "cmake --build $ --config Release" (build_folder.esc)
   endIf
+endRoutine
+
+routine cc_default_macos_target->String
+  # The macOS version 'cc' targets by default, e.g. "26.0", from the
+  # __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ macro (MMmmpp, e.g. 260000).
+  local result = Process.run( "cc -dM -E - </dev/null", &env )
+  if (not result.success) return null
+  local line = result->String.split('\n').find( $.contains("__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__") )
+  if (not line) return null
+  local n = line.value.after_last(' ').trimmed->Int
+  if (n == 0) return null
+  return "$.$" (n/10000,(n/100)%100)
 endRoutine
 
 routine plutosvg_libs->File[]

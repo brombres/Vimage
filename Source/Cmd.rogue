@@ -3407,7 +3407,7 @@ class CmdOpen( args:String[] ) : EditCmd
             necessary (not file.is_folder)
             local ext = file.extension.to_lowercase
             which (ext)
-              case "bmp", "heic", "jpg", "jpeg", "png", "tif", "tiff", "webp"
+              case "bmp", "heic", "jpg", "jpeg", "png", "svg", "tif", "tiff", "webp"
                 noAction
               others
                 escapeContingent
@@ -4305,6 +4305,9 @@ class CmdWrite : EditCmd [singleton]
           file.save( bitmap.to_png_bytes )
         case "jpg", "jpeg"
           file.save( bitmap.to_jpeg_bytes )
+        case "svg"
+          status = "SVG save is unsupported."
+          return
         others
           status = "[saving image type '$' is unsupported]"(ext)
           return

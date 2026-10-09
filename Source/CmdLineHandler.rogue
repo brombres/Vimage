@@ -1578,6 +1578,9 @@ class CmdLineWrite : CmdLineFilepathHandler [singleton]
       which (File(args).extension.to_lowercase)
         case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
           noAction
+        case "svg"
+          status = "SVG save is unsupported."
+          return
         others
           args += ".png"
       endWhich
@@ -1622,6 +1625,9 @@ class CmdLineSave : CmdLineHandler [singleton]
       which (File(args).extension.to_lowercase)
         case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
           noAction
+        case "svg"
+          status = "SVG save is unsupported."
+          return
         others
           args += ".png"
       endWhich
@@ -1672,6 +1678,9 @@ class CmdLineWriteQuit : CmdLineHandler [singleton]
       which (File(args).extension.to_lowercase)
         case "png", "jpg", "jpeg", "tiff", "bmp", "gif"
           noAction
+        case "svg"
+          status = "SVG save is unsupported."
+          return
         others
           args += ".png"
       endWhich

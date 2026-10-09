@@ -45,7 +45,11 @@ class Image
       if (@bitmap) return @bitmap
 
       if (file and file.value.exists)
-        bitmap = Bitmap.load( file.value )
+        if (file.value.extension.to_lowercase == "svg")
+          bitmap = PlutoSVG.load( file.value )
+        else
+          bitmap = Bitmap.load( file.value )
+        endIf
         if (not @bitmap)
           error = "Unsupported file type or corrupted file: " + file
           bitmap = Bitmap(1,1)

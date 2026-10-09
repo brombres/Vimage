@@ -1,0 +1,70 @@
+library Vimage
+uses Graphics
+
+nativeHeader @|#include "plutosvg.h"
+nativeHeader @|#include "plutovg.h"
+
+class PlutoSVG [singleton]
+  # Rasterizes SVG files via the PlutoSVG native library (Libraries/plutosvg,
+  # installed and built by 'rogo deps').
+  METHODS
+    method load( file:File )->Bitmap
+      # Renders the SVG at its intrinsic size (from its width/height or viewBox).
+      # Returns null if the file cannot be read, parsed, or has no usable size.
+      local bytes = Byte[]( file )
+      if (bytes.is_empty) return null
+
+      local document = native( "(RogueInt64)(intptr_t)plutosvg_document_load_from_data( (const char*)$bytes->as_bytes, (int)$bytes->count, -1, -1, NULL, NULL )" )->Int64
+      if (document == 0) return null
+
+      # Rendering with size -1x-1 uses the document's intrinsic size.
+      local surface = native( "(RogueInt64)(intptr_t)plutosvg_document_render_to_surface( (plutosvg_document_t*)(intptr_t)$document, NULL, -1, -1, NULL, NULL, NULL )" )->Int64
+      native @|plutosvg_document_destroy( (plutosvg_document_t*)(intptr_t)$document );
+      if (surface == 0) return null
+
+      local width  = native( "plutovg_surface_get_width( (plutovg_surface_t*)(intptr_t)$surface )" )->Int
+      local height = native( "plutovg_surface_get_height( (plutovg_surface_t*)(intptr_t)$surface )" )->Int
+      if (width <= 0 or height <= 0)
+        native @|plutovg_surface_destroy( (plutovg_surface_t*)(intptr_t)$surface );
+        return null
+      endIf
+
+      local bitmap = Bitmap( width, height )
+
+      # PlutoVG surfaces are native-endian premultiplied 0xAARRGGBB - the same
+      # layout as Rogue's Color - so each row can be copied directly and then
+      # unmultiplied in place (same math as Bitmap.unmultiply_alpha).
+      native @|{
+              |  plutovg_surface_t* surface = (plutovg_surface_t*)(intptr_t)$surface;
+              |  unsigned char* src_row = plutovg_surface_get_data( surface );
+              |  int            stride  = plutovg_surface_get_stride( surface );
+              |  RogueInt32*    dest    = $bitmap->pixels->as_int32s;
+              |  int j;
+              |  for (j=0; j<$height; ++j)
+              |  {
+              |    RogueInt32* src = (RogueInt32*) src_row;
+              |    int i;
+              |    for (i=0; i<$width; ++i)
+              |    {
+              |      RogueInt32 argb = src[i];
+              |      int a = (argb >> 24) & 255;
+              |      if (a && a != 255)
+              |      {
+              |        int r = (((argb>>16) & 255) * 255 + (a>>1)) / a;
+              |        int g = (((argb>>8) & 255) * 255 + (a>>1)) / a;
+              |        int b = ((argb & 255) * 255 + (a>>1)) / a;
+              |        if (r > 255) r = 255;
+              |        if (g > 255) g = 255;
+              |        if (b > 255) b = 255;
+              |        argb = (RogueInt32)((a<<24) | (r<<16) | (g<<8) | b);
+              |      }
+              |      *(dest++) = argb;
+              |    }
+              |    src_row += stride;
+              |  }
+              |  plutovg_surface_destroy( surface );
+              |}
+
+      bitmap.filepath = file.filepath
+      return bitmap
+endClass
