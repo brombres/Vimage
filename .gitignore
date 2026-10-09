@@ -1,6 +1,9 @@
 /Libraries
 /TestImages
 
+# Dependencies installed by 'rogo deps'
+/Libraries/plutosvg
+
 # Rogo
 .rogo
 Local.settings

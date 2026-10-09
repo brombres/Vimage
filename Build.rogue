@@ -4,6 +4,7 @@
 
 $requireRogue "2.34"
 
+uses Utility/GitRepo
 uses Utility/VersionNumber
 
 #$ LINK_LIBS            = true
@@ -86,13 +87,76 @@ routine rogo_build
 endRoutine
 
 routine rogo_deps
-  # Installs and/or builds dependencies
+  # SYNTAX: rogo deps [update]
+  # Installs and/or builds dependencies. 'update' pulls the latest library sources.
   local update = System.command_line_arguments.contains( "update" )
   deps( &=update )
 endRoutine
 
 routine deps( &update )
   # Installs and/or builds dependencies
+  local libraries = File( "Libraries" )
+  if (not libraries.exists) libraries.create_folder
+
+  #-------- Libraries/plutosvg --------
+  local folder = File( "Libraries/plutosvg" )
+  local repo = GitRepo( "https://github.com/sammycage/plutosvg.git", folder )
+  local needs_build = false
+
+  if (not repo.exists)
+    println "Cloning PlutoSVG"
+    execute "git clone --recursive $ $" (repo.url,folder.esc)
+    needs_build = true
+
+  elseIf (update)
+    if (repo.has_remote_changes)
+      println "Updating PlutoSVG"
+      repo.pull( &verbose )
+      execute "cd $ && git submodule update --init --recursive" (folder.esc)
+      needs_build = true
+    endIf
+  endIf
+
+  local build_folder = folder/"build"
+  if (needs_build)
+    build_folder.delete  # sources changed; discard stale build products
+  else
+    forEach (lib in plutosvg_libs)
+      if (not lib.exists) needs_build = true
+    endForEach
+  endIf
+
+  if (needs_build)
+    if (not System.find_executable("cmake"))
+      throw Error( "CMake is required to build PlutoSVG. Install it (e.g. 'brew install cmake') and run 'rogo deps' again." )
+    endIf
+    println "Building PlutoSVG"
+    execute "cmake -S $ -B $ -DCMAKE_BUILD_TYPE=Release -DPLUTOSVG_BUILD_EXAMPLES=OFF -DPLUTOVG_BUILD_EXAMPLES=OFF" (folder.esc,build_folder.esc)
+    execute "cmake --build $ --config Release" (build_folder.esc)
+  endIf
+endRoutine
+
+routine plutosvg_libs->File[]
+  # The static libraries produced by the PlutoSVG CMake build.
+  if (System.is_windows)
+    return [ File("Libraries/plutosvg/build/Release/plutosvg.lib"), File("Libraries/plutosvg/build/plutovg/Release/plutovg.lib") ]
+  else
+    return [ File("Libraries/plutosvg/build/libplutosvg.a"), File("Libraries/plutosvg/build/plutovg/libplutovg.a") ]
+  endIf
+endRoutine
+
+routine plutosvg_cc_args->String
+  # Compiler flags for including and statically linking PlutoSVG.
+  local args = String[]
+  if (System.is_windows)
+    args.add( "/DPLUTOSVG_BUILD_STATIC /DPLUTOVG_BUILD_STATIC" )
+    args.add( "/ILibraries/plutosvg/source /ILibraries/plutosvg/plutovg/include" )
+  else
+    args.add( "-DPLUTOSVG_BUILD_STATIC -DPLUTOVG_BUILD_STATIC" )
+    args.add( "-I Libraries/plutosvg/source -I Libraries/plutosvg/plutovg/include" )
+  endIf
+  args.add( (forEach in plutosvg_libs).esc )
+  return args.join( ' ' )
 endRoutine
 
 
@@ -108,6 +172,7 @@ endRoutine
 
 routine rogo_rebuild
   # Force-rebuilds project.
+  deps
   compile_rogue
   compile_c
 endRoutine
@@ -348,6 +413,7 @@ routine compile_c
     flags += which{ Build.BUILD_MODE=="release":"/O2" || "/Od" }
     local obj_filepath = File( "Build/$-Windows.obj"(Build.PROJECT) ).esc
     local cc = "cl $ /nologo $.c /Fo$ /Fe$" (flags,c_filepath,obj_filepath,exe_filepath)
+    cc .= appending( plutosvg_cc_args )
     cc .= appending( "$LIBRARY_FLAGS" )
     cc .= appending( Build.CC_LINK_WINDOWS )
     execute cc
@@ -356,6 +422,7 @@ routine compile_c
     if (flags != "") flags += " "
     flags += which{ Build.BUILD_MODE=="release":"-O3" || "-O0" }
     local cc = "cc $ -Wall -fno-strict-aliasing $.m -o $ -lm" (flags,File(c_filepath).esc,exe_file.esc)
+    cc .= appending( plutosvg_cc_args )
     cc .= appending( "$LIBRARY_FLAGS" )
     cc .= appending( Build.CC_LINK_MACOS )
     execute cc
@@ -364,6 +431,7 @@ routine compile_c
     if (flags != "") flags += " "
     flags += which{ Build.BUILD_MODE=="release":"-O3" || "-O0" }
     local cc = "cc $ -Wall -fno-strict-aliasing $.c -o $ -lm" (flags,File(c_filepath).esc,exe_file.esc)
+    cc .= appending( plutosvg_cc_args )
     cc .= appending( "$LIBRARY_FLAGS" )
     cc .= appending( Build.CC_LINK_UNIX )
     execute cc
