@@ -73,6 +73,8 @@ endRoutine
 
 routine rogo_build
   # Recompiles Rogue -> C -> Exe if needed. 'rogo rebuild' forces a build.
+  rogo_deps
+
   local source_files = Files( "Source", "**/*.rogue" )
   if (source_files.any_newer_than(exe_file))
     local c_filepath = "Build/$-$.c" (Build.PROJECT,System.os)
@@ -81,6 +83,10 @@ routine rogo_build
     endIf
     compile_c
   endIf
+endRoutine
+
+routine rogo_deps
+  # Installs and/or builds dependencies
 endRoutine
 
 routine rogo_build_debug
