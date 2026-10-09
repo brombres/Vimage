@@ -87,7 +87,14 @@ endRoutine
 
 routine rogo_deps
   # Installs and/or builds dependencies
+  local update = System.command_line_arguments.contains( "update" )
+  deps( &=update )
 endRoutine
+
+routine deps( &update )
+  # Installs and/or builds dependencies
+endRoutine
+
 
 routine rogo_build_debug
   # Force-rebuilds in debug mode.
