@@ -36,6 +36,9 @@ class State
         endIf
       endIf
 
+    method on( e:TextEvent )
+      noAction
+
     method on_enter
       noAction
 
@@ -262,6 +265,14 @@ class EnterCmdLineState : State
       endForEach
 
       return cmds
+
+    method on( e:TextEvent )
+      # ASCII arrives via KeyEvent; other characters (e.g. the U+202F in macOS
+      # screenshot filenames) only arrive as TextEvents.
+      if (e.character >= 128)
+        VimageUI.command.print e.character
+        update_status( VimageUI.command )
+      endIf
 
     method on( e:KeyEvent )
       if (e.is_press)

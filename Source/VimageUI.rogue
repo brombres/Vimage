@@ -90,6 +90,9 @@ class VimageUI : ConsoleUI [singleton]
 
       State.current.on( e )
 
+    method on( e:TextEvent )
+      State.current.on( e )
+
     method on( e:PointerEvent )
       last_input_timer.restart
       keep_active( 1.1 )

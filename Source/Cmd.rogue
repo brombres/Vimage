@@ -3401,6 +3401,15 @@ class CmdOpen( args:String[] ) : EditCmd
           endIf
         endIf
 
+        if (not listing.count and not File(arg).contains_wildcards)
+          listing = find_with_normalized_spaces( arg )
+          if (not listing.count)
+            if local folder = Vimage.current_folder
+              listing = find_with_normalized_spaces( (folder/arg).filepath )
+            endIf
+          endIf
+        endIf
+
         forEach (filepath in listing)
           local file = File( filepath )
           contingent
@@ -3427,6 +3436,31 @@ class CmdOpen( args:String[] ) : EditCmd
 
       if (index != first_index) ImageList.select( first_index )
       else                      status = " [file not found]"
+
+    method find_with_normalized_spaces( filepath:String )->String[]
+      # macOS screenshot filenames have a narrow no-break space (U+202F) before
+      # AM/PM; let typed regular spaces match that and other Unicode spaces.
+      local results = String[]
+      local file = File( filepath )
+      local folder = File( file.folder )
+      if (not folder.is_folder) return results
+
+      local name = normalized_spaces( file.filename )
+      forEach (entry in folder.listing)
+        if (normalized_spaces(File(entry).filename) == name) results.add( entry )
+      endForEach
+      return results
+
+    method normalized_spaces( st:String )->String
+      local result = String()
+      forEach (ch in st)
+        if (ch == 0xA0 or (ch >= 0x2000 and ch <= 0x200A) or ch == 0x202F or ch == 0x205F or ch == 0x3000)
+          result.print( ' ' )
+        else
+          result.print( ch )
+        endIf
+      endForEach
+      return result
 
 endClass
 
